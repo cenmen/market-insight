@@ -1,0 +1,24 @@
+# dependencies
+node_modules
+**/node_modules
+
+# build outputs
+dist
+build
+coverage
+.next
+.turbo
+**/dist
+**/build
+**/coverage
+**/.next
+**/.turbo
+
+# tool/cache dirs
+.git
+.pnpm-store
+.idea
+.vscode
+
+# generated/static raw assets
+apps/website/rawData

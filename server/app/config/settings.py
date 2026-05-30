@@ -3,7 +3,7 @@ import os
 
 
 class Settings(BaseModel):
-    app_name: str = Field(default="wealth-channel")
+    app_name: str = Field(default="market-insight")
     timezone: str = Field(default="Asia/Shanghai")
     env: str = Field(default=os.getenv("env", "development"))
     log_dir: str = Field(default=os.getenv("LOG_DIR", "logs"))

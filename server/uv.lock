@@ -1322,7 +1322,7 @@ wheels = [
 ]
 
 [[package]]
-name = "wealth-channel"
+name = "market-insight"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

@@ -1,4 +1,4 @@
-# wealth-channel 接口文档
+# market-insight 接口文档
 
 > 版本：`1.0.0` · 基于 FastAPI · 文档 UI：Scalar
 
@@ -158,7 +158,7 @@
 ```jsonc
 {
   "timestamp": "2025-12-03 10:20:30", // 当前时间（本地时区）
-  "service": "wealth-channel",        // 服务名称
+  "service": "market-insight",        // 服务名称
   "version": "1.0.0"                  // 版本号
 }
 ```

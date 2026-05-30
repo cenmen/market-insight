@@ -1,5 +1,5 @@
 [project]
-name = "wealth-channel"
+name = "market-insight"
 version = "0.1.0"
 description = "个人回测系统与数据服务"
 readme = "README.md"

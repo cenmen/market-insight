@@ -8,7 +8,6 @@
 - 统一前缀：`/api`
 - 分组：
   - `基础数据`（前缀 `/basic`）
-  - `策略`（前缀 `/strategy`）
   - `系统设置`（前缀 `/setting`）
 
 ## 统一响应结构
@@ -111,42 +110,6 @@
 - 示例（仅示意）：
   - `GET /api/basic/search?keyword=伊利`
 
----
-
-## 策略 · 信号
-前缀：`/api/strategy`
-
-### 1) 计算策略信号
-- 方法与路径：`GET /api/strategy/signals`
-- 概述：按 K 线参数与策略 ID 计算买卖事件与预计收益
-- 请求参数（Query）：
-  - `code` `string`，默认 `600519`，股票代码（6位）
-  - `period` `enum`，默认 `daily`，可选：`daily`/`weekly`/`monthly`
-  - `startDate` `string?`，默认 `20250101`，格式 `YYYYMMDD`
-  - `endDate` `string?`，默认 `20500101`，格式 `YYYYMMDD`
-  - `adjust` `string?`，`qfq`/`hfq`，默认不复权
-  - `timeout` `number?`，请求超时（秒）
-  - `strategyId` `number`，策略 ID（例如：`1`=倒锤子线抄底·次日卖出 V1）
-- 成功响应（`data` 字段）：
-
-```jsonc
-{
-  "items": [                // 交易事件列表
-    { "date": "2025-01-02", "value": 11.35, "type": "buy" },
-    {
-      "date": "2025-01-03", "value": 11.40, "type": "sell",
-      "profit_pct": 0.44,            // 相对买入价的收益（%）
-      "profit_pct_vs_high": -0.44    // 相对卖出日最高价的收益（%）
-    }
-  ],
-  "expected_profit_pct": 0.21 // 预计平均收益（%）
-}
-```
-- 示例（仅示意）：
-  - `GET /api/strategy/signals?strategyId=1&code=600519&period=daily&startDate=20250101&endDate=20250131`
-
----
-
 ## 系统设置
 前缀：`/api/setting`
 
@@ -162,28 +125,6 @@
   "version": "1.0.0"                  // 版本号
 }
 ```
-
-### 2) 获取策略集合
-- 方法与路径：`GET /api/setting/strategies`
-- 概述：返回可用策略列表
-- 请求参数（Query）：
-  - `keyword` `string?`，关键词（按标题或描述过滤）
-- 成功响应（`data` 字段）：
-
-```jsonc
-{
-  "count": 1,                  // 策略数量
-  "items": [
-    {
-      "strategy_id": 1,       // 策略ID
-      "title": "倒锤子线抄底·次日卖出（V1）", // 策略名称
-      "desc": "出现倒锤子线当日建仓，次日卖出"   // 策略描述
-    }
-  ]
-}
-```
-
----
 
 ## 错误示例
 - 业务失败：
@@ -211,4 +152,4 @@
 
 ## 说明
 - 文档 UI 为 Scalar，访问 `/docs` 可交互调试。
-- 模块分组包含 `basic` 与 `strategy`，对外路由前缀分别为 `/basic` 与 `/strategy`。
+- 模块分组包含 `basic` 与 `setting`，对外路由前缀分别为 `/basic` 与 `/setting`。

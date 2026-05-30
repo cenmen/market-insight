@@ -1,19 +1,32 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends
-import asyncio
-from aiocache import SimpleMemoryCache
 
 from app.core.context import Context, build_context
 from app.core.response import ResponseModel
-from app.modules.basic.schema.request import KlineParams, SearchStockParams
-from app.modules.basic.schema.response import KlineBar, KlineResponse, SearchStockItem, SearchStockResponse
-from app.modules.basic.service import load_kline_by_tx_cached, search_stocks
+from app.modules.basic.schema.request import (
+    FundTopHoldingsParams,
+    KlineParams,
+    SearchStockParams,
+    StockMainFinanceParams,
+)
+from app.modules.basic.schema.response import (
+    FundTopHoldingItem,
+    FundTopHoldingsResponse,
+    KlineBar,
+    KlineResponse,
+    QuarterFinanceItem,
+    SearchStockItem,
+    SearchStockResponse,
+)
+from app.modules.basic.service import (
+    fetch_fund_top_holdings,
+    fetch_stock_main_finance,
+    load_kline_by_tx_cached,
+    search_stocks,
+)
 
 router = APIRouter()
-
-
-kline_cache = SimpleMemoryCache()
 
 
 @router.get(
@@ -40,4 +53,34 @@ def search(params: SearchStockParams = Depends(), context: Context = Depends(bui
     records = search_stocks(params)
     items = [SearchStockItem.model_validate(r) for r in records]
     data = SearchStockResponse(count=len(items), items=items)
+    return ResponseModel.success(data=data, request_id=context.request_id)
+
+
+@router.get(
+    "/fund/top-holdings",
+    response_model=ResponseModel,
+    summary="获取ETF前十大持仓",
+    description="按基金代码返回前十大持仓及持仓报告期",
+)
+def get_fund_top_holdings(params: FundTopHoldingsParams = Depends(), context: Context = Depends(build_context)):
+    records, position_report = fetch_fund_top_holdings(params.code)
+    items = [FundTopHoldingItem.model_validate(r) for r in records]
+    data = FundTopHoldingsResponse(
+        code=params.code,
+        count=len(items),
+        position_report=position_report,
+        items=items,
+    )
+    return ResponseModel.success(data=data, request_id=context.request_id)
+
+
+@router.get(
+    "/stock/main-finance",
+    response_model=ResponseModel,
+    summary="获取股票核心财务指标",
+    description="按股票代码与报告类型返回单期核心财务指标",
+)
+def get_stock_main_finance(params: StockMainFinanceParams = Depends(), context: Context = Depends(build_context)):
+    record = fetch_stock_main_finance(params.stockCode, params.reportType)
+    data = QuarterFinanceItem.model_validate(record) if record else None
     return ResponseModel.success(data=data, request_id=context.request_id)

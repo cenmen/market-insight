@@ -28,3 +28,12 @@ class KlineParams(BaseModel):
 
 class SearchStockParams(BaseModel):
     keyword: str = Field(..., description="关键词，支持股票代码或名称的部分匹配", min_length=1, json_schema_extra={"example": "伊利股份"})
+
+
+class FundTopHoldingsParams(BaseModel):
+    code: str = Field(..., description="ETF 基金代码", min_length=1, json_schema_extra={"example": "588200"})
+
+
+class StockMainFinanceParams(BaseModel):
+    stockCode: str = Field(..., description="股票代码", min_length=1, json_schema_extra={"example": "600519"})
+    reportType: str = Field(..., description="报告类型，如 一季报/中报/三季报/年报", min_length=1, json_schema_extra={"example": "一季报"})

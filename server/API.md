@@ -8,6 +8,7 @@
 - 统一前缀：`/api`
 - 分组：
   - `基础数据`（前缀 `/basic`）
+  - `Skill 数据`（前缀 `/skill`）
   - `系统设置`（前缀 `/setting`）
 
 ## 统一响应结构
@@ -110,6 +111,31 @@
 - 示例（仅示意）：
   - `GET /api/basic/search?keyword=伊利`
 
+### 3) 获取ETF前十大持仓
+- 方法与路径：`GET /api/basic/fund/top-holdings`
+- 概述：按 ETF 基金代码返回前十大持仓及持仓报告期
+- 请求参数（Query）：
+  - `code` `string`，ETF 基金代码（例如：`588200`）
+
+### 4) 获取股票核心财务指标
+- 方法与路径：`GET /api/basic/stock/main-finance`
+- 概述：按股票代码与报告类型返回单期核心财务指标
+- 请求参数（Query）：
+  - `stockCode` `string`，股票代码（例如：`600519`）
+  - `reportType` `string`，报告类型（`一季报`/`中报`/`三季报`/`年报`）
+
+---
+
+## Skill 数据
+前缀：`/api/skill`
+
+### 1) 一次性获取ETF基础数据
+- 方法与路径：`GET /api/skill/etf`
+- 概述：供 skill 直接调用，一次返回 ETF K线、前十大持仓、持仓股单期财务指标
+- 请求参数（Query）：
+  - `code` `string`，ETF 基金代码（例如：`588200`）
+  - `klineLimit` `number?`，K线条数，默认 `60`
+
 ## 系统设置
 前缀：`/api/setting`
 
@@ -152,4 +178,4 @@
 
 ## 说明
 - 文档 UI 为 Scalar，访问 `/docs` 可交互调试。
-- 模块分组包含 `basic` 与 `setting`，对外路由前缀分别为 `/basic` 与 `/setting`。
+- 模块分组包含 `basic`、`skill` 与 `setting`，对外路由前缀分别为 `/basic`、`/skill` 与 `/setting`。

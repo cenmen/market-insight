@@ -32,3 +32,27 @@ class SearchStockItem(BaseModel):
 class SearchStockResponse(BaseModel):
     count: int = Field()  # 结果条数
     items: List[SearchStockItem] = Field()  # 返回的匹配项列表
+
+
+class QuarterFinanceItem(BaseModel):
+    date: str = Field()
+    roe: float = Field()
+    main_grow: float = Field()
+    net_rate: float = Field()
+    gross_rate: float = Field()
+    rev_grow: float = Field()
+    profit_grow: float = Field()
+
+
+class FundTopHoldingItem(BaseModel):
+    stock_code: str = Field()
+    stock_name: str = Field()
+    hold_rate: float = Field()
+    quarter_data: List[QuarterFinanceItem] = Field(default_factory=list)
+
+
+class FundTopHoldingsResponse(BaseModel):
+    code: str = Field()
+    count: int = Field()
+    position_report: Optional[str] = Field(default=None)
+    items: List[FundTopHoldingItem] = Field()

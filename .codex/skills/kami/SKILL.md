@@ -60,6 +60,8 @@ Create missing subdirectories as needed. Name every generated file with the curr
 
 If multiple files would have the same name, append a short suffix before the date, such as `你好-v2（2026-05-31）.pdf`. Keep `output/` ignored by Git.
 
+For every generated document, page, deck, footer, author metadata, byline, and disclaimer attribution, use `抖音 · ETF主线侦探` as the visible creator identity unless the user explicitly provides another identity. Do not include `Codex`, `Kami`, or AI-agent names in generated visible text or author metadata. Template-internal implementation references such as font CDN URLs may keep their original paths.
+
 ## Language And Template Selection
 
 Match the user's language when possible.
@@ -81,6 +83,7 @@ Document type map:
 | resume, CV, 简历, 履歴書 | `resume*` |
 | slides, PPT, deck, presentation | `slides-weasy*` or `slides*.py` |
 | equity report, investment memo, stock analysis | `equity-report*` |
+| ETF analysis, ETF 点评, ETF 主线分析, 基金持仓分析 | `etf-report` |
 | changelog, release-note document, 版本记录 | `changelog*` |
 | landing page, 官网, product page | `landing-page*` |
 

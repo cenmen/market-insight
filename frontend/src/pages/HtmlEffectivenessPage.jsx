@@ -1,16 +1,17 @@
 import PageShell from '../components/PageShell';
+import styles from './HtmlEffectivenessPage.module.css';
 
 export default function HtmlEffectivenessPage() {
   return (
     <PageShell>
-      <article className='font-momo mx-auto h-[88vh] w-full max-w-[760px] overflow-y-auto text-[#2f2c26]'>
-        <p className='mb-4 text-xs tracking-[0.25em] text-[#8d8b83] uppercase md:text-[15px]'>VANTASTACK RESEARCH 盘面解读</p>
-        <header className='border-t border-[#e4dfd3] pt-4 md:pt-5'>
-          <h1 className='text-[30px] leading-[1.1] font-semibold tracking-[0.01em] text-[#1f1e1a] md:text-[72px]'>5月收官：科技股挨了一闷棍，但主线还没散</h1>
-          <p className='mt-4 text-[16px] leading-tight text-[#6f6b61] md:mt-5 md:text-[32px]'>算力和电力仍是主线，但市场开始重新计价拥挤度。</p>
+      <article className={styles.article}>
+        <p className={styles.eyebrow}>VANTASTACK RESEARCH 盘面解读</p>
+        <header className={styles.header}>
+          <h1 className={styles.title}>5月收官：科技股挨了一闷棍，但主线还没散</h1>
+          <p className={styles.subtitle}>算力和电力仍是主线，但市场开始重新计价拥挤度。</p>
         </header>
 
-        <section className='mt-6 space-y-2 text-[14px] leading-[1.78] font-normal tracking-[0.01em] md:mt-11 md:text-[14px]'>
+        <section className={styles.content}>
           <p>今天这个盘，挺像月底家里算账。</p>
           <p>前半个月大家还在外面吃火锅、喝奶茶、买新衣服，觉得日子红红火火。到了月底一看账单，心里咯噔一下：钱是花爽了，但信用卡也快顶格了。</p>
           <p>A股今天就是这个感觉。</p>
@@ -71,9 +72,6 @@ export default function HtmlEffectivenessPage() {
           <p>一句话总结今天：</p>
           <p>5月的A股，科技股赢了全月，但输在收官日。</p>
           <p>算力和电力还是主线，但从今天开始，市场不再奖励所有胆子大的人，只奖励看得清、拿得住、跑得快的人。</p>
-          {/* <p className='mt-8 md:mt-11'>
-            作者 / <span className='font-momoLatin'>小红书</span> · 韭菜练习生
-          </p> */}
         </section>
       </article>
     </PageShell>

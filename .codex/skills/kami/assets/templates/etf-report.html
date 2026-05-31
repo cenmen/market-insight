@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<!-- ==================================================================
+     ETF REPORT TEMPLATE · parchment design system
+     ETF 点评 / 主线分析 / 基金持仓分析
+     结构：标题区 -> 核心指标 -> 投资逻辑 -> 主题分布 -> 持仓明细 -> 技术观察 -> 风险
+     ================================================================== -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>{{ETF名称}} · ETF 分析</title>
+<meta name="author" content="{{作者}}">
+<meta name="description" content="{{摘要}}">
+<meta name="keywords" content="{{关键词}}">
+<meta name="generator" content="{{生成器}}">
+<style>
+  @font-face {
+    font-family: "TsangerJinKai02";
+    src: url("../fonts/TsangerJinKai02-W04.ttf") format("truetype"),
+       url("https://cdn.jsdelivr.net/gh/tw93/Kami@main/assets/fonts/TsangerJinKai02-W04.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: "TsangerJinKai02";
+    src: url("../fonts/TsangerJinKai02-W05.ttf") format("truetype"),
+       url("https://cdn.jsdelivr.net/gh/tw93/Kami@main/assets/fonts/TsangerJinKai02-W05.ttf") format("truetype");
+    font-weight: 500;
+    font-style: normal;
+  }
+
+  @page {
+    size: A4;
+    margin: 16mm 18mm 18mm 18mm;
+    background: #f5f4ed;
+
+    @bottom-center {
+      content: counter(page) "  ·  {{ETF名称}} 分析";
+      font-family: "TsangerJinKai02", "Source Han Serif SC",
+                   "Noto Serif CJK SC", "Songti SC", Georgia, serif;
+      font-size: 9pt;
+      color: #6b6a64;
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --parchment: #f5f4ed;
+    --ivory:     #faf9f5;
+    --near-black:#141413;
+    --dark-warm: #3d3d3a;
+    --olive:     #504e49;
+    --stone:     #6b6a64;
+    --brand:     #1B365D;
+    --border:    #e8e6dc;
+    --border-soft:#e5e3d8;
+    --tag-bg:    #E4ECF5;
+    --positive:  #1B365D;
+    --negative:  #6b6a64;
+    --serif: "TsangerJinKai02", "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", "STSong", Georgia, serif;
+    --sans: var(--serif);
+    --rhythm-module: 14pt;
+    --rhythm-section: 18pt;
+  }
+
+  html, body { background: var(--parchment); }
+
+  @media screen {
+    body { max-width: 210mm; margin: 0 auto; padding: 16mm 18mm 18mm 18mm; }
+  }
+
+  body {
+    color: var(--near-black);
+    font-family: var(--serif);
+    font-size: 10pt;
+    line-height: 1.5;
+    letter-spacing: 0.3pt;
+    widows: 3;
+    orphans: 3;
+  }
+
+  strong { font-weight: 500; }
+  .hl { color: var(--brand); font-weight: 500; }
+
+  .report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--rhythm-module);
+    border-left: 2.5pt solid var(--brand);
+    border-radius: 1.5pt;
+    padding-left: 8pt;
+  }
+  .ticker-block { flex: 1; }
+  .ticker-eyebrow {
+    font-size: 9pt;
+    color: var(--brand);
+    letter-spacing: 1pt;
+    text-transform: uppercase;
+    margin-bottom: 4pt;
+  }
+  .ticker-name {
+    font-family: var(--serif);
+    font-size: 24pt;
+    font-weight: 500;
+    color: var(--near-black);
+    line-height: 1.15;
+    margin-bottom: 4pt;
+  }
+  .ticker-sub {
+    font-size: 10pt;
+    color: var(--olive);
+    line-height: 1.4;
+  }
+  .price-block {
+    text-align: right;
+    padding-top: 4pt;
+  }
+  .price-current {
+    font-family: var(--serif);
+    font-size: 28pt;
+    font-weight: 500;
+    color: var(--near-black);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .price-change {
+    font-size: 10pt;
+    font-weight: 500;
+    margin-top: 2pt;
+    font-variant-numeric: tabular-nums;
+  }
+  .price-change.up { color: var(--positive); }
+  .price-change.down { color: var(--negative); }
+  .price-date {
+    font-size: 9pt;
+    color: var(--stone);
+    margin-top: 2pt;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5pt;
+    margin: 0 0 13pt 0;
+  }
+  .tag {
+    display: inline-block;
+    background: var(--tag-bg);
+    color: var(--brand);
+    font-size: 9pt;
+    font-weight: 500;
+    padding: 1pt 6pt;
+    border-radius: 3pt;
+  }
+
+  .metrics {
+    display: flex;
+    gap: 14pt;
+    margin-bottom: 16pt;
+    padding: 6pt 0;
+    border-top: 0.3pt dotted var(--border);
+    border-bottom: 0.3pt dotted var(--border);
+  }
+  .metric {
+    flex: 1;
+    display: flex;
+    align-items: baseline;
+    gap: 4pt;
+  }
+  .metric-value {
+    font-family: var(--serif);
+    font-size: 16pt;
+    font-weight: 500;
+    color: var(--brand);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .metric-label {
+    font-size: 9pt;
+    color: var(--olive);
+    line-height: 1.3;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: 16pt;
+    font-weight: 500;
+    color: var(--near-black);
+    margin: 18pt 0 6pt 0;
+    break-after: avoid;
+  }
+
+  h3 {
+    font-size: 13pt;
+    font-weight: 500;
+    color: var(--dark-warm);
+    margin: 12pt 0 4pt 0;
+    break-after: avoid;
+  }
+
+  p { margin: 0 0 8pt 0; line-height: 1.5; widows: 2; orphans: 2; }
+
+  ul, ol {
+    margin: 4pt 0 8pt 0;
+    padding-left: 18pt;
+    line-height: 1.5;
+  }
+  ul li::marker { color: var(--brand); }
+  ol li::marker { color: var(--brand); font-weight: 500; }
+
+  table, .kami-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9.5pt;
+    margin: 8pt 0;
+    break-inside: avoid;
+  }
+  table th, .kami-table th {
+    text-align: left;
+    font-weight: 500;
+    color: var(--dark-warm);
+    padding: 5pt 8pt;
+    border-bottom: 1pt solid var(--border);
+    background: transparent;
+  }
+  table td, .kami-table td {
+    padding: 4pt 8pt;
+    border-bottom: 0.3pt solid var(--border-soft);
+    vertical-align: top;
+  }
+  table.compact th, .kami-table.compact th { padding: 3pt 6pt; font-size: 8pt; }
+  table.compact td, .kami-table.compact td { padding: 2pt 6pt; font-size: 8pt; line-height: 1.4; }
+  table.financial td:not(:first-child), .kami-table.financial td:not(:first-child) {
+    text-align: right; font-variant-numeric: tabular-nums;
+  }
+  table.financial th:not(:first-child), .kami-table.financial th:not(:first-child) { text-align: right; }
+  table.striped tbody tr:nth-child(even) td, .kami-table.striped tbody tr:nth-child(even) td {
+    background: var(--ivory);
+  }
+
+  .callout {
+    background: var(--ivory);
+    border-left: 2pt solid var(--brand);
+    padding: 8pt 12pt;
+    border-radius: 3pt;
+    margin: 10pt 0;
+    line-height: 1.5;
+    break-inside: avoid;
+  }
+
+  .distribution {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10pt;
+    margin: 8pt 0;
+  }
+  .bucket {
+    background: var(--ivory);
+    border: 0.5pt solid var(--border);
+    border-radius: 4pt;
+    padding: 8pt 10pt;
+    break-inside: avoid;
+  }
+  .bucket-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 8pt;
+    margin-bottom: 3pt;
+    color: var(--dark-warm);
+    font-weight: 500;
+  }
+  .bucket-percent {
+    color: var(--brand);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .bucket-desc {
+    color: var(--olive);
+    font-size: 9pt;
+    line-height: 1.4;
+  }
+
+  .risk-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10pt;
+    margin: 8pt 0;
+  }
+  .risk-item {
+    padding: 6pt 10pt;
+    background: var(--ivory);
+    border-radius: 3pt;
+    break-inside: avoid;
+  }
+  .risk-label {
+    font-size: 9pt;
+    font-weight: 500;
+    color: var(--brand);
+    margin-bottom: 2pt;
+  }
+  .risk-desc {
+    font-size: 9pt;
+    color: var(--olive);
+    line-height: 1.4;
+  }
+
+  figure {
+    margin: 12pt 0;
+    break-inside: avoid;
+  }
+  figcaption {
+    font-size: 9pt;
+    color: var(--stone);
+    margin-top: 4pt;
+    text-align: center;
+  }
+  .chart-placeholder {
+    background: var(--ivory);
+    border-radius: 4pt;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--stone);
+    font-size: 9pt;
+  }
+
+  .event-list {
+    border-left: 1pt solid var(--border);
+    margin: 8pt 0 0 4pt;
+    padding-left: 12pt;
+  }
+  .event {
+    margin-bottom: 10pt;
+    break-inside: avoid;
+  }
+  .event-title {
+    color: var(--dark-warm);
+    font-weight: 500;
+  }
+  .event-date {
+    color: var(--stone);
+    font-size: 9pt;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .report-footer {
+    margin-top: 16pt;
+    padding-top: 6pt;
+    border-top: 0.3pt dotted var(--border);
+    font-size: 9pt;
+    color: var(--stone);
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
+</head>
+<body>
+  <div class="report-header">
+    <div class="ticker-block">
+      <div class="ticker-eyebrow">ETF ANALYSIS</div>
+      <div class="ticker-name">{{ETF名称}} <span style="font-size: 14pt; color: var(--stone);">{{ETF代码}}</span></div>
+      <div class="ticker-sub">{{跟踪指数}} · {{一句核心判断}}</div>
+    </div>
+    <div class="price-block">
+      <div class="price-current">{{最新价格或规模}}</div>
+      <div class="price-change {{up/down}}">{{短期信号}}</div>
+      <div class="price-date">{{日期}}</div>
+    </div>
+  </div>
+
+  <div class="tags">
+    {{主题标签}}
+  </div>
+
+  <div class="metrics">
+    {{核心指标卡片}}
+  </div>
+
+  <h2>投资逻辑</h2>
+  <p>{{2-3 句 ETF 主题暴露、行业主线、适合观察的核心变量。}}</p>
+  <div class="callout">{{一句话总结 ETF 的配置价值与主要约束。}}</div>
+
+  <h2>短期影响因素</h2>
+  <ol>
+    {{短期影响因素列表}}
+  </ol>
+
+  <h2>风格特征</h2>
+  <ol>
+    {{风格特征列表}}
+  </ol>
+
+  <h2>主题业务分布</h2>
+  <div class="distribution">
+    {{主题业务分布}}
+  </div>
+
+  <h2>持仓明细</h2>
+  <table class="compact striped">
+    <thead>
+      <tr>
+        <th>代码</th>
+        <th>名称</th>
+        <th>持仓占比</th>
+        <th>简介</th>
+        <th>产品标签</th>
+        <th>ROE</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{持仓明细}}
+    </tbody>
+  </table>
+
+  <h2>技术观察</h2>
+  <table class="financial striped">
+    <thead>
+      <tr>
+        <th>信号</th>
+        <th>读数</th>
+        <th>用途</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{技术信号}}
+    </tbody>
+  </table>
+  <figure>
+    <div class="chart-placeholder" style="height: 52mm;">{{K线图或价格走势 SVG}}</div>
+    <figcaption>{{图表说明}}</figcaption>
+  </figure>
+
+  <h2>跟踪事件</h2>
+  <div class="event-list">
+    {{事件时间线}}
+  </div>
+
+  <h2>风险提示</h2>
+  <div class="risk-grid">
+    {{风险提示}}
+  </div>
+
+  <div class="report-footer">
+    <span>仅作 ETF 主题研究与排版展示，不构成投资建议。</span>
+    <span>{{作者}} · {{日期}}</span>
+  </div>
+</body>
+</html>

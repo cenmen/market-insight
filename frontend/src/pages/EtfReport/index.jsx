@@ -1,5 +1,5 @@
-import etf515880 from '../data/etf515880'
-import styles from './EtfReportPage.module.css'
+import etf515880 from '../../data/etf515880'
+import styles from './index.module.css'
 
 function formatRate(rate) {
   return `${Number(rate).toFixed(2)}%`

@@ -1,5 +1,5 @@
-import PageShell from '../components/PageShell';
-import styles from './HtmlEffectivenessPage.module.css';
+import PageShell from '../../components/PageShell'
+import styles from './index.module.css'
 
 export default function HtmlEffectivenessPage() {
   return (
@@ -75,5 +75,5 @@ export default function HtmlEffectivenessPage() {
         </section>
       </article>
     </PageShell>
-  );
+  )
 }

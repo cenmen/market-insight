@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
-import { pageLinks } from '../utils/pages'
-import styles from './HomePage.module.css'
+import { pageLinks } from '../../utils/pages'
+import styles from './index.module.css'
 
 export default function HomePage() {
   return (

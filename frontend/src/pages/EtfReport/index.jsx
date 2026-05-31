@@ -1,3 +1,5 @@
+import BaseKLineChart from '../../components/charts/BaseKLineChart'
+import BasePieChart from '../../components/charts/BasePieChart'
 import etf515880 from '../../data/etf515880'
 import styles from './index.module.css'
 
@@ -92,123 +94,14 @@ function renderEvent(viewpoint) {
   )
 }
 
-function getChartDomain(data) {
-  const lows = data.map(function mapLow(item) {
-    return item.low
-  })
-  const highs = data.map(function mapHigh(item) {
-    return item.high
-  })
-  const volumes = data.map(function mapVolume(item) {
-    return item.volume
-  })
-
-  return {
-    minPrice: Math.min(...lows),
-    maxPrice: Math.max(...highs),
-    maxVolume: Math.max(...volumes),
-  }
-}
-
-function makePriceScale(minPrice, maxPrice, top, height) {
-  return function scalePrice(value) {
-    return top + ((maxPrice - value) / (maxPrice - minPrice)) * height
-  }
-}
-
-function makeVolumeScale(maxVolume, top, height) {
-  return function scaleVolume(value) {
-    return top + height - (value / maxVolume) * height
-  }
-}
-
-function KLineChart({ data }) {
-  const width = 1080
-  const priceTop = 30
-  const priceHeight = 210
-  const volumeTop = 258
-  const volumeHeight = 44
-  const left = 50
-  const right = 18
-  const chartWidth = width - left - right
-  const candleWidth = 8
-  const domain = getChartDomain(data)
-  const priceScale = makePriceScale(domain.minPrice, domain.maxPrice, priceTop, priceHeight)
-  const volumeScale = makeVolumeScale(domain.maxVolume, volumeTop, volumeHeight)
-  const step = chartWidth / Math.max(data.length - 1, 1)
-  const gridValues = [1.0, 1.2, 1.4, 1.6, 1.8]
-  const dateMarkers = data.filter(function filterDateMarker(_, index) {
-    return index % 8 === 0
-  })
-
-  function renderGrid(value) {
-    const y = priceScale(value)
-
-    return (
-      <g key={value}>
-        <line className={styles.axis} x1={left} x2={width - right} y1={y} y2={y} />
-        <text className={styles.axisLabel} x={18} y={y + 4}>
-          {value.toFixed(1)}
-        </text>
-      </g>
-    )
-  }
-
-  function renderDateMarker(item) {
-    const index = data.indexOf(item)
-    const x = left + index * step
-
-    return (
-      <text className={styles.axisLabel} x={x - 28} y={324} key={item.date}>
-        {item.date.slice(5)}
-      </text>
-    )
-  }
-
-  function renderCandle(item, index) {
-    const x = left + index * step
-    const openY = priceScale(item.open)
-    const closeY = priceScale(item.close)
-    const highY = priceScale(item.high)
-    const lowY = priceScale(item.low)
-    const bodyY = Math.min(openY, closeY)
-    const bodyHeight = Math.max(Math.abs(openY - closeY), 3)
-    const isUp = item.close >= item.open
-    const volumeY = volumeScale(item.volume)
-    const volumeHeightValue = volumeTop + volumeHeight - volumeY
-
-    return (
-      <g key={item.date}>
-        <line className={isUp ? styles.wickUp : styles.wickDown} x1={x} x2={x} y1={highY} y2={lowY} />
-        <rect
-          className={isUp ? styles.candleUp : styles.candleDown}
-          x={x - candleWidth / 2}
-          y={bodyY}
-          width={candleWidth}
-          height={bodyHeight}
-        />
-        <rect
-          className={isUp ? styles.volumeUp : styles.volumeDown}
-          x={x - candleWidth / 2}
-          y={volumeY}
-          width={candleWidth}
-          height={volumeHeightValue}
-        />
-      </g>
-    )
-  }
-
-  return (
-    <svg className={styles.chart} viewBox={`0 0 ${width} 340`} role="img" aria-label="通信ETF K线技术分析">
-      {gridValues.map(renderGrid)}
-      {data.map(renderCandle)}
-      {dateMarkers.map(renderDateMarker)}
-    </svg>
-  )
-}
-
 export default function EtfReportPage() {
   const data = etf515880
+  const pieData = data.businessRatio.map(function mapBucket(item) {
+    return {
+      name: item.type,
+      value: Number(item.rate.toFixed(2)),
+    }
+  })
 
   return (
     <main className={styles.page}>
@@ -250,8 +143,12 @@ export default function EtfReportPage() {
         </section>
 
         <section>
-          <h2 className={styles.sectionTitle}>主题业务分布</h2>
+          <h2 className={styles.sectionTitle}>业务分布</h2>
           <div className={styles.distribution}>{data.businessRatio.map(renderBucket)}</div>
+          <figure className={styles.chartFrame}>
+            <BasePieChart data={pieData} title='主题业务占比' height={336} />
+            <figcaption className={styles.figcaption}>持仓业务分布示意（按权重口径汇总）</figcaption>
+          </figure>
         </section>
 
         <section>
@@ -297,7 +194,7 @@ export default function EtfReportPage() {
             </tbody>
           </table>
           <figure className={styles.chartFrame}>
-            <KLineChart data={data.kLineData} />
+            <BaseKLineChart data={data.kLineData} height={364} />
             <figcaption className={styles.figcaption}>{data.report.chartCaption}</figcaption>
           </figure>
         </section>

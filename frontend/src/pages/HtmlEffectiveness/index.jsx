@@ -1,9 +1,8 @@
-import PageShell from '../../components/PageShell'
 import styles from './index.module.css'
 
 export default function HtmlEffectivenessPage() {
   return (
-    <PageShell>
+    <main className={styles.page}>
       <article className={styles.article}>
         <p className={styles.eyebrow}>VANTASTACK RESEARCH 盘面解读</p>
         <header className={styles.header}>
@@ -74,6 +73,6 @@ export default function HtmlEffectivenessPage() {
           <p>算力和电力还是主线，但从今天开始，市场不再奖励所有胆子大的人，只奖励看得清、拿得住、跑得快的人。</p>
         </section>
       </article>
-    </PageShell>
+    </main>
   )
 }

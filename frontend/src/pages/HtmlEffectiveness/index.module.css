@@ -1,3 +1,12 @@
+.page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  overflow: hidden;
+  background: #f4f2e8;
+  padding: 0 16px;
+}
+
 .article {
   width: 100%;
   max-width: 760px;
@@ -51,6 +60,11 @@
 }
 
 @media (min-width: 768px) {
+  .page {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+
   .eyebrow {
     font-size: 15px;
   }

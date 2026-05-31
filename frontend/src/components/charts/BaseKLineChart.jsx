@@ -8,11 +8,45 @@ function splitKlineData(data) {
 
   data.forEach(function eachItem(item) {
     categoryData.push(item.date)
-    values.push([item.open, item.close, item.low, item.high])
-    volumes.push([item.volume, item.open <= item.close ? 1 : -1])
+    values.push({
+      value: [item.open, item.close, item.low, item.high],
+      open: item.open,
+      close: item.close,
+      low: item.low,
+      high: item.high,
+      volume: item.volume,
+      amount: item.amount,
+      amplitude: item.amplitude,
+      changePercent: item.changePercent,
+      changeAmount: item.changeAmount,
+      turnoverRate: item.turnoverRate,
+      date: item.date,
+    })
+    volumes.push({
+      value: item.volume ?? 0,
+      itemStyle: {
+        color: item.open <= item.close ? 'rgba(27, 54, 93, 0.45)' : 'rgba(107, 106, 100, 0.42)',
+      },
+    })
   })
 
   return { categoryData, values, volumes }
+}
+
+function formatNumber(value, digits = 2) {
+  const num = Number(value)
+  if (!Number.isFinite(num)) {
+    return '--'
+  }
+  return num.toFixed(digits)
+}
+
+function formatAmountToYi(value) {
+  const num = Number(value)
+  if (!Number.isFinite(num)) {
+    return '--'
+  }
+  return `${(num / 100000000).toFixed(2)} 亿`
 }
 
 export default function BaseKLineChart({ data = [], height = 360, className }) {
@@ -26,10 +60,34 @@ export default function BaseKLineChart({ data = [], height = 360, className }) {
         tooltip: {
           trigger: 'axis',
           axisPointer: { type: 'cross' },
+          confine: true,
           borderWidth: 1,
           borderColor: '#e8e6dc',
           backgroundColor: '#faf9f5',
           textStyle: { color: '#141413' },
+          formatter(params) {
+            const seriesItems = Array.isArray(params) ? params : [params]
+            const klineItem = seriesItems.find(function findKLine(item) {
+              return item.seriesType === 'candlestick'
+            })
+            if (!klineItem) {
+              return ''
+            }
+            const raw = klineItem.data || {}
+            return [
+              `日期：${raw.date ?? klineItem.axisValue ?? '--'}`,
+              `开盘：${formatNumber(raw.open)}`,
+              `收盘：${formatNumber(raw.close)}`,
+              `最高：${formatNumber(raw.high)}`,
+              `最低：${formatNumber(raw.low)}`,
+              `成交量：${formatAmountToYi(raw.volume)}`,
+              `成交额：${formatAmountToYi(raw.amount)}`,
+              `振幅：${formatNumber(raw.amplitude)}%`,
+              `涨跌幅：${formatNumber(raw.changePercent)}%`,
+              `涨跌额：${formatNumber(raw.changeAmount)}`,
+              `换手率：${formatNumber(raw.turnoverRate)}%`,
+            ].join('<br/>')
+          },
         },
         axisPointer: {
           link: [{ xAxisIndex: 'all' }],
@@ -45,7 +103,7 @@ export default function BaseKLineChart({ data = [], height = 360, className }) {
           {
             type: 'category',
             data: dataset.categoryData,
-            boundaryGap: false,
+            boundaryGap: true,
             axisLine: { lineStyle: { color: '#e8e6dc' } },
             axisTick: { show: false },
             axisLabel: { color: '#6b6a64', fontFamily: 'JetBrains Mono, monospace' },
@@ -57,7 +115,7 @@ export default function BaseKLineChart({ data = [], height = 360, className }) {
             type: 'category',
             gridIndex: 1,
             data: dataset.categoryData,
-            boundaryGap: false,
+            boundaryGap: true,
             axisLine: { lineStyle: { color: '#e8e6dc' } },
             axisTick: { show: false },
             axisLabel: { show: false },
@@ -81,23 +139,18 @@ export default function BaseKLineChart({ data = [], height = 360, className }) {
             splitNumber: 2,
             axisLine: { show: false },
             axisTick: { show: false },
-            axisLabel: { color: '#6b6a64', fontFamily: 'JetBrains Mono, monospace' },
+            axisLabel: { show: false },
             splitLine: { show: false },
           },
         ],
         dataZoom: [
-          { type: 'inside', xAxisIndex: [0, 1], start: 0, end: 100 },
           {
-            show: true,
-            type: 'slider',
+            type: 'inside',
             xAxisIndex: [0, 1],
-            top: 338,
-            height: 16,
-            borderColor: '#e8e6dc',
-            backgroundColor: '#f5f4ed',
-            fillerColor: '#d6e1ee',
-            handleStyle: { color: '#1B365D' },
-            textStyle: { color: '#6b6a64' },
+            zoomOnMouseWheel: false,
+            moveOnMouseWheel: false,
+            moveOnMouseMove: false,
+            preventDefaultMouseMove: true,
           },
         ],
         series: [
@@ -118,11 +171,7 @@ export default function BaseKLineChart({ data = [], height = 360, className }) {
             xAxisIndex: 1,
             yAxisIndex: 1,
             data: dataset.volumes,
-            itemStyle: {
-              color(params) {
-                return params.data[1] > 0 ? 'rgba(27, 54, 93, 0.45)' : 'rgba(107, 106, 100, 0.42)'
-              },
-            },
+            barWidth: '60%',
           },
         ],
       }

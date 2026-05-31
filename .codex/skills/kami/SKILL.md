@@ -29,12 +29,36 @@ Load only the references needed for the current task. Do not read the entire ski
 
 1. Identify the deliverable: document type, language, output format, page or length target, audience, and source material.
 2. Choose the nearest existing template. Do not create a new template unless none fits.
-3. Copy the chosen template into the user's requested output path or a sensible project-local output path, then replace placeholders and commented content blocks.
+3. Copy the chosen template into the user's requested output path or the default project-local output path below, then replace placeholders and commented content blocks.
 4. Preserve the Kami design language unless the user provides a brand profile or explicit visual direction.
 5. Use primary or user-provided sources for current facts, companies, products, people, releases, market data, and financial numbers.
 6. For diagrams inside documents or slides, read `references/diagrams.md`, choose a primitive from `assets/diagrams/`, and embed the SVG in a `<figure>` with an insight-led caption.
 7. For PDF output, prefer the WeasyPrint HTML templates. Use `slides.py` / `slides-en.py` only when the user explicitly needs an editable PPTX deck. Use Marp only if the user explicitly asks for markdown slides and suitable Marp assets exist.
 8. After finishing, tell the user what changed and provide manual verification commands instead of running preview, build, test, lint, or self-validation commands when the local project rules prohibit them.
+
+## Output Convention
+
+When used inside this project, write generated artifacts under the project root `output/` directory unless the user explicitly provides another path.
+
+Use these subdirectories by artifact type:
+
+| Artifact | Directory |
+| --- | --- |
+| HTML / landing page | `output/html/` |
+| PDF | `output/pdf/` |
+| PPTX | `output/pptx/` |
+| PNG / JPG / SVG images | `output/images/` |
+| Source markdown or notes | `output/source/` |
+
+Create missing subdirectories as needed. Name every generated file with the current date in full-width Chinese parentheses before the extension:
+
+```text
+你好（2026-05-31）.pdf
+产品一页纸（2026-05-31）.html
+市场洞察 slides（2026-05-31）.pptx
+```
+
+If multiple files would have the same name, append a short suffix before the date, such as `你好-v2（2026-05-31）.pdf`. Keep `output/` ignored by Git.
 
 ## Language And Template Selection
 

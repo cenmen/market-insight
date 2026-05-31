@@ -27,6 +27,7 @@ dist
 dist-ssr
 build
 artifacts
+output/
 
 # Tool caches
 .cache

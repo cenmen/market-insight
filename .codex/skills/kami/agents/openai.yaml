@@ -1,0 +1,9 @@
+interface:
+  display_name: "Kami"
+  short_description: "Typeset polished PDFs, decks, and landing pages"
+  icon_large: "./assets/images/logo.svg"
+  brand_color: "#1B365D"
+  default_prompt: "Use $kami to turn this draft into a polished PDF or static landing page."
+
+policy:
+  allow_implicit_invocation: true

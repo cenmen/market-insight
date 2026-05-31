@@ -11,6 +11,13 @@ function getLatestFinancial(row) {
   return row.data?.[0] ?? {};
 }
 
+function formatQuarter(financial) {
+  if (!financial.year || !financial.quarter) {
+    return '--';
+  }
+  return `${financial.year}Q${financial.quarter}`;
+}
+
 export default function EtfReportPage() {
   const data = etf515880;
   const pieData = data.businessRatio.map(function mapBucket(item) {
@@ -117,46 +124,52 @@ export default function EtfReportPage() {
 
         <section>
           <h2 className={styles.sectionTitle}>持仓明细</h2>
-          <div className={styles.tableScroll}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>代码</th>
-                  <th>名称</th>
-                  <th className={styles.num}>持仓占比</th>
-                  <th>简介</th>
-                  <th>产品标签</th>
-                  <th className={styles.num}>ROE</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.financialRows.map(function mapHolding(row) {
-                  const financial = getLatestFinancial(row);
-                  return (
-                    <tr key={row.code}>
-                      <td>{row.code}</td>
-                      <td>
-                        <strong>{row.name}</strong>
-                      </td>
-                      <td className={styles.num}>{formatRate(row.weight)}</td>
-                      <td>{row.intro}</td>
-                      <td>
-                        <div className={styles.tagList}>
-                          {row.productTags.map(function mapProductTag(tag) {
-                            return (
-                              <span className={styles.miniTag} key={tag}>
-                                {tag}
-                              </span>
-                            );
-                          })}
-                        </div>
-                      </td>
-                      <td className={styles.num}>{formatRate(financial.roe ?? 0)}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className={styles.holdingList}>
+            {data.financialRows.map(function mapHolding(row) {
+              const financial = getLatestFinancial(row);
+              return (
+                <article className={styles.holdingCard} key={row.code}>
+                  <header className={styles.holdingHeader}>
+                    <div className={styles.holdingTitle}>
+                      <strong>{row.name}</strong>
+                      <span className={styles.holdingCode}>{row.code}</span>
+                      <span className={styles.holdingQuarter}>{formatQuarter(financial)}</span>
+                    </div>
+                    <div className={styles.holdingMeta}>
+                      <div className={styles.holdingWeight}>持仓占比 {formatRate(row.weight)}</div>
+                    </div>
+                  </header>
+                  <div className={styles.tagList}>
+                    {row.productTags.map(function mapProductTag(tag) {
+                      return (
+                        <span className={styles.miniTag} key={tag}>
+                          {tag}
+                        </span>
+                      );
+                    })}
+                  </div>
+                  <dl className={styles.holdingMetrics}>
+                    <div className={styles.holdingMetric}>
+                      <dt>ROE</dt>
+                      <dd>{formatRate(financial.roe ?? 0)}</dd>
+                    </div>
+                    <div className={styles.holdingMetric}>
+                      <dt>营业收入增长率</dt>
+                      <dd>{formatRate(financial.revenueGrowthRate ?? 0)}</dd>
+                    </div>
+                    <div className={styles.holdingMetric}>
+                      <dt>净利率</dt>
+                      <dd>{formatRate(financial.netProfitMargin ?? 0)}</dd>
+                    </div>
+                    <div className={styles.holdingMetric}>
+                      <dt>扣非净利润增长率</dt>
+                      <dd>{formatRate(financial.nonNetProfitGrowthRate ?? 0)}</dd>
+                    </div>
+                  </dl>
+                  <p className={styles.holdingIntro}>{row.intro}</p>
+                </article>
+              );
+            })}
           </div>
         </section>
 

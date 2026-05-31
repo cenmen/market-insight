@@ -214,42 +214,70 @@
   line-height: 1.4;
 }
 
-.table {
-  width: 100%;
-  margin: 8pt 0;
-  border-collapse: collapse;
-  break-inside: avoid;
-  font-size: 9pt;
+.holdingList {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10pt;
+  margin-top: 8pt;
 }
 
-.table th {
-  padding: 5pt 8pt;
-  border-bottom: 1pt solid #e8e6dc;
-  color: #3d3d3a;
-  font-weight: 500;
-  text-align: left;
-}
-
-.table td {
-  padding: 4pt 8pt;
-  border-bottom: 0.3pt solid #e5e3d8;
-  vertical-align: top;
-}
-
-.table tbody tr:nth-child(even) td {
+.holdingCard {
+  padding: 10pt;
+  border: 0.5pt solid #e8e6dc;
+  border-radius: 4pt;
   background: #faf9f5;
+  break-inside: avoid;
 }
 
-.num {
+.holdingHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8pt;
+}
+
+.holdingMeta {
   text-align: right;
-  font-variant-numeric: tabular-nums;
+}
+
+.holdingTitle {
+  display: flex;
+  align-items: baseline;
+  gap: 6pt;
+  color: #141413;
+}
+
+.holdingCode {
+  color: #6b6a64;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5pt;
+}
+
+.holdingWeight {
+  color: #1b365d;
+  font-size: 9pt;
+  font-weight: 500;
   white-space: nowrap;
+}
+
+.holdingQuarter {
+  color: #6b6a64;
+  font-size: 8.5pt;
+  white-space: nowrap;
+}
+
+.holdingIntro {
+  margin: 8pt 0 0;
+  color: #504e49;
+  font-size: 9pt;
+  line-height: 1.4;
 }
 
 .tagList {
   display: flex;
   flex-wrap: wrap;
   gap: 3pt;
+  margin-top: 4pt;
 }
 
 .miniTag {
@@ -260,6 +288,29 @@
   font-size: 8pt;
   padding: 1pt 4pt;
   white-space: nowrap;
+}
+
+.holdingMetrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4pt 8pt;
+  margin: 4pt 0 0;
+}
+
+.holdingMetric {
+  margin: 0;
+}
+
+.holdingMetric dt {
+  color: #6b6a64;
+  font-size: 8.5pt;
+}
+
+.holdingMetric dd {
+  margin: 1pt 0 0;
+  color: #141413;
+  font-size: 9pt;
+  font-variant-numeric: tabular-nums;
 }
 
 .chartFrame {
@@ -497,15 +548,27 @@
   .metric,
   .bucket,
   .riskItem,
-  .techCard {
+  .techCard,
+  .holdingCard {
     margin-bottom: 10pt;
   }
 
-  .table {
-    min-width: 780px;
+  .holdingHeader,
+  .holdingMetrics {
+    display: block;
   }
 
-  .tableScroll {
-    overflow-x: auto;
+  .holdingWeight {
+    display: block;
+    margin-top: 2pt;
+  }
+
+  .holdingMeta {
+    margin-top: 2pt;
+    text-align: left;
+  }
+
+  .holdingMetric {
+    margin-top: 5pt;
   }
 }

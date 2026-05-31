@@ -25,7 +25,7 @@ function splitKlineData(data) {
     volumes.push({
       value: item.volume ?? 0,
       itemStyle: {
-        color: item.open <= item.close ? 'rgba(27, 54, 93, 0.45)' : 'rgba(107, 106, 100, 0.42)',
+        color: item.open <= item.close ? 'rgba(239, 68, 68, 0.35)' : 'rgba(34, 197, 94, 0.32)',
       },
     })
   })

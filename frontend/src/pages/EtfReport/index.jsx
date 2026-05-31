@@ -111,7 +111,7 @@ export default function EtfReportPage() {
             })}
           </div>
           <figure className={styles.chartFrame}>
-            <BasePieChart data={pieData} title='主题业务占比' height={336} />
+            <BasePieChart data={pieData} height={336} />
           </figure>
         </section>
 

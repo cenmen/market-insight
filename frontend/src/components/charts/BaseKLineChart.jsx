@@ -49,6 +49,17 @@ function formatAmountToYi(value) {
   return `${(num / 100000000).toFixed(2)} 亿`
 }
 
+function formatDateWithoutYear(value) {
+  if (typeof value !== 'string') {
+    return value
+  }
+  const parts = value.split('-')
+  if (parts.length === 3) {
+    return `${parts[1]}-${parts[2]}`
+  }
+  return value
+}
+
 export default function BaseKLineChart({ data = [], height = 360, className }) {
   const option = useMemo(
     function makeOption() {
@@ -106,7 +117,13 @@ export default function BaseKLineChart({ data = [], height = 360, className }) {
             boundaryGap: true,
             axisLine: { lineStyle: { color: '#e8e6dc' } },
             axisTick: { show: false },
-            axisLabel: { color: '#6b6a64', fontFamily: 'JetBrains Mono, monospace' },
+            axisLabel: {
+              color: '#6b6a64',
+              fontFamily: 'JetBrains Mono, monospace',
+              formatter(value) {
+                return formatDateWithoutYear(value)
+              },
+            },
             splitLine: { show: false },
             min: 'dataMin',
             max: 'dataMax',
@@ -159,10 +176,10 @@ export default function BaseKLineChart({ data = [], height = 360, className }) {
             type: 'candlestick',
             data: dataset.values,
             itemStyle: {
-              color: '#1B365D',
-              color0: '#6b6a64',
-              borderColor: '#1B365D',
-              borderColor0: '#6b6a64',
+              color: '#ef4444',
+              color0: '#22c55e',
+              borderColor: '#ef4444',
+              borderColor0: '#22c55e',
             },
           },
           {

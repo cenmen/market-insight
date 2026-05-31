@@ -3,23 +3,27 @@ import BaseChart from './BaseChart'
 
 const PALETTE = ['#1B365D', '#2D5A8A', '#6b6a64', '#8b857a', '#d0dce9', '#e4ecf5']
 
-export default function BasePieChart({ data = [], title = '占比结构', height = 320, className }) {
+export default function BasePieChart({ data = [], title, height = 320, className }) {
   const option = useMemo(
     function makeOption() {
       return {
         animation: false,
         color: PALETTE,
-        title: {
-          text: title,
-          left: 'center',
-          top: 4,
-          textStyle: {
-            color: '#3d3d3a',
-            fontFamily: '"TsangerJinKai02", "Source Han Serif SC", serif',
-            fontWeight: 500,
-            fontSize: 14,
-          },
-        },
+        ...(title
+          ? {
+              title: {
+                text: title,
+                left: 'center',
+                top: 4,
+                textStyle: {
+                  color: '#3d3d3a',
+                  fontFamily: '"TsangerJinKai02", "Source Han Serif SC", serif',
+                  fontWeight: 500,
+                  fontSize: 14,
+                },
+              },
+            }
+          : {}),
         tooltip: {
           trigger: 'item',
           formatter: '{b}<br/>{c}% ({d}%)',
@@ -29,7 +33,8 @@ export default function BasePieChart({ data = [], title = '占比结构', height
           textStyle: { color: '#141413' },
         },
         legend: {
-          bottom: 0,
+          bottom: 6,
+          left: 'center',
           textStyle: {
             color: '#6b6a64',
           },
@@ -38,8 +43,8 @@ export default function BasePieChart({ data = [], title = '占比结构', height
           {
             name: '业务占比',
             type: 'pie',
-            radius: ['42%', '70%'],
-            center: ['50%', '52%'],
+            radius: ['40%', '64%'],
+            center: ['50%', '42%'],
             avoidLabelOverlap: true,
             itemStyle: {
               borderRadius: 4,

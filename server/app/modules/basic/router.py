@@ -5,12 +5,15 @@ from fastapi import APIRouter, Depends
 from app.core.context import Context, build_context
 from app.core.response import ResponseModel
 from app.modules.basic.schema.request import (
+    FundKlineParams,
     FundTopHoldingsParams,
     KlineParams,
     SearchStockParams,
     StockMainFinanceParams,
 )
 from app.modules.basic.schema.response import (
+    FundKlineItem,
+    FundKlineResponse,
     FundTopHoldingItem,
     FundTopHoldingsResponse,
     KlineBar,
@@ -20,6 +23,7 @@ from app.modules.basic.schema.response import (
     SearchStockResponse,
 )
 from app.modules.basic.service import (
+    fetch_fund_kline,
     fetch_fund_top_holdings,
     fetch_stock_main_finance,
     load_kline_by_tx_cached,
@@ -71,6 +75,19 @@ def get_fund_top_holdings(params: FundTopHoldingsParams = Depends(), context: Co
         position_report=position_report,
         items=items,
     )
+    return ResponseModel.success(data=data, request_id=context.request_id)
+
+
+@router.get(
+    "/fund/kline",
+    response_model=ResponseModel,
+    summary="获取ETF基金K线",
+    description="按基金代码返回指定条数的日K线数据",
+)
+def get_fund_kline(params: FundKlineParams = Depends(), context: Context = Depends(build_context)):
+    records = fetch_fund_kline(params.code, params.limit)
+    items = [FundKlineItem.model_validate(r) for r in records]
+    data = FundKlineResponse(code=params.code, count=len(items), lines=items)
     return ResponseModel.success(data=data, request_id=context.request_id)
 
 

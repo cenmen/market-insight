@@ -56,3 +56,23 @@ class FundTopHoldingsResponse(BaseModel):
     count: int = Field()
     position_report: Optional[str] = Field(default=None)
     items: List[FundTopHoldingItem] = Field()
+
+
+class FundKlineItem(BaseModel):
+    date: Optional[str] = Field(default=None)
+    open: Optional[float] = Field(default=None)
+    close: Optional[float] = Field(default=None)
+    high: Optional[float] = Field(default=None)
+    low: Optional[float] = Field(default=None)
+    volume: Optional[float] = Field(default=None)
+    amount: Optional[float] = Field(default=None)
+    amplitude: Optional[float] = Field(default=None)
+    changePercent: Optional[float] = Field(default=None)
+    changeAmount: Optional[float] = Field(default=None)
+    turnoverRate: Optional[float] = Field(default=None)
+
+
+class FundKlineResponse(BaseModel):
+    code: str = Field()
+    count: int = Field()
+    lines: List[FundKlineItem] = Field()

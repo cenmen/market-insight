@@ -33,7 +33,7 @@ def register_api_error_handlers(app: FastAPI) -> None:
     async def validation_exception_handler(request: Request, exc: RequestValidationError):
         logger = get_logger()
         rid = getattr(getattr(request, "state", None), "request_id", None)
-        logger.exception({"event": "validation_error", "request_id": rid, "path": str(request.url.path)})
+        logger.error({"event": "validation_error", "request_id": rid, "path": str(request.url.path)})
         fields: list[str] = []
         try:
             for err in exc.errors():
@@ -59,6 +59,6 @@ def register_api_error_handlers(app: FastAPI) -> None:
     async def _general_error_handler(request, exc: Exception):
         logger = get_logger()
         rid = getattr(getattr(request, "state", None), "request_id", None)
-        logger.exception({"event": "unhandled_error", "request_id": rid, "path": str(request.url.path)})
+        logger.error({"event": "unhandled_error", "request_id": rid, "path": str(request.url.path)})
         content = ResponseModel.fail(code=-1, data=None, message="服务内部错误", request_id=rid).model_dump()
         return JSONResponse(status_code=500, content=content)

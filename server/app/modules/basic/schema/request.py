@@ -34,6 +34,11 @@ class FundTopHoldingsParams(BaseModel):
     code: str = Field(..., description="ETF 基金代码", min_length=1, json_schema_extra={"example": "588200"})
 
 
+class FundKlineParams(BaseModel):
+    code: str = Field(..., description="ETF 基金代码", min_length=1, json_schema_extra={"example": "588200"})
+    limit: int = Field(default=60, description="返回K线条数", ge=1, le=500)
+
+
 class StockMainFinanceParams(BaseModel):
     stockCode: str = Field(..., description="股票代码", min_length=1, json_schema_extra={"example": "600519"})
     reportType: str = Field(..., description="报告类型，如 一季报/中报/三季报/年报", min_length=1, json_schema_extra={"example": "一季报"})

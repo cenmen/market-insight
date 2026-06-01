@@ -1,3 +1,10 @@
+@import "tailwindcss";
+
+@theme {
+  --color-rise: #dc2626;
+  --color-fall: #059669;
+}
+
 @font-face {
   font-family: "TsangerJinKai02";
   src: url("./assets/fonts/TsangerJinKai02-W04.ttf") format("truetype");
@@ -50,4 +57,15 @@ a {
 
 #root {
   min-height: 100vh;
+}
+
+@layer utilities {
+  .post-underline {
+    text-decoration-line: underline;
+    text-decoration-style: dashed;
+    text-decoration-color: #1b365d;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    text-decoration-skip-ink: none;
+  }
 }

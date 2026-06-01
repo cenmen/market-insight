@@ -1,6 +1,7 @@
 import BaseKLineChart from '@/components/charts/BaseKLineChart';
 import BasePieChart from '@/components/charts/BasePieChart';
 import EventTimeline from '@/components/EventTimeline';
+import ReportFooter from '@/components/ReportFooter';
 import etf515880 from '@/data/etf515880';
 import { useSearchParams } from 'react-router-dom';
 import styles from './index.module.css';
@@ -217,12 +218,7 @@ export default function EtfReportPage() {
           </div>
         </section>
 
-        <footer className={styles.reportFooter}>
-          <span>{data.report.disclaimer}</span>
-          <span>
-            {data.report.author} · {data.report.date}
-          </span>
-        </footer>
+        <ReportFooter />
       </article>
     </main>
   );

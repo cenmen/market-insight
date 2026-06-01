@@ -9,4 +9,9 @@ export const pageLinks = [
     title: '通信ETF（515880）分析',
     description: 'AI 算力通信硬件主线、持仓与技术观察',
   },
+  {
+    path: '/after-close',
+    title: '盘后分析',
+    description: '三大指数、板块对照与资金行为复盘',
+  },
 ]

@@ -2,6 +2,7 @@ import BaseKLineChart from '@/components/charts/BaseKLineChart';
 import BasePieChart from '@/components/charts/BasePieChart';
 import EventTimeline from '@/components/EventTimeline';
 import etf515880 from '@/data/etf515880';
+import { useSearchParams } from 'react-router-dom';
 import styles from './index.module.css';
 
 function formatRate(rate) {
@@ -20,7 +21,9 @@ function formatQuarter(financial) {
 }
 
 export default function EtfReportPage() {
+  const [searchParams] = useSearchParams();
   const data = etf515880;
+  const useMask = searchParams.get('mask') === '1';
   const pieData = data.businessRatio.map(function mapBucket(item) {
     return {
       name: item.type,
@@ -32,7 +35,7 @@ export default function EtfReportPage() {
     <main className={styles.page}>
       <article className={styles.report}>
         <header className={styles.reportHeader}>
-          <div className={styles.tickerBlock}>
+          <div className={`${styles.tickerBlock} ${useMask ? styles.maskedBlock : ''}`}>
             <div className={styles.tickerEyebrow}>ETF ANALYSIS</div>
             <h1 className={styles.tickerName}>
               {data.etf.name} <span className={styles.tickerCode}>{data.etf.code}</span>
@@ -40,6 +43,7 @@ export default function EtfReportPage() {
             <div className={styles.tickerSub}>
               {data.etf.index} · {data.report.coreJudgment}
             </div>
+            {useMask ? <div className={styles.glassMask} aria-hidden="true" /> : null}
           </div>
           <div className={styles.priceBlock}>
             <div className={styles.priceCurrent}>{data.etf.scale}</div>

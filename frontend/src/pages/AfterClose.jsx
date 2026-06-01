@@ -1,5 +1,22 @@
 import ReportFooter from '@/components/ReportFooter';
-import IndexPulseTable from '@/components/IndexPulseTable';
+import KamiTable from '@/components/KamiTable';
+
+function formatSignedPercent(value) {
+  const numeric = Number(value);
+  const sign = numeric > 0 ? '+' : '';
+  return `${sign}${numeric.toFixed(2)}%`;
+}
+
+function renderTrendBlocks(trend) {
+  return (
+    <div className='flex flex-wrap gap-[3px]'>
+      {trend.map(function mapTrend(item, index) {
+        const isRise = Number(item) >= 0;
+        return <span key={`${index}-${item}`} className={`h-[8px] w-[8px] rounded-[1px] ${isRise ? 'bg-[#cf3f42]' : 'bg-[#2e8b57]'}`} />;
+      })}
+    </div>
+  );
+}
 
 const afterCloseData = {
   mainIndexes: [
@@ -102,6 +119,73 @@ export default function AfterClosePage() {
   const conclusion = data?.conclusion ?? null;
   const content = data?.content ?? null;
   const sectorTableRows = data?.sectorTableRows ?? [];
+  const tableDataSource = sectorTableRows.map(function mapRow(item) {
+    return {
+      key: item.code,
+      name: item.alias,
+      changeRate: item.changeRate,
+      maxDrawdown: item.maxDrawdown,
+      turnoverRate: item.turnoverRate,
+      mainNetInflow: item.mainNetInflow,
+      recentTrend: item.recentTrend,
+    };
+  });
+  const tableColumns = [
+    {
+      title: '名称',
+      dataIndex: 'name',
+      key: 'name',
+      width: '88px',
+      render: function renderName(value) {
+        return <div className='font-medium text-[#141413]'>{value}</div>;
+      },
+    },
+    {
+      title: '涨跌幅',
+      dataIndex: 'changeRate',
+      key: 'changeRate',
+      align: 'right',
+      render: function renderChangeRate(value) {
+        return <span className={`tabular-nums font-medium ${Number(value) >= 0 ? 'text-rise' : 'text-fall'}`}>{formatSignedPercent(value)}</span>;
+      },
+    },
+    {
+      title: '最大回撤',
+      dataIndex: 'maxDrawdown',
+      key: 'maxDrawdown',
+      align: 'right',
+      render: function renderMaxDrawdown(value) {
+        return <span className='tabular-nums text-fall'>{formatSignedPercent(value)}</span>;
+      },
+    },
+    {
+      title: '换手率',
+      dataIndex: 'turnoverRate',
+      key: 'turnoverRate',
+      align: 'right',
+      render: function renderTurnoverRate(value) {
+        return <span className='tabular-nums'>{formatSignedPercent(value)}</span>;
+      },
+    },
+    {
+      title: '主力净流入',
+      dataIndex: 'mainNetInflow',
+      key: 'mainNetInflow',
+      align: 'right',
+      render: function renderMainNetInflow(value) {
+        return <span className={`tabular-nums ${Number(value) >= 0 ? 'text-rise' : 'text-fall'}`}>{`${Number(value) >= 0 ? '+' : ''}${Number(value).toFixed(2)}亿`}</span>;
+      },
+    },
+    {
+      title: '最近涨跌',
+      dataIndex: 'recentTrend',
+      key: 'recentTrend',
+      width: '90px',
+      render: function renderRecentTrend(value) {
+        return renderTrendBlocks(value);
+      },
+    },
+  ];
 
   return (
     <main className="min-h-screen bg-[#f5f4ed] [font-family:'TsangerJinKai02','Source_Han_Serif_SC','Noto_Serif_CJK_SC','Songti_SC','STSong',Georgia,serif] text-[#141413]">
@@ -126,7 +210,7 @@ export default function AfterClosePage() {
         </section>
 
         <section className='mt-4'>
-          <IndexPulseTable rows={sectorTableRows} />
+          <KamiTable dataSource={tableDataSource} columns={tableColumns} />
         </section>
         <section className='mt-4 text-[15px] leading-7 text-[#2f2e2b] [&>p+p]:mt-2'>{content}</section>
         {conclusion ? (

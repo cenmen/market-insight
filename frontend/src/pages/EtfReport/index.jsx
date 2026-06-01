@@ -1,7 +1,7 @@
-import BaseKLineChart from '../../components/charts/BaseKLineChart';
-import BasePieChart from '../../components/charts/BasePieChart';
-import EventTimeline from '../../components/EventTimeline';
-import etf515880 from '../../data/etf515880';
+import BaseKLineChart from '@/components/charts/BaseKLineChart';
+import BasePieChart from '@/components/charts/BasePieChart';
+import EventTimeline from '@/components/EventTimeline';
+import etf515880 from '@/data/etf515880';
 import styles from './index.module.css';
 
 function formatRate(rate) {

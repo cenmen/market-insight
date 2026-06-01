@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
-import EtfReportPage from '../pages/EtfReport'
-import HomePage from '../pages/Home'
-import HtmlEffectivenessPage from '../pages/HtmlEffectiveness'
+import EtfReportPage from '@/pages/EtfReport'
+import HomePage from '@/pages/Home'
+import HtmlEffectivenessPage from '@/pages/HtmlEffectiveness'
 
 export default function AppRoutes() {
   return (

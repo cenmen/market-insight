@@ -4,7 +4,6 @@ import EventTimeline from '@/components/EventTimeline';
 import ReportFooter from '@/components/ReportFooter';
 import etf515880 from '@/data/etf515880';
 import { useSearchParams } from 'react-router-dom';
-import styles from './index.module.css';
 
 function formatRate(rate) {
   return `${Number(rate).toFixed(2)}%`;
@@ -33,56 +32,58 @@ export default function EtfReportPage() {
   });
 
   return (
-    <main className={styles.page}>
-      <article className={styles.report}>
-        <header className={styles.reportHeader}>
-          <div className={`${styles.tickerBlock} ${useMask ? styles.maskedBlock : ''}`}>
-            <div className={styles.tickerEyebrow}>ETF ANALYSIS</div>
-            <h1 className={styles.tickerName}>
-              {data.etf.name} <span className={styles.tickerCode}>{data.etf.code}</span>
+    <main className='min-h-screen bg-[#f5f4ed] font-["TsangerJinKai02","Source_Han_Serif_SC","Noto_Serif_CJK_SC","Songti_SC","STSong",Georgia,serif] text-[10pt] leading-[1.5] tracking-[0.3pt] text-[#141413]'>
+      <article className='mx-auto w-full max-w-[210mm] px-[18mm] pt-[16mm] pb-[18mm] max-[820px]:px-[18px] max-[820px]:py-[24px]'>
+        <header className='mb-[14pt] flex items-start justify-between gap-[18pt] rounded-[1.5pt] border-l-[2.5pt] border-[#1b365d] pl-[8pt] max-[820px]:block'>
+          <div className={`${useMask ? 'isolate' : ''} relative flex-1 min-w-0`}>
+            <div className='mb-[4pt] text-[9pt] tracking-[1pt] text-[#1b365d] uppercase'>ETF ANALYSIS</div>
+            <h1 className='mb-[4pt] text-[24pt] leading-[1.15] font-medium text-[#141413]'>
+              {data.etf.name} <span className='text-[14pt] text-[#6b6a64]'>{data.etf.code}</span>
             </h1>
-            <div className={styles.tickerSub}>
+            <div className='text-[10pt] leading-[1.4] text-[#504e49]'>
               {data.etf.index} · {data.report.coreJudgment}
             </div>
-            {useMask ? <div className={styles.glassMask} aria-hidden="true" /> : null}
+            {useMask ? (
+              <div className='pointer-events-none absolute inset-[-2pt_-6pt_-2pt_0] z-[2] rounded-[6pt] border border-[rgba(255,255,255,0.45)] bg-[rgba(240,244,250,0.24)] shadow-[inset_0_0_0_0.5pt_rgba(255,255,255,0.24)] backdrop-blur-[5px] saturate-[1.12]' aria-hidden='true' />
+            ) : null}
           </div>
-          <div className={styles.priceBlock}>
-            <div className={styles.priceCurrent}>{data.etf.scale}</div>
-            <div className={styles.priceChange}>{data.report.headlineSignal}</div>
-            <div className={styles.priceDate}>{data.report.date}</div>
+          <div className='min-w-[46mm] pt-[4pt] text-right max-[820px]:mt-[14pt] max-[820px]:text-left'>
+            <div className='text-[26pt] leading-none font-medium text-[#141413] tabular-nums'>{data.etf.scale}</div>
+            <div className='mt-[2pt] text-[10pt] font-medium text-[#1b365d]'>{data.report.headlineSignal}</div>
+            <div className='mt-[2pt] text-[9pt] text-[#6b6a64]'>{data.report.date}</div>
           </div>
         </header>
 
-        <div className={styles.tags}>
+        <div className='mb-[13pt] flex flex-wrap gap-[5pt]'>
           {data.etf.concepts.map(function mapConcept(concept) {
             return (
-              <span className={styles.tag} key={concept}>
+              <span className='inline-block rounded-[3pt] bg-[#e4ecf5] px-[6pt] py-[1pt] text-[9pt] font-medium text-[#1b365d]' key={concept}>
                 {concept}
               </span>
             );
           })}
         </div>
-        <section className={styles.metrics}>
+        <section className='mb-[16pt] grid grid-cols-4 gap-[10pt] max-[820px]:grid-cols-2 max-[820px]:gap-[6pt]'>
           {data.metrics.map(function mapMetric(metric) {
             return (
-              <div className={styles.metric} key={metric.label}>
-                <div className={styles.metricLabel}>{metric.label}</div>
-                <div className={styles.metricValue}>{metric.value}</div>
-                <div className={styles.metricNote}>{metric.note}</div>
+              <div className='rounded-[4pt] border border-[#e8e6dc] bg-[#faf9f5] p-[10pt]' key={metric.label}>
+                <div className='text-[10pt] font-medium text-[#3d3d3a]'>{metric.label}</div>
+                <div className='mt-[5pt] text-[14pt] leading-[1.1] font-medium tabular-nums text-[#1b365d]'>{metric.value}</div>
+                <div className='mt-[5pt] text-[9pt] leading-[1.3] text-[#504e49]'>{metric.note}</div>
               </div>
             );
           })}
         </section>
 
         <section>
-          <h2 className={styles.sectionTitle}>投资逻辑</h2>
-          <p className={styles.paragraph}>{data.report.thesis}</p>
-          <div className={styles.callout}>{data.report.callout}</div>
+          <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>投资逻辑</h2>
+          <p className='mb-[8pt]'>{data.report.thesis}</p>
+          <div className='my-[10pt] break-inside-avoid rounded-[3pt] border-l-[2pt] border-[#1b365d] bg-[#faf9f5] px-[12pt] py-[8pt]'>{data.report.callout}</div>
         </section>
 
         <section>
-          <h2 className={styles.sectionTitle}>短期影响因素</h2>
-          <ol className={styles.orderedList}>
+          <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>短期影响因素</h2>
+          <ol className='my-[8pt] ml-0 list-decimal pl-[18pt] leading-[1.5] marker:font-medium marker:text-[#1b365d] [&>li]:my-[2pt]'>
             {data.shortTermFactors.map(function mapFactor(item) {
               return (
                 <li key={item.title}>
@@ -95,8 +96,8 @@ export default function EtfReportPage() {
         </section>
 
         <section>
-          <h2 className={styles.sectionTitle}>风格特征</h2>
-          <ol className={styles.orderedList}>
+          <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>风格特征</h2>
+          <ol className='my-[8pt] ml-0 list-decimal pl-[18pt] leading-[1.5] marker:font-medium marker:text-[#1b365d] [&>li]:my-[2pt]'>
             {data.styleCharacteristics.map(function mapCharacteristic(item) {
               return (
                 <li key={item.title}>
@@ -109,70 +110,70 @@ export default function EtfReportPage() {
         </section>
 
         <section>
-          <h2 className={styles.sectionTitle}>业务分布</h2>
-          <div className={styles.distribution}>
+          <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>业务分布</h2>
+          <div className='my-[8pt] grid grid-cols-2 gap-[10pt] max-[820px]:block'>
             {data.businessRatio.map(function mapBucket(item) {
               return (
-                <div className={styles.bucket} key={item.type}>
-                  <div className={styles.bucketHead}>
+                <div className='mb-[8pt] break-inside-avoid rounded-[4pt] border border-[#e8e6dc] bg-[#faf9f5] px-[10pt] py-[8pt]' key={item.type}>
+                  <div className='mb-[3pt] flex justify-between gap-[8pt] font-medium text-[#3d3d3a]'>
                     <span>{item.type}</span>
-                    <span className={styles.bucketPercent}>{formatRate(item.rate)}</span>
+                    <span className='whitespace-nowrap tabular-nums text-[#1b365d]'>{formatRate(item.rate)}</span>
                   </div>
-                  <div className={styles.bucketDesc}>{item.desc}</div>
+                  <div className='text-[9pt] leading-[1.4] text-[#504e49]'>{item.desc}</div>
                 </div>
               );
             })}
           </div>
-          <figure className={styles.chartFrame}>
+          <figure className='my-[12pt] break-inside-avoid'>
             <BasePieChart data={pieData} height={336} />
           </figure>
         </section>
 
         <section>
-          <h2 className={styles.sectionTitle}>持仓明细</h2>
-          <div className={styles.holdingList}>
+          <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>持仓明细</h2>
+          <div className='mt-[8pt] grid grid-cols-2 gap-[10pt] max-[820px]:grid-cols-1 max-[820px]:gap-[8pt]'>
             {data.financialRows.map(function mapHolding(row) {
               const financial = getLatestFinancial(row);
               return (
-                <article className={styles.holdingCard} key={row.code}>
-                  <header className={styles.holdingHeader}>
-                    <div className={styles.holdingTitle}>
+                <article className='break-inside-avoid rounded-[4pt] border border-[#e8e6dc] bg-[#faf9f5] p-[10pt]' key={row.code}>
+                  <header className='flex items-start justify-between gap-[8pt] max-[820px]:block'>
+                    <div className='flex items-baseline gap-[6pt] text-[#141413]'>
                       <strong>{row.name}</strong>
-                      <span className={styles.holdingCode}>{row.code}</span>
-                      <span className={styles.holdingQuarter}>{formatQuarter(financial)}</span>
+                      <span className='font-["JetBrains_Mono",monospace] text-[8.5pt] text-[#6b6a64]'>{row.code}</span>
+                      <span className='whitespace-nowrap text-[8.5pt] text-[#6b6a64]'>{formatQuarter(financial)}</span>
                     </div>
-                    <div className={styles.holdingMeta}>
-                      <div className={styles.holdingWeight}>持仓占比 {formatRate(row.weight)}</div>
+                    <div className='text-right max-[820px]:mt-[2pt] max-[820px]:text-left'>
+                      <div className='whitespace-nowrap text-[9pt] font-medium text-[#1b365d] max-[820px]:mt-[2pt]'>持仓占比 {formatRate(row.weight)}</div>
                     </div>
                   </header>
-                  <div className={styles.tagList}>
+                  <div className='mt-[4pt] flex flex-wrap gap-[3pt]'>
                     {row.productTags.map(function mapProductTag(tag) {
                       return (
-                        <span className={styles.miniTag} key={tag}>
+                        <span className='inline-block whitespace-nowrap rounded-[3pt] bg-[#eef2f7] px-[4pt] py-[1pt] text-[8pt] text-[#1b365d]' key={tag}>
                           {tag}
                         </span>
                       );
                     })}
                   </div>
-                  <dl className={styles.holdingMetrics}>
-                    <div className={styles.holdingMetric}>
-                      <dt>ROE</dt>
-                      <dd>{formatRate(financial.roe ?? 0)}</dd>
+                  <dl className='mt-[4pt] grid grid-cols-2 gap-y-[4pt] gap-x-[8pt] max-[820px]:grid-cols-2'>
+                    <div className='m-0'>
+                      <dt className='text-[8.5pt] text-[#6b6a64]'>ROE</dt>
+                      <dd className='mt-[1pt] text-[9pt] tabular-nums text-[#141413]'>{formatRate(financial.roe ?? 0)}</dd>
                     </div>
-                    <div className={styles.holdingMetric}>
-                      <dt>营业收入增长率</dt>
-                      <dd>{formatRate(financial.revenueGrowthRate ?? 0)}</dd>
+                    <div className='m-0'>
+                      <dt className='text-[8.5pt] text-[#6b6a64]'>营业收入增长率</dt>
+                      <dd className='mt-[1pt] text-[9pt] tabular-nums text-[#141413]'>{formatRate(financial.revenueGrowthRate ?? 0)}</dd>
                     </div>
-                    <div className={styles.holdingMetric}>
-                      <dt>净利率</dt>
-                      <dd>{formatRate(financial.netProfitMargin ?? 0)}</dd>
+                    <div className='m-0'>
+                      <dt className='text-[8.5pt] text-[#6b6a64]'>净利率</dt>
+                      <dd className='mt-[1pt] text-[9pt] tabular-nums text-[#141413]'>{formatRate(financial.netProfitMargin ?? 0)}</dd>
                     </div>
-                    <div className={styles.holdingMetric}>
-                      <dt>扣非净利润增长率</dt>
-                      <dd>{formatRate(financial.nonNetProfitGrowthRate ?? 0)}</dd>
+                    <div className='m-0'>
+                      <dt className='text-[8.5pt] text-[#6b6a64]'>扣非净利润增长率</dt>
+                      <dd className='mt-[1pt] text-[9pt] tabular-nums text-[#141413]'>{formatRate(financial.nonNetProfitGrowthRate ?? 0)}</dd>
                     </div>
                   </dl>
-                  <p className={styles.holdingIntro}>{row.intro}</p>
+                  <p className='mt-[8pt] text-[9pt] leading-[1.4] text-[#504e49]'>{row.intro}</p>
                 </article>
               );
             })}
@@ -180,38 +181,38 @@ export default function EtfReportPage() {
         </section>
 
         <section>
-          <h2 className={styles.sectionTitle}>技术观察</h2>
-          <div className={styles.techGrid}>
-            <div className={styles.techCard}>
-              <div className={styles.techLabel}>最近 5 日振幅</div>
-              <div className={styles.techValue}>{data.recentFiveDayAmplitude}</div>
-              <div className={styles.techDesc}>用于观察短线波动空间</div>
+          <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>技术观察</h2>
+          <div className='my-[8pt] grid grid-cols-2 gap-[10pt] max-[820px]:grid-cols-2'>
+            <div className='mb-[8pt] rounded-[4pt] border border-[#e8e6dc] bg-[#faf9f5] p-[10pt]'>
+              <div className='text-[10pt] font-medium text-[#3d3d3a]'>最近 5 日振幅</div>
+              <div className='mt-[4pt] text-[14pt] font-medium tabular-nums text-[#1b365d]'>{data.recentFiveDayAmplitude}</div>
+              <div className='mt-[4pt] text-[9pt] text-[#504e49]'>用于观察短线波动空间</div>
             </div>
-            <div className={styles.techCard}>
-              <div className={styles.techLabel}>最近 10 日最大跌幅（{data.recentTenDayMaxDrawdownDate}）</div>
-              <div className={styles.techValue}>{data.recentTenDayMaxDrawdown}</div>
-              <div className={styles.techDesc}>用于观察短线回撤压力</div>
+            <div className='mb-[8pt] rounded-[4pt] border border-[#e8e6dc] bg-[#faf9f5] p-[10pt]'>
+              <div className='text-[10pt] font-medium text-[#3d3d3a]'>最近 10 日最大跌幅（{data.recentTenDayMaxDrawdownDate}）</div>
+              <div className='mt-[4pt] text-[14pt] font-medium tabular-nums text-[#1b365d]'>{data.recentTenDayMaxDrawdown}</div>
+              <div className='mt-[4pt] text-[9pt] text-[#504e49]'>用于观察短线回撤压力</div>
             </div>
           </div>
-          <figure className={styles.chartFrame}>
+          <figure className='my-[12pt] break-inside-avoid'>
             <BaseKLineChart data={data.kLineData} height={364} />
-            <figcaption className={styles.figcaption}>{data.report.chartCaption}</figcaption>
+            <figcaption className='mt-[4pt] text-[9pt] text-[#6b6a64]'>{data.report.chartCaption}</figcaption>
           </figure>
         </section>
 
         <section>
-          <h2 className={styles.sectionTitle}>跟踪事件</h2>
+          <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>跟踪事件</h2>
           <EventTimeline items={data.viewpoints} />
         </section>
 
         <section>
-          <h2 className={styles.sectionTitle}>风险提示</h2>
-          <div className={styles.riskGrid}>
+          <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>风险提示</h2>
+          <div className='my-[8pt] grid grid-cols-2 gap-[10pt] max-[820px]:block'>
             {data.report.risks.map(function mapRisk(risk) {
               return (
-                <div className={styles.riskItem} key={risk.title}>
-                  <div className={styles.riskLabel}>{risk.title}</div>
-                  <div className={styles.riskDesc}>{risk.description}</div>
+                <div className='mb-[8pt] break-inside-avoid rounded-[3pt] bg-[#faf9f5] px-[10pt] py-[6pt]' key={risk.title}>
+                  <div className='mb-[2pt] text-[9pt] font-medium text-[#1b365d]'>{risk.title}</div>
+                  <div className='text-[9pt] leading-[1.4] text-[#504e49]'>{risk.description}</div>
                 </div>
               );
             })}

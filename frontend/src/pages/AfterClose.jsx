@@ -1,5 +1,5 @@
-import ReportFooter from '@/components/ReportFooter';
-import KamiTable from '@/components/KamiTable';
+import ReportFooter from '@/components/ReportFooter.jsx';
+import KamiTable from '@/components/KamiTable.jsx';
 
 function formatSignedPercent(value) {
   const numeric = Number(value);
@@ -7,12 +7,26 @@ function formatSignedPercent(value) {
   return `${sign}${numeric.toFixed(2)}%`;
 }
 
+function formatPlainPercent(value) {
+  const numeric = Number(value);
+  return `${numeric.toFixed(2)}%`;
+}
+
+function getTrendBlockClass(value) {
+  const numeric = Number(value);
+  if (numeric < -5) return 'bg-[#1f7a3f]';
+  if (numeric < -2) return 'bg-[#49a35f]';
+  if (numeric < 0) return 'bg-[#8fca9e]';
+  if (numeric < 2) return 'bg-[#f1a3a4]';
+  if (numeric <= 5) return 'bg-[#dc6f72]';
+  return 'bg-[#bd3b3f]';
+}
+
 function renderTrendBlocks(trend) {
   return (
-    <div className='flex flex-wrap gap-[3px]'>
+    <div className='inline-flex items-center gap-[3px]'>
       {trend.map(function mapTrend(item, index) {
-        const isRise = Number(item) >= 0;
-        return <span key={`${index}-${item}`} className={`h-[8px] w-[8px] rounded-[1px] ${isRise ? 'bg-[#cf3f42]' : 'bg-[#2e8b57]'}`} />;
+        return <span key={`${index}-${item}`} className={`h-[10px] w-[10px] rounded-[2px] ${getTrendBlockClass(item)}`} title={formatPlainPercent(item)} />;
       })}
     </div>
   );
@@ -25,32 +39,292 @@ const afterCloseData = {
     { name: '科创50', indexValue: '1663.69', changeRate: -5.0 },
   ],
   sectorTableRows: [
-    { code: '588200', alias: '芯片', latestPrice: 1006.23, changeRate: 1.23, amplitude: 2.45, maxDrawdown: -4.51, turnoverRate: 3.18, mainNetInflow: 1.26, recentTrend: [1, -1, 1, 1, -1, 1, -1, 1] },
-    { code: '515880', alias: '通信', latestPrice: 987.12, changeRate: -0.58, amplitude: 1.77, maxDrawdown: -3.06, turnoverRate: 2.44, mainNetInflow: -0.85, recentTrend: [-1, 1, -1, -1, 1, -1, 1, -1] },
-    { code: '159516', alias: '半导体设备', latestPrice: 1124.35, changeRate: -1.16, amplitude: 2.91, maxDrawdown: -5.23, turnoverRate: 4.02, mainNetInflow: -1.12, recentTrend: [-1, -1, 1, -1, 1, -1, -1, 1] },
-    { code: '159819', alias: '人工智能', latestPrice: 1208.67, changeRate: 2.11, amplitude: 3.84, maxDrawdown: -6.34, turnoverRate: 5.15, mainNetInflow: 2.68, recentTrend: [1, 1, -1, 1, 1, -1, 1, 1] },
-    { code: '562500', alias: '机器人', latestPrice: 951.44, changeRate: 0.73, amplitude: 2.22, maxDrawdown: -4.62, turnoverRate: 3.29, mainNetInflow: 0.44, recentTrend: [1, -1, 1, -1, 1, 1, -1, 1] },
-    { code: '159206', alias: '卫星', latestPrice: 876.31, changeRate: -0.94, amplitude: 2.41, maxDrawdown: -5.48, turnoverRate: 2.88, mainNetInflow: -0.36, recentTrend: [-1, 1, -1, 1, -1, -1, 1, -1] },
-    { code: '516160', alias: '新能源', latestPrice: 1039.56, changeRate: 1.34, amplitude: 2.69, maxDrawdown: -4.95, turnoverRate: 3.72, mainNetInflow: 1.15, recentTrend: [1, -1, 1, 1, -1, 1, 1, -1] },
-    { code: '159755', alias: '电池', latestPrice: 918.75, changeRate: -0.72, amplitude: 2.13, maxDrawdown: -5.11, turnoverRate: 2.97, mainNetInflow: -0.57, recentTrend: [-1, -1, 1, -1, 1, -1, 1, -1] },
-    { code: '515790', alias: '光伏', latestPrice: 842.09, changeRate: 0.48, amplitude: 1.96, maxDrawdown: -4.21, turnoverRate: 2.63, mainNetInflow: 0.22, recentTrend: [1, -1, -1, 1, -1, 1, -1, 1] },
-    { code: '512400', alias: '有色', latestPrice: 1096.18, changeRate: 1.67, amplitude: 2.58, maxDrawdown: -3.75, turnoverRate: 2.51, mainNetInflow: 1.91, recentTrend: [1, 1, -1, 1, -1, 1, 1, -1] },
-    { code: '159326', alias: '电网设备', latestPrice: 1014.72, changeRate: 0.89, amplitude: 1.84, maxDrawdown: -3.42, turnoverRate: 2.19, mainNetInflow: 0.68, recentTrend: [1, -1, 1, -1, 1, -1, 1, 1] },
-    { code: '159870', alias: '化工', latestPrice: 965.37, changeRate: -0.31, amplitude: 1.53, maxDrawdown: -2.87, turnoverRate: 1.98, mainNetInflow: -0.14, recentTrend: [-1, 1, -1, 1, -1, 1, -1, 1] },
-    { code: '159865', alias: '养殖', latestPrice: 902.46, changeRate: 0.56, amplitude: 1.62, maxDrawdown: -3.03, turnoverRate: 1.86, mainNetInflow: 0.19, recentTrend: [1, -1, -1, 1, 1, -1, 1, -1] },
-    { code: '159825', alias: '农业', latestPrice: 934.28, changeRate: 0.42, amplitude: 1.49, maxDrawdown: -2.65, turnoverRate: 1.74, mainNetInflow: 0.11, recentTrend: [1, 1, -1, -1, 1, -1, 1, -1] },
-    { code: '515220', alias: '煤炭', latestPrice: 1188.52, changeRate: 2.08, amplitude: 2.11, maxDrawdown: -2.44, turnoverRate: 2.33, mainNetInflow: 2.16, recentTrend: [1, 1, 1, -1, 1, 1, -1, 1] },
-    { code: '516150', alias: '稀土', latestPrice: 1048.13, changeRate: -0.67, amplitude: 2.35, maxDrawdown: -4.06, turnoverRate: 2.68, mainNetInflow: -0.49, recentTrend: [-1, 1, -1, -1, 1, -1, 1, 1] },
-    { code: '159732', alias: '消费电子', latestPrice: 1133.64, changeRate: 1.72, amplitude: 2.74, maxDrawdown: -4.58, turnoverRate: 3.41, mainNetInflow: 1.47, recentTrend: [1, -1, 1, 1, -1, 1, -1, 1] },
-    { code: '510880', alias: '红利', latestPrice: 1266.95, changeRate: 0.63, amplitude: 1.24, maxDrawdown: -1.96, turnoverRate: 1.29, mainNetInflow: 0.77, recentTrend: [1, 1, -1, 1, -1, 1, 1, -1] },
-    { code: '512880', alias: '证券', latestPrice: 1077.85, changeRate: 1.95, amplitude: 2.48, maxDrawdown: -3.88, turnoverRate: 3.06, mainNetInflow: 1.84, recentTrend: [1, -1, 1, 1, -1, 1, 1, -1] },
-    { code: '512800', alias: '银行', latestPrice: 1211.34, changeRate: 0.38, amplitude: 0.96, maxDrawdown: -1.74, turnoverRate: 1.12, mainNetInflow: 0.93, recentTrend: [1, 1, -1, 1, 1, -1, 1, 1] },
-    { code: '562510', alias: '旅游', latestPrice: 885.49, changeRate: -0.27, amplitude: 1.68, maxDrawdown: -2.93, turnoverRate: 1.67, mainNetInflow: -0.08, recentTrend: [-1, 1, -1, 1, -1, 1, -1, -1] },
-    { code: '159928', alias: '消费', latestPrice: 1011.56, changeRate: 0.84, amplitude: 1.42, maxDrawdown: -2.38, turnoverRate: 1.53, mainNetInflow: 0.35, recentTrend: [1, -1, 1, -1, 1, 1, -1, 1] },
-    { code: '512690', alias: '白酒', latestPrice: 972.44, changeRate: -0.49, amplitude: 1.87, maxDrawdown: -3.32, turnoverRate: 1.95, mainNetInflow: -0.26, recentTrend: [-1, -1, 1, -1, 1, -1, 1, -1] },
-    { code: '512200', alias: '房地产', latestPrice: 798.22, changeRate: 0.93, amplitude: 2.06, maxDrawdown: -4.17, turnoverRate: 2.22, mainNetInflow: 0.41, recentTrend: [1, -1, -1, 1, -1, 1, 1, -1] },
-    { code: '159745', alias: '建筑材料', latestPrice: 856.9, changeRate: -0.14, amplitude: 1.33, maxDrawdown: -2.71, turnoverRate: 1.48, mainNetInflow: -0.03, recentTrend: [-1, 1, -1, 1, -1, -1, 1, -1] },
-    { code: '512170', alias: '医疗', latestPrice: 944.68, changeRate: -1.03, amplitude: 2.57, maxDrawdown: -5.02, turnoverRate: 2.76, mainNetInflow: -0.95, recentTrend: [-1, 1, -1, -1, 1, -1, -1, 1] },
+    {
+      code: '588200',
+      alias: '芯片',
+      latestPrice: 1006.23,
+      changeRate: 1.23,
+      amplitude: 2.45,
+      maxDrawdown: -4.51,
+      turnoverRate: 3.18,
+      mainNetInflow: 1.26,
+      recentTrend: [1, -1, 1, 1, -1, 1, -1, 1],
+    },
+    {
+      code: '515880',
+      alias: '通信',
+      latestPrice: 987.12,
+      changeRate: -0.58,
+      amplitude: 1.77,
+      maxDrawdown: -3.06,
+      turnoverRate: 2.44,
+      mainNetInflow: -0.85,
+      recentTrend: [-1, 1, -1, -1, 1, -1, 1, -1],
+    },
+    {
+      code: '159516',
+      alias: '半导体设备',
+      latestPrice: 1124.35,
+      changeRate: -1.16,
+      amplitude: 2.91,
+      maxDrawdown: -5.23,
+      turnoverRate: 4.02,
+      mainNetInflow: -1.12,
+      recentTrend: [-1, -1, 1, -1, 1, -1, -1, 1],
+    },
+    {
+      code: '159819',
+      alias: '人工智能',
+      latestPrice: 1208.67,
+      changeRate: 2.11,
+      amplitude: 3.84,
+      maxDrawdown: -6.34,
+      turnoverRate: 5.15,
+      mainNetInflow: 2.68,
+      recentTrend: [1, 1, -1, 1, 1, -1, 1, 1],
+    },
+    {
+      code: '562500',
+      alias: '机器人',
+      latestPrice: 951.44,
+      changeRate: 0.73,
+      amplitude: 2.22,
+      maxDrawdown: -4.62,
+      turnoverRate: 3.29,
+      mainNetInflow: 0.44,
+      recentTrend: [1, -1, 1, -1, 1, 1, -1, 1],
+    },
+    {
+      code: '159206',
+      alias: '卫星',
+      latestPrice: 876.31,
+      changeRate: -0.94,
+      amplitude: 2.41,
+      maxDrawdown: -5.48,
+      turnoverRate: 2.88,
+      mainNetInflow: -0.36,
+      recentTrend: [-1, 1, -1, 1, -1, -1, 1, -1],
+    },
+    {
+      code: '516160',
+      alias: '新能源',
+      latestPrice: 1039.56,
+      changeRate: 1.34,
+      amplitude: 2.69,
+      maxDrawdown: -4.95,
+      turnoverRate: 3.72,
+      mainNetInflow: 1.15,
+      recentTrend: [1, -1, 1, 1, -1, 1, 1, -1],
+    },
+    {
+      code: '159755',
+      alias: '电池',
+      latestPrice: 918.75,
+      changeRate: -0.72,
+      amplitude: 2.13,
+      maxDrawdown: -5.11,
+      turnoverRate: 2.97,
+      mainNetInflow: -0.57,
+      recentTrend: [-1, -1, 1, -1, 1, -1, 1, -1],
+    },
+    {
+      code: '515790',
+      alias: '光伏',
+      latestPrice: 842.09,
+      changeRate: 0.48,
+      amplitude: 1.96,
+      maxDrawdown: -4.21,
+      turnoverRate: 2.63,
+      mainNetInflow: 0.22,
+      recentTrend: [1, -1, -1, 1, -1, 1, -1, 1],
+    },
+    {
+      code: '512400',
+      alias: '有色',
+      latestPrice: 1096.18,
+      changeRate: 1.67,
+      amplitude: 2.58,
+      maxDrawdown: -3.75,
+      turnoverRate: 2.51,
+      mainNetInflow: 1.91,
+      recentTrend: [1, 1, -1, 1, -1, 1, 1, -1],
+    },
+    {
+      code: '159326',
+      alias: '电网设备',
+      latestPrice: 1014.72,
+      changeRate: 0.89,
+      amplitude: 1.84,
+      maxDrawdown: -3.42,
+      turnoverRate: 2.19,
+      mainNetInflow: 0.68,
+      recentTrend: [1, -1, 1, -1, 1, -1, 1, 1],
+    },
+    {
+      code: '159870',
+      alias: '化工',
+      latestPrice: 965.37,
+      changeRate: -0.31,
+      amplitude: 1.53,
+      maxDrawdown: -2.87,
+      turnoverRate: 1.98,
+      mainNetInflow: -0.14,
+      recentTrend: [-1, 1, -1, 1, -1, 1, -1, 1],
+    },
+    {
+      code: '159865',
+      alias: '养殖',
+      latestPrice: 902.46,
+      changeRate: 0.56,
+      amplitude: 1.62,
+      maxDrawdown: -3.03,
+      turnoverRate: 1.86,
+      mainNetInflow: 0.19,
+      recentTrend: [1, -1, -1, 1, 1, -1, 1, -1],
+    },
+    {
+      code: '159825',
+      alias: '农业',
+      latestPrice: 934.28,
+      changeRate: 0.42,
+      amplitude: 1.49,
+      maxDrawdown: -2.65,
+      turnoverRate: 1.74,
+      mainNetInflow: 0.11,
+      recentTrend: [1, 1, -1, -1, 1, -1, 1, -1],
+    },
+    {
+      code: '515220',
+      alias: '煤炭',
+      latestPrice: 1188.52,
+      changeRate: 2.08,
+      amplitude: 2.11,
+      maxDrawdown: -2.44,
+      turnoverRate: 2.33,
+      mainNetInflow: 2.16,
+      recentTrend: [1, 1, 1, -1, 1, 1, -1, 1],
+    },
+    {
+      code: '516150',
+      alias: '稀土',
+      latestPrice: 1048.13,
+      changeRate: -0.67,
+      amplitude: 2.35,
+      maxDrawdown: -4.06,
+      turnoverRate: 2.68,
+      mainNetInflow: -0.49,
+      recentTrend: [-1, 1, -1, -1, 1, -1, 1, 1],
+    },
+    {
+      code: '159732',
+      alias: '消费电子',
+      latestPrice: 1133.64,
+      changeRate: 1.72,
+      amplitude: 2.74,
+      maxDrawdown: -4.58,
+      turnoverRate: 3.41,
+      mainNetInflow: 1.47,
+      recentTrend: [1, -1, 1, 1, -1, 1, -1, 1],
+    },
+    {
+      code: '510880',
+      alias: '红利',
+      latestPrice: 1266.95,
+      changeRate: 0.63,
+      amplitude: 1.24,
+      maxDrawdown: -1.96,
+      turnoverRate: 1.29,
+      mainNetInflow: 0.77,
+      recentTrend: [1, 1, -1, 1, -1, 1, 1, -1],
+    },
+    {
+      code: '512880',
+      alias: '证券',
+      latestPrice: 1077.85,
+      changeRate: 1.95,
+      amplitude: 2.48,
+      maxDrawdown: -3.88,
+      turnoverRate: 3.06,
+      mainNetInflow: 1.84,
+      recentTrend: [1, -1, 1, 1, -1, 1, 1, -1],
+    },
+    {
+      code: '512800',
+      alias: '银行',
+      latestPrice: 1211.34,
+      changeRate: 0.38,
+      amplitude: 0.96,
+      maxDrawdown: -1.74,
+      turnoverRate: 1.12,
+      mainNetInflow: 0.93,
+      recentTrend: [1, 1, -1, 1, 1, -1, 1, 1],
+    },
+    {
+      code: '562510',
+      alias: '旅游',
+      latestPrice: 885.49,
+      changeRate: -0.27,
+      amplitude: 1.68,
+      maxDrawdown: -2.93,
+      turnoverRate: 1.67,
+      mainNetInflow: -0.08,
+      recentTrend: [-1, 1, -1, 1, -1, 1, -1, -1],
+    },
+    {
+      code: '159928',
+      alias: '消费',
+      latestPrice: 1011.56,
+      changeRate: 0.84,
+      amplitude: 1.42,
+      maxDrawdown: -2.38,
+      turnoverRate: 1.53,
+      mainNetInflow: 0.35,
+      recentTrend: [1, -1, 1, -1, 1, 1, -1, 1],
+    },
+    {
+      code: '512690',
+      alias: '白酒',
+      latestPrice: 972.44,
+      changeRate: -0.49,
+      amplitude: 1.87,
+      maxDrawdown: -3.32,
+      turnoverRate: 1.95,
+      mainNetInflow: -0.26,
+      recentTrend: [-1, -1, 1, -1, 1, -1, 1, -1],
+    },
+    {
+      code: '512200',
+      alias: '房地产',
+      latestPrice: 798.22,
+      changeRate: 0.93,
+      amplitude: 2.06,
+      maxDrawdown: -4.17,
+      turnoverRate: 2.22,
+      mainNetInflow: 0.41,
+      recentTrend: [1, -1, -1, 1, -1, 1, 1, -1],
+    },
+    {
+      code: '159745',
+      alias: '建筑材料',
+      latestPrice: 856.9,
+      changeRate: -0.14,
+      amplitude: 1.33,
+      maxDrawdown: -2.71,
+      turnoverRate: 1.48,
+      mainNetInflow: -0.03,
+      recentTrend: [-1, 1, -1, 1, -1, -1, 1, -1],
+    },
+    {
+      code: '512170',
+      alias: '医疗',
+      latestPrice: 944.68,
+      changeRate: -1.03,
+      amplitude: 2.57,
+      maxDrawdown: -5.02,
+      turnoverRate: 2.76,
+      mainNetInflow: -0.95,
+      recentTrend: [-1, 1, -1, -1, 1, -1, -1, 1],
+    },
   ],
   conclusion: '维持主线，降低追高频率。主线逻辑未破坏，但高位波动显著抬升，优先聚焦有业绩与订单验证的核心环节。',
   content: (
@@ -113,79 +387,94 @@ const afterCloseData = {
   ),
 };
 
+afterCloseData.tableDataSource = afterCloseData.sectorTableRows.map(function mapRow(item) {
+  return {
+    key: item.code,
+    name: item.alias,
+    changeRate: item.changeRate,
+    maxDrawdown: item.maxDrawdown,
+    turnoverRate: item.turnoverRate,
+    mainNetInflow: item.mainNetInflow,
+    recentTrend: item.recentTrend,
+  };
+}).sort(function sortByChangeRateDesc(a, b) {
+  return Number(b.changeRate) - Number(a.changeRate);
+});
+
+afterCloseData.tableColumns = [
+  {
+    title: '名称',
+    dataIndex: 'name',
+    key: 'name',
+    width: '100px',
+    render: function renderName(value) {
+      return <div className='font-medium text-[#141413]'>{value}</div>;
+    },
+  },
+  {
+    title: '涨跌幅',
+    dataIndex: 'changeRate',
+    key: 'changeRate',
+    align: 'right',
+    width: '100px',
+    render: function renderChangeRate(value) {
+      return <span className={`font-medium tabular-nums ${Number(value) >= 0 ? 'text-rise' : 'text-fall'}`}>{formatSignedPercent(value)}</span>;
+    },
+  },
+  {
+    title: '最大回撤',
+    dataIndex: 'maxDrawdown',
+    key: 'maxDrawdown',
+    align: 'right',
+    width: '100px',
+    render: function renderMaxDrawdown(value) {
+      return <span className='text-fall tabular-nums'>{formatSignedPercent(value)}</span>;
+    },
+  },
+  {
+    title: '换手率',
+    dataIndex: 'turnoverRate',
+    key: 'turnoverRate',
+    align: 'right',
+    width: '100px',
+    render: function renderTurnoverRate(value) {
+      return <span className='tabular-nums'>{formatPlainPercent(value)}</span>;
+    },
+  },
+  {
+    title: '主力净流入',
+    dataIndex: 'mainNetInflow',
+    key: 'mainNetInflow',
+    align: 'right',
+    width: '100px',
+    render: function renderMainNetInflow(value) {
+      return (
+        <span
+          className={`tabular-nums ${Number(value) >= 0 ? 'text-rise' : 'text-fall'}`}
+        >{`${Number(value) >= 0 ? '+' : ''}${Number(value).toFixed(2)}亿`}</span>
+      );
+    },
+  },
+  {
+    title: '最近涨跌',
+    dataIndex: 'recentTrend',
+    key: 'recentTrend',
+    align: 'right',
+    verticalAlign: 'middle',
+    cellClassName: 'pr-[5pt]',
+    render: function renderRecentTrend(value) {
+      return <div className='flex h-full items-center justify-end'>{renderTrendBlocks(value)}</div>;
+    },
+  },
+];
+
 export default function AfterClosePage() {
   const data = afterCloseData;
   const mainIndexes = data?.mainIndexes ?? [];
   const conclusion = data?.conclusion ?? null;
   const content = data?.content ?? null;
-  const sectorTableRows = data?.sectorTableRows ?? [];
-  const tableDataSource = sectorTableRows.map(function mapRow(item) {
-    return {
-      key: item.code,
-      name: item.alias,
-      changeRate: item.changeRate,
-      maxDrawdown: item.maxDrawdown,
-      turnoverRate: item.turnoverRate,
-      mainNetInflow: item.mainNetInflow,
-      recentTrend: item.recentTrend,
-    };
-  });
-  const tableColumns = [
-    {
-      title: '名称',
-      dataIndex: 'name',
-      key: 'name',
-      width: '88px',
-      render: function renderName(value) {
-        return <div className='font-medium text-[#141413]'>{value}</div>;
-      },
-    },
-    {
-      title: '涨跌幅',
-      dataIndex: 'changeRate',
-      key: 'changeRate',
-      align: 'right',
-      render: function renderChangeRate(value) {
-        return <span className={`tabular-nums font-medium ${Number(value) >= 0 ? 'text-rise' : 'text-fall'}`}>{formatSignedPercent(value)}</span>;
-      },
-    },
-    {
-      title: '最大回撤',
-      dataIndex: 'maxDrawdown',
-      key: 'maxDrawdown',
-      align: 'right',
-      render: function renderMaxDrawdown(value) {
-        return <span className='tabular-nums text-fall'>{formatSignedPercent(value)}</span>;
-      },
-    },
-    {
-      title: '换手率',
-      dataIndex: 'turnoverRate',
-      key: 'turnoverRate',
-      align: 'right',
-      render: function renderTurnoverRate(value) {
-        return <span className='tabular-nums'>{formatSignedPercent(value)}</span>;
-      },
-    },
-    {
-      title: '主力净流入',
-      dataIndex: 'mainNetInflow',
-      key: 'mainNetInflow',
-      align: 'right',
-      render: function renderMainNetInflow(value) {
-        return <span className={`tabular-nums ${Number(value) >= 0 ? 'text-rise' : 'text-fall'}`}>{`${Number(value) >= 0 ? '+' : ''}${Number(value).toFixed(2)}亿`}</span>;
-      },
-    },
-    {
-      title: '最近涨跌',
-      dataIndex: 'recentTrend',
-      key: 'recentTrend',
-      width: '90px',
-      render: function renderRecentTrend(value) {
-        return renderTrendBlocks(value);
-      },
-    },
-  ];
+  const tableDataSource = data?.tableDataSource ?? [];
+  const tableColumns = data?.tableColumns ?? [];
 
   return (
     <main className="min-h-screen bg-[#f5f4ed] [font-family:'TsangerJinKai02','Source_Han_Serif_SC','Noto_Serif_CJK_SC','Songti_SC','STSong',Georgia,serif] text-[#141413]">

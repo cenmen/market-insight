@@ -1,7 +1,7 @@
 import BaseKLineChart from '@/components/charts/BaseKLineChart';
 import BasePieChart from '@/components/charts/BasePieChart';
-import EventTimeline from '@/components/EventTimeline';
-import ReportFooter from '@/components/ReportFooter';
+import EventTimeline from '@/components/EventTimeline.jsx';
+import ReportFooter from '@/components/ReportFooter.jsx';
 import etf515880 from '@/data/etf515880';
 import { useSearchParams } from 'react-router-dom';
 

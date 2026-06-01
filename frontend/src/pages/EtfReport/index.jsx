@@ -1,5 +1,6 @@
 import BaseKLineChart from '../../components/charts/BaseKLineChart';
 import BasePieChart from '../../components/charts/BasePieChart';
+import EventTimeline from '../../components/EventTimeline';
 import etf515880 from '../../data/etf515880';
 import styles from './index.module.css';
 
@@ -195,23 +196,7 @@ export default function EtfReportPage() {
 
         <section>
           <h2 className={styles.sectionTitle}>跟踪事件</h2>
-          <div className={styles.eventList}>
-            {data.viewpoints.map(function mapViewpoint(viewpoint) {
-              return (
-                <article className={styles.event} key={`${viewpoint.title}-${viewpoint.date}`}>
-                  <div className={styles.eventDot} />
-                  <div className={styles.eventBody}>
-                    <div className={styles.eventHead}>
-                      <div className={styles.eventTitle}>{viewpoint.title}</div>
-                      <div className={styles.eventDate}>{viewpoint.date}</div>
-                    </div>
-                    <div className={styles.eventMeta}>{viewpoint.source}</div>
-                    <p className={styles.eventSummary}>{viewpoint.summary}</p>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+          <EventTimeline items={data.viewpoints} />
         </section>
 
         <section>

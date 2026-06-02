@@ -76,7 +76,31 @@ function resolveCandleMarkerIndex(marker, categoryData) {
   return -1;
 }
 
-function buildCandleMarkerData(data, categoryData, markers) {
+function normalizeMarkerGroups(markers) {
+  if (Array.isArray(markers)) {
+    return {
+      candleMarkers: markers,
+      supportMarkers: [],
+      resistanceMarkers: [],
+    };
+  }
+
+  if (!markers || typeof markers !== 'object') {
+    return {
+      candleMarkers: [],
+      supportMarkers: [],
+      resistanceMarkers: [],
+    };
+  }
+
+  return {
+    candleMarkers: Array.isArray(markers.candleMarkers) ? markers.candleMarkers : [],
+    supportMarkers: Array.isArray(markers.supportMarkers) ? markers.supportMarkers : [],
+    resistanceMarkers: Array.isArray(markers.resistanceMarkers) ? markers.resistanceMarkers : [],
+  };
+}
+
+function buildCandleMarkerData(data, categoryData, markers, kind) {
   if (!Array.isArray(markers) || markers.length === 0) {
     return [];
   }
@@ -110,14 +134,44 @@ function buildCandleMarkerData(data, categoryData, markers) {
       }
 
       const labelPrice = position === 'below' ? targetPrice - markerGap : targetPrice + markerGap;
-      const label = marker.label || '锤子线';
+      const defaultLabel =
+        kind === 'support'
+          ? '支撑位'
+          : kind === 'resistance'
+            ? '压力位'
+            : '锤子线';
+      const label = marker.label || defaultLabel;
 
-      return [dataIndex, targetPrice, labelPrice, label, position];
+      return [dataIndex, targetPrice, labelPrice, label, position, kind];
     })
     .filter(Boolean);
 }
 
 function makeCandleMarkerSeries(markerData) {
+  function resolveMarkerStyle(kind) {
+    if (kind === 'support') {
+      return {
+        line: '#16a34a',
+        fill: '#f0fdf4',
+        text: '#166534',
+      };
+    }
+
+    if (kind === 'resistance') {
+      return {
+        line: '#dc2626',
+        fill: '#fff1f2',
+        text: '#991b1b',
+      };
+    }
+
+    return {
+      line: '#1b365d',
+      fill: '#faf9f5',
+      text: '#1b365d',
+    };
+  }
+
   return {
     name: 'K线标记',
     type: 'custom',
@@ -132,8 +186,10 @@ function makeCandleMarkerSeries(markerData) {
       const labelPoint = api.coord([api.value(0), api.value(2)]);
       const label = api.value(3);
       const position = api.value(4);
+      const kind = api.value(5);
       const isBelow = position === 'below';
       const textOffset = isBelow ? 3 : -3;
+      const markerStyle = resolveMarkerStyle(kind);
 
       return {
         type: 'group',
@@ -147,7 +203,7 @@ function makeCandleMarkerSeries(markerData) {
               y2: targetPoint[1],
             },
             style: {
-              stroke: '#1b365d',
+              stroke: markerStyle.line,
               lineWidth: 0.8,
               opacity: 0.92,
             },
@@ -160,8 +216,8 @@ function makeCandleMarkerSeries(markerData) {
               r: 1,
             },
             style: {
-              fill: '#faf9f5',
-              stroke: '#1b365d',
+              fill: markerStyle.fill,
+              stroke: markerStyle.line,
               lineWidth: 0.8,
               opacity: 0.96,
             },
@@ -172,7 +228,7 @@ function makeCandleMarkerSeries(markerData) {
               x: labelPoint[0],
               y: labelPoint[1] + textOffset,
               text: label,
-              fill: '#1b365d',
+              fill: markerStyle.text,
               font: '500 8px TsangerJinKai02, serif',
               textAlign: 'center',
               textVerticalAlign: isBelow ? 'top' : 'bottom',
@@ -184,12 +240,21 @@ function makeCandleMarkerSeries(markerData) {
   };
 }
 
-export default function BaseKLineChart({ data = [], height = 360, className, candleMarkers = [] }) {
+export default function BaseKLineChart({ data = [], height = 360, className, markers = {} }) {
   const option = useMemo(
     function makeOption() {
       const dataset = splitKlineData(data);
-      const candleMarkerData = buildCandleMarkerData(data, dataset.categoryData, candleMarkers);
-      const hasCandleMarkers = candleMarkerData.length > 0;
+      const normalizedMarkers = normalizeMarkerGroups(markers);
+      const candleMarkerData = buildCandleMarkerData(data, dataset.categoryData, normalizedMarkers.candleMarkers, 'candle');
+      const supportMarkerData = buildCandleMarkerData(data, dataset.categoryData, normalizedMarkers.supportMarkers, 'support');
+      const resistanceMarkerData = buildCandleMarkerData(
+        data,
+        dataset.categoryData,
+        normalizedMarkers.resistanceMarkers,
+        'resistance',
+      );
+      const markerSeriesData = candleMarkerData.concat(supportMarkerData, resistanceMarkerData);
+      const hasMarkers = markerSeriesData.length > 0;
       const series = [
         {
           name: '价格',
@@ -212,8 +277,8 @@ export default function BaseKLineChart({ data = [], height = 360, className, can
         },
       ];
 
-      if (hasCandleMarkers) {
-        series.push(makeCandleMarkerSeries(candleMarkerData));
+      if (hasMarkers) {
+        series.push(makeCandleMarkerSeries(markerSeriesData));
       }
 
       return {
@@ -258,7 +323,7 @@ export default function BaseKLineChart({ data = [], height = 360, className, can
           },
         },
         grid: [
-          { left: 56, right: 16, top: hasCandleMarkers ? 34 : 18, height: hasCandleMarkers ? 204 : 220 },
+          { left: 56, right: 16, top: hasMarkers ? 34 : 18, height: hasMarkers ? 204 : 220 },
           { left: 56, right: 16, top: 252, height: 86 },
         ],
         xAxis: [
@@ -325,7 +390,7 @@ export default function BaseKLineChart({ data = [], height = 360, className, can
         series,
       };
     },
-    [data, candleMarkers],
+    [data, markers],
   );
 
   return <BaseChart option={option} height={height} className={className} />;

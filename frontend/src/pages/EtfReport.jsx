@@ -1,5 +1,5 @@
-import BaseKLineChart from '@/components/charts/BaseKLineChart';
-import BasePieChart from '@/components/charts/BasePieChart';
+import BaseKLineChart from '@/components/BaseKLineChart';
+import BasePieChart from '@/components/BasePieChart';
 import ReportFooter from '@/components/ReportFooter.jsx';
 import Timeline from '@/components/Timeline.jsx';
 import etfs from '@/data/etfs';
@@ -206,7 +206,7 @@ export default function EtfReportPage() {
             </div>
           </div>
           <figure className='my-[12pt] break-inside-avoid'>
-            <BaseKLineChart data={data.kLineData} candleMarkers={data.kLineMarkers} height={364} />
+            <BaseKLineChart data={data.kLineData} markers={data.kLineMarkers} height={364} />
             <figcaption className='mt-[4pt] text-[9pt] text-[#6b6a64]'>{data.report.chartCaption}</figcaption>
           </figure>
         </section>

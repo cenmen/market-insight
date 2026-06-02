@@ -1,0 +1,7 @@
+interface:
+  display_name: "K 线技术分析"
+  short_description: "分析蜡烛图、趋势、支撑压力和画线点位"
+  default_prompt: "使用 $kline-technical-analysis 分析标的 K 线走势，输出支撑压力、画线点位和明日预测 K 线。"
+
+policy:
+  allow_implicit_invocation: true

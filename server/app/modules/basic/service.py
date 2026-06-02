@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Tuple
+from datetime import datetime
 import json
 import re
 import time
@@ -58,6 +59,12 @@ def secid(code_value: str) -> str:
     return f"{market}.{code}"
 
 
+def ths_market(code_value: str) -> str:
+    """转换同花顺 K 线接口要求的市场代码。"""
+    code = str(code_value).zfill(6)
+    return "20" if code.startswith(("5", "6", "9")) else "33"
+
+
 def normalize_quarter_date(value: Any) -> str | None:
     """把接口可能返回的报告期格式统一成 YYYY-MM-DD。"""
     text = str(value or "").strip()
@@ -100,6 +107,42 @@ def parse_kline_item(item: str) -> Dict[str, Any]:
         "changeAmount": safe_float(values[9] if len(values) > 9 else None),
         "turnoverRate": safe_float(values[10] if len(values) > 10 else None),
     }
+
+
+def format_ths_timestamp(value: Any) -> str:
+    """把同花顺毫秒时间戳转换成 YYYY-MM-DD。"""
+    timestamp = safe_float(value)
+    if timestamp <= 0:
+        return ""
+    return datetime.fromtimestamp(timestamp / 1000).strftime("%Y-%m-%d")
+
+
+def parse_ths_fund_kline_value(item: List[Any], previous_close: float | None = None) -> Dict[str, Any]:
+    """解析同花顺单条基金 K 线数组。字段顺序来自 data_fields: 1,7,8,9,11,13,19。"""
+    open_price = safe_float(item[1] if len(item) > 1 else None)
+    high = safe_float(item[2] if len(item) > 2 else None)
+    low = safe_float(item[3] if len(item) > 3 else None)
+    close = safe_float(item[4] if len(item) > 4 else None)
+    volume = safe_float(item[5] if len(item) > 5 else None)
+    amount = safe_float(item[6] if len(item) > 6 else None)
+    change_amount = close - previous_close if previous_close else 0.0
+    change_percent = (change_amount / previous_close * 100) if previous_close else 0.0
+    amplitude = ((high - low) / previous_close * 100) if previous_close else 0.0
+
+    return {
+        "date": format_ths_timestamp(item[0] if item else None),
+        "open": open_price,
+        "close": close,
+        "high": high,
+        "low": low,
+        "volume": volume,
+        "amount": amount,
+        "amplitude": round(amplitude, 2),
+        "changePercent": round(change_percent, 2),
+        "changeAmount": round(change_amount, 3),
+        "turnoverRate": 0.0,
+    }
+
 
 def load_kline_by_tx(params: KlineParams) -> pl.DataFrame:
     info = get_stock_info_by_code(params.code)
@@ -335,24 +378,37 @@ def fetch_stock_main_finance(stock_code: str, report_type: str) -> Dict[str, Any
 
 
 def fetch_fund_kline(code: str, limit: int) -> List[Dict[str, Any]]:
-    """抓取东方财富基金日 K 线数据，仅返回格式化 K 线列表。"""
+    """抓取同花顺基金日 K 线数据，仅返回格式化 K 线列表。"""
     if limit <= 0:
         raise ValueError("limit 必须大于 0")
 
+    normalized_code = str(code).zfill(6)
     try:
-        response = httpx.get(
-            "https://push2his.eastmoney.com/api/qt/stock/kline/get",
-            params={
-                "secid": secid(code),
-                "klt": 101,
-                "fqt": 1,
-                "lmt": limit,
-                "end": 20500000,
-                "iscca": 1,
-                "fields1": "f1,f2,f3,f4,f5,f6,f7,f8",
-                "fields2": "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64",
-                "ut": "f057cbcbce2a86e2866ab8877db1d059",
-                "forcect": 1,
+        response = httpx.post(
+            "https://quota-h.10jqka.com.cn/fuyao/common_hq_aggr/quote/v1/single_kline",
+            headers={
+                "accept": "*/*",
+                "content-type": "application/json",
+                "origin": "https://stockpage.10jqka.com.cn",
+                "platform": "hxkline",
+                "referer": "https://stockpage.10jqka.com.cn/",
+                "source-id": "hxkline-NEWS_appNewsFlowHome_Page",
+                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome Safari",
+                "x-auth-appname": "AINVEST",
+                "x-auth-progid": "7047",
+                "x-auth-type": "ths",
+                "x-auth-version": "1.0",
+                "x-fuyao-auth": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdXRob3JpemVyX25hbWVzcGFjZSI6ImNvbW1vbi1ocS1hZ2dyIiwibGljZW5zZWVfdHlwZSI6IkZST05UX0FQUCIsImxpY2Vuc2VlX25hbWVzcGFjZSI6Imh4a2xpbmUtTkVXU19hcHBOZXdzRmxvd0hvbWVfUGFnZSJ9.ldrvWTheNnGOa_rH_buA6OoUpLtW2bhcdr3fABrGHbk",
+            },
+            json={
+                "code_list": [{"codes": [normalized_code], "market": ths_market(normalized_code)}],
+                "trade_class": "intraday",
+                "time_period": "day_1",
+                "trade_date": -1,
+                "begin_time": -limit,
+                "end_time": 0,
+                "adjust_type": "forward",
+                "gpid": 1,
             },
             timeout=20.0,
             follow_redirects=True,
@@ -361,6 +417,23 @@ def fetch_fund_kline(code: str, limit: int) -> List[Dict[str, Any]]:
     except Exception as exc:
         raise RuntimeError(f"获取基金K线失败: {exc}")
 
-    response_data = data.get("data") or {}
-    klines = response_data.get("klines") or []
-    return [parse_kline_item(row) for row in klines]
+    if data.get("status_code") != 0:
+        message = data.get("status_msg") or "未知错误"
+        raise RuntimeError(f"获取基金K线失败: {message}")
+
+    quote_data = ((data.get("data") or {}).get("quote_data") or [])
+    if not quote_data:
+        return []
+
+    values = quote_data[0].get("value") or []
+
+    records: List[Dict[str, Any]] = []
+    previous_close: float | None = None
+    for item in values:
+        if not isinstance(item, list):
+            continue
+        record = parse_ths_fund_kline_value(item, previous_close)
+        records.append(record)
+        previous_close = record["close"]
+
+    return records

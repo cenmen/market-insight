@@ -1,7 +1,7 @@
 interface:
   display_name: "ETF 分析"
-  short_description: "抓取持仓、财务与 K 线数据并生成 ETF 分析 TS 数据"
-  default_prompt: "使用 $etf-analysis 抓取 ETF 持仓、财务和 K 线数据，并为本项目生成 ETF 分析 TS 数据。"
+  short_description: "抓取持仓、财务与 K 线并生成前端 ETF 数据"
+  default_prompt: "使用 $etf-analysis 抓取 ETF 持仓、财务和 K 线数据，并生成 frontend/src/data/etfs 使用的 ETF 分析 JS 数据。"
 
 policy:
   allow_implicit_invocation: false

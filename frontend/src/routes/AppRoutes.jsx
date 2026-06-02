@@ -10,7 +10,7 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/article/html-effectiveness" element={<HtmlEffectivenessPage />} />
-      <Route path="/etf/515880" element={<EtfReportPage />} />
+      <Route path="/etf/:code" element={<EtfReportPage />} />
       <Route path="/after-close" element={<AfterClosePage />} />
       <Route path="/pre-open" element={<PreOpenPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />

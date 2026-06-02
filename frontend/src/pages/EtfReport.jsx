@@ -1,7 +1,7 @@
 import BaseKLineChart from '@/components/charts/BaseKLineChart';
 import BasePieChart from '@/components/charts/BasePieChart';
-import EventTimeline from '@/components/EventTimeline.jsx';
 import ReportFooter from '@/components/ReportFooter.jsx';
+import Timeline from '@/components/Timeline.jsx';
 import etfs from '@/data/etfs';
 import { Navigate, useParams, useSearchParams } from 'react-router-dom';
 
@@ -214,7 +214,7 @@ export default function EtfReportPage() {
         {data.viewpoints?.length > 0 && (
           <section>
             <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>跟踪事件</h2>
-            <EventTimeline items={data.viewpoints} />
+            <Timeline items={data.viewpoints} />
           </section>
         )}
 

@@ -2,40 +2,52 @@ import Timeline from '@/components/Timeline.jsx';
 
 const recentEvents = [
   {
-    date: '2026-06-02',
+    datetime: '2026-06-02 19:29:43',
     title: 'AI硬件继续扩散',
     source: '盘后整理',
+    statusTag: { label: '利好', kind: 'bullish' },
     summary: 'CPO、光模块、PCB、AI PC 等方向延续强势，资金继续围绕海外科技映射做文章。',
+    tags: ['CPO', '光模块', 'AI PC'],
   },
   {
-    date: '2026-06-01',
+    datetime: '2026-06-01 18:40:11',
     title: '高位科技开始分歧',
     source: '盘后整理',
+    statusTag: { label: '中性', kind: 'neutral' },
     summary: '半导体和算力链出现高位震荡，资金开始尝试往电力、消费等低位方向切换。',
+    tags: ['算力', '电力', '切换'],
   },
   {
-    date: '2026-05-30',
+    datetime: '2026-05-30 21:08:05',
     title: '电力链获得关注',
     source: '盘后整理',
+    statusTag: { label: '利好', kind: 'bullish' },
     summary: '火电、绿电和电网设备被重新定价，市场开始讨论 AI 时代的能源底座。',
+    tags: ['火电', '绿电', '电网设备'],
   },
   {
-    date: '2026-05-29',
+    datetime: '2026-05-29 20:14:22',
     title: '海外科技情绪外溢',
     source: '盘后整理',
+    statusTag: { label: '利好', kind: 'bullish' },
     summary: '美股科技股走强后，A 股资金快速寻找算力硬件、存储和服务器材料的映射标的。',
+    tags: ['美股科技', '存储', '服务器'],
   },
   {
-    date: '2026-05-28',
+    datetime: '2026-05-28 17:56:39',
     title: '成交放大，风格偏成长',
     source: '盘后整理',
+    statusTag: { label: '中性', kind: 'neutral' },
     summary: '市场成交明显抬升，成长风格占优，科技主线的弹性开始变得更突出。',
+    tags: ['成交放大', '成长风格', '弹性'],
   },
   {
-    date: '2026-05-27',
+    datetime: '2026-05-27 19:03:18',
     title: '主线由芯片向链条扩散',
     source: '盘后整理',
+    statusTag: { label: '利空', kind: 'bearish' },
     summary: '市场从单点芯片扩散到 PCB、光模块、封装、存储等更完整的产业链条。',
+    tags: ['芯片', 'PCB', '封装'],
   },
 ];
 

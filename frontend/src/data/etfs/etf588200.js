@@ -18,13 +18,11 @@ const etf588200 = {
   },
   report: {
     date: '2026-06-02',
-    author: '抖音 · ETF主线侦探',
     headlineSignal: '规模与流动性观察',
     coreJudgment: '国产芯片主线的高弹性组合',
     thesis: '跟踪上证科创板芯片指数，组合暴露集中在晶圆代工、AI算力芯片、内存接口、半导体设备和光芯片等方向。它不是低波动红利资产，而是偏国产半导体景气、AI算力需求和科创板风险偏好的高弹性ETF。',
-    callout: '一句话看法：适合用来跟踪国产芯片和AI算力芯片主线的风险偏好，但短线涨跌受龙头股交易拥挤、设备订单验证和科创板情绪影响很大。',
+    callout: '适合用来跟踪国产芯片和AI算力芯片主线的风险偏好，但短线涨跌受龙头股交易拥挤、设备订单验证和科创板情绪影响很大。',
     chartCaption: '近期走势显示芯片主线弹性明显放大，连续上冲后短线回撤和宽幅震荡也同步增加。',
-    disclaimer: '仅供参考，不构成任何投资建议；市场有风险，决策需谨慎，风险自负。',
     risks: [
       {
         title: '高波动风险',
@@ -67,8 +65,10 @@ const etf588200 = {
     }
   ],
   recentFiveDayAmplitude: '5.74%（4.26% ~ 7.61%）',
+  recentFiveDayAmplitudeComment: '近 5 日振幅中枢偏高，说明资金分歧和价格弹性都在放大，短线更容易出现宽幅震荡。',
   recentTenDayMaxDrawdown: '-6.98%',
   recentTenDayMaxDrawdownDate: '2026.05.29',
+  recentTenDayMaxDrawdownComment: '10 日内最大回撤接近 7%，回撤压力较明显，观察重点是回踩后能否重新收回短期均线。',
   businessRatio: [
     {
       type: 'AI算力芯片与IP',

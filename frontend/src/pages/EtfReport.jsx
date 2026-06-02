@@ -27,7 +27,7 @@ export default function EtfReportPage() {
   const useMask = searchParams.get('mask') === '1';
 
   if (!data) {
-    return <Navigate to="/" replace />;
+    return <Navigate to='/' replace />;
   }
 
   const pieData = data.businessRatio.map(function mapBucket(item) {
@@ -75,7 +75,7 @@ export default function EtfReportPage() {
         <section className='mb-[16pt] grid grid-cols-4 gap-[10pt] max-[820px]:grid-cols-2 max-[820px]:gap-[6pt]'>
           {data.metrics.map(function mapMetric(metric) {
             return (
-              <div className='rounded-[4pt] border border-[#e8e6dc] bg-[#faf9f5] p-[10pt]' key={metric.label}>
+              <div className='rounded-[4pt] bg-[#faf9f5] p-[10pt]' key={metric.label}>
                 <div className='text-[10pt] font-medium text-[#3d3d3a]'>{metric.label}</div>
                 <div className='mt-[5pt] text-[14pt] leading-[1.1] font-medium text-[#1b365d] tabular-nums'>{metric.value}</div>
                 <div className='mt-[5pt] text-[9pt] leading-[1.3] text-[#504e49]'>{metric.note}</div>
@@ -125,7 +125,7 @@ export default function EtfReportPage() {
           <div className='my-[8pt] grid grid-cols-2 gap-[10pt] max-[820px]:block'>
             {data.businessRatio.map(function mapBucket(item) {
               return (
-                <div className='break-inside-avoid rounded-[4pt] border border-[#e8e6dc] bg-[#faf9f5] px-[10pt] py-[8pt]' key={item.type}>
+                <div className='break-inside-avoid rounded-[4pt] bg-[#faf9f5] px-[10pt] py-[8pt]' key={item.type}>
                   <div className='mb-[3pt] flex justify-between gap-[8pt] font-medium text-[#3d3d3a]'>
                     <span>{item.type}</span>
                     <span className='whitespace-nowrap text-[#1b365d] tabular-nums'>{formatRate(item.rate)}</span>
@@ -146,7 +146,7 @@ export default function EtfReportPage() {
             {data.financialRows.map(function mapHolding(row) {
               const financial = getLatestFinancial(row);
               return (
-                <article className='break-inside-avoid rounded-[4pt] border border-[#e8e6dc] bg-[#faf9f5] p-[10pt]' key={row.code}>
+                <article className='break-inside-avoid rounded-[4pt] bg-[#faf9f5] p-[10pt]' key={row.code}>
                   <header className='flex items-start justify-between gap-[8pt] max-[820px]:block'>
                     <div className='flex items-baseline gap-[6pt] text-[#141413]'>
                       <strong>{row.name}</strong>
@@ -194,15 +194,15 @@ export default function EtfReportPage() {
         <section>
           <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>技术观察</h2>
           <div className='my-[8pt] grid grid-cols-2 gap-[10pt] max-[820px]:grid-cols-2'>
-            <div className='mb-[8pt] rounded-[4pt] border border-[#e8e6dc] bg-[#faf9f5] p-[10pt]'>
+            <div className='mb-[8pt] rounded-[4pt] bg-[#faf9f5] p-[10pt]'>
               <div className='text-[10pt] font-medium text-[#3d3d3a]'>最近 5 日振幅</div>
               <div className='mt-[4pt] text-[14pt] font-medium text-[#1b365d] tabular-nums'>{data.recentFiveDayAmplitude}</div>
-              <div className='mt-[4pt] text-[9pt] text-[#504e49]'>用于观察短线波动空间</div>
+              <div className='mt-[4pt] text-[9pt] text-[#504e49]'>{data.recentFiveDayAmplitudeComment}</div>
             </div>
-            <div className='mb-[8pt] rounded-[4pt] border border-[#e8e6dc] bg-[#faf9f5] p-[10pt]'>
+            <div className='mb-[8pt] rounded-[4pt] bg-[#faf9f5] p-[10pt]'>
               <div className='text-[10pt] font-medium text-[#3d3d3a]'>最近 10 日最大跌幅（{data.recentTenDayMaxDrawdownDate}）</div>
               <div className='mt-[4pt] text-[14pt] font-medium text-[#1b365d] tabular-nums'>{data.recentTenDayMaxDrawdown}</div>
-              <div className='mt-[4pt] text-[9pt] text-[#504e49]'>用于观察短线回撤压力</div>
+              <div className='mt-[4pt] text-[9pt] text-[#504e49]'>{data.recentTenDayMaxDrawdownComment}</div>
             </div>
           </div>
           <figure className='my-[12pt] break-inside-avoid'>
@@ -211,10 +211,12 @@ export default function EtfReportPage() {
           </figure>
         </section>
 
-        <section>
-          <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>跟踪事件</h2>
-          <EventTimeline items={data.viewpoints} />
-        </section>
+        {data.viewpoints?.length > 0 && (
+          <section>
+            <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>跟踪事件</h2>
+            <EventTimeline items={data.viewpoints} />
+          </section>
+        )}
 
         <section>
           <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>风险提示</h2>

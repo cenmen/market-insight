@@ -9,14 +9,12 @@ const etf515880 = {
   },
   report: {
     date: '2026-05-31',
-    author: '抖音 · ETF主线侦探',
     headlineSignal: '规模与流动性观察',
     coreJudgment: 'AI 算力通信硬件的高弹性组合',
     thesis:
       '跟踪中证全指通信设备指数，组合暴露集中在光模块、AI 数据中心、通信设备、算力网络等方向。它不是传统运营商红利型资产，而是偏 AI 基础设施和数据中心资本开支弹性的硬件链 ETF。',
-    callout: '一句话看法：适合用来跟踪 AI 算力通信主线的景气度，但组合权重集中、波动偏高，买点更依赖订单验证和短线回撤后的风险收益比。',
+    callout: '适合用来跟踪 AI 算力通信主线的景气度，但组合权重集中、波动偏高，买点更依赖订单验证和短线回撤后的风险收益比。',
     chartCaption: '近期走势显示主线仍偏强，但短线波动和回撤压力同步上升。',
-    disclaimer: '仅供参考，不构成任何投资建议；市场有风险，决策需谨慎，风险自负。',
     risks: [
       {
         title: '订单兑现风险',
@@ -59,8 +57,10 @@ const etf515880 = {
     },
   ],
   recentFiveDayAmplitude: '4.73%（2.70% ~ 7.41%）',
+  recentFiveDayAmplitudeComment: '近 5 日振幅仍处于偏高区间，主线弹性还在，但高位资金切换会放大日内波动。',
   recentTenDayMaxDrawdown: '-5.34%',
   recentTenDayMaxDrawdownDate: '2026.05.21',
+  recentTenDayMaxDrawdownComment: '10 日最大回撤超过 5%，回撤压力中等偏高，后续要看反弹时成交能否重新配合。',
   businessRatio: [
     {
       type: '光模块与高速光通信',

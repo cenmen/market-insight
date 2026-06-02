@@ -1,0 +1,7 @@
+interface:
+  display_name: "盘后分析更新"
+  short_description: "更新盘后页指数、ETF 表格与复盘文章"
+  default_prompt: "使用 $after-close-analysis 更新今日盘后分析页面数据和 ETF主线侦探复盘文章。"
+
+policy:
+  allow_implicit_invocation: true

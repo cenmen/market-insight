@@ -1,0 +1,155 @@
+---
+name: after-close-analysis
+description: Market Insight 项目专用的今日盘后分析页面更新工作流。用户说“今日盘后分析”“更新盘后分析”“盘后页面更新分析”等意图时自动使用：获取 A 股指数、ETF 跟踪指数行情与资金流，计算盘后表格字段，并以「ETF主线侦探」口吻更新 frontend/src/data/afterCloseData.jsx。
+---
+
+# 盘后页面更新分析
+
+## 目标
+
+更新本项目盘后页面数据文件：
+
+```text
+frontend/src/data/afterCloseData.jsx
+```
+
+需要更新：
+
+- `afterCloseData.mainIndexes`
+- `afterCloseData.tableDataSource`
+- `afterCloseData.conclusion`
+- `afterCloseData.content`
+
+触发语包括但不限于：“今日盘后分析”“更新盘后分析”“盘后页面更新分析”“帮我写今天盘后复盘”。
+
+## 开始前
+
+1. 读取 `frontend/src/data/afterCloseData.jsx`，确认当前 JSX 数据结构和排序辅助函数，不要改动无关逻辑。
+2. 读取 `frontend/src/data/etfBaseList.js`，用它作为 ETF 与跟踪指数清单来源。不要在 skill 中另建一份 ETF 清单。
+3. 获取当天最新市场数据。盘后数据属于强时效信息，必须使用当前来源查询，不能只凭模型记忆。
+4. 如果用户提供其他博主收盘观点，把它们作为观点参考；只吸收逻辑，不要照抄原文。
+5. 遵守项目 `AGENTS.md`：完成后不要运行 preview、build、test、lint 或自校验命令，只告诉用户可手动执行的命令。
+
+## 数据更新规则
+
+### mainIndexes
+
+获取今日最新的：
+
+- 上证指数
+- 创业板指
+- 科创50
+
+写入格式：
+
+```jsx
+mainIndexes: [
+  { name: '上证指数', indexValue: '4057.74', changeRate: -0.27 },
+  { name: '创业板指', indexValue: '3950.94', changeRate: -2.15 },
+  { name: '科创50', indexValue: '1663.69', changeRate: -5.0 },
+],
+```
+
+要求：
+
+- `indexValue` 使用字符串，保留两位小数。
+- `changeRate` 使用数字，单位是百分比，不带 `%`。
+- 指数顺序保持：上证指数、创业板指、科创50。
+
+### tableDataSource
+
+对 `frontend/src/data/etfBaseList.js` 中每只 ETF 的跟踪指数获取今日数据：
+
+- 涨跌幅
+- 开盘价
+- 收盘价
+- 最低价
+- 最高价
+- 换手率
+- 主力净流入
+
+派生字段：
+
+```text
+maxDrawdown = (最低价 - 开盘价) / 开盘价 * 100
+maxTRise = (最高价 - 最低价) / 最低价 * 100
+```
+
+写入 `tableDataSource` 的每行格式：
+
+```jsx
+{ key: '588200', name: '芯片', changeRate: 1.23, maxDrawdown: -4.51, maxTRise: 2.45, turnoverRate: 3.18, mainNetInflow: 1.26, isPinned: true }
+```
+
+要求：
+
+- `key` 使用 ETF 代码。
+- `name` 使用 `etfBaseList.js` 里的 `alias`。
+- `changeRate`、`maxDrawdown`、`maxTRise`、`turnoverRate`、`mainNetInflow` 都使用数字，保留两位小数。
+- `mainNetInflow` 单位为亿元，不带单位文本；流出写负数。
+- 芯片、通信、半导体设备、电网设备必须补回 `isPinned: true`。
+- 其他行不主动添加 `isPinned`。
+- 如果某个跟踪指数没有可靠 `indexCode` 或主力净流入数据，不要编造；换用可靠行情源补齐。确实无法补齐时，先向用户说明缺失字段和来源限制，不要写假数。
+
+## 推荐数据来源顺序
+
+1. 优先使用用户提供的数据源，包括行情表、截图、网页链接、CSV、Excel、券商软件导出数据或其他明确来源。
+2. 如果用户没有提供数据源，再自行查询东方财富、同花顺、Wind/Choice 可访问页面、证券行情 API 或其他可靠公开来源。
+3. 获取最新行情时，如需联网搜索或打开网页，按当前环境工具规则执行；必须使用当日或盘后最新数据。
+4. 不要把新闻原文复述进文章；消息面只用于解释资金行为。
+
+## 文章写作规则
+
+身份：`ETF主线侦探`。
+
+文风：
+
+- 老股民聊天式、口语化。
+- 不写研报腔，不堆新闻，不照搬数据。
+- 有观点、有逻辑、有节奏感，像每天陪读者复盘和推演市场的交易员。
+- 可以使用生活化比喻，例如换桌、抢座、接力、洗人下车。
+- 不要使用“一、二、三”这类分段标题。
+
+必须覆盖的分析角度：
+
+- 资金为什么买、为什么卖。
+- 主线是强化、分歧、轮动还是退潮。
+- 市场情绪和交易逻辑。
+- 哪些方向值得继续跟踪。
+- 哪些方向需要规避。
+- 如果用户给了其他博主收盘观点，把它们作为参考融入判断。
+
+结尾必须给出「ETF主线侦探结论」，并覆盖：
+
+- 市场状态
+- 当前主线
+- 风险方向
+- 重点观察方向
+- ETF 投资者应对策略
+
+写入规则：
+
+- `afterCloseData.conclusion` 写一句浓缩结论，适合页面高亮展示。
+- `afterCloseData.content` 使用 JSX 片段，尽量只用 `<p>` 分段。
+- 可以用 `<strong>` 强调“ETF主线侦探结论：”，但不要加小标题式分段结构。
+
+示例结构：
+
+```jsx
+content: (
+  <>
+    <p>今天这盘，表面看是指数怎么走，里面其实是资金在重新换桌。</p>
+    <p>资金愿意买的方向，核心不是便宜两个字，而是它还能不能讲出下一棒接力的人。</p>
+    <p><strong>ETF主线侦探结论：</strong>市场状态是震荡分歧，当前主线仍在科技和高端制造里找承接，风险方向是高位缩量反抽但资金不回流的品种，重点观察能不能从单点抱团扩散到板块接力。ETF 投资者别急着一把梭，底仓看主线，分歧等确认。</p>
+  </>
+),
+```
+
+## 编辑要求
+
+- 使用 `apply_patch` 修改文件。
+- 尽量只改 `frontend/src/data/afterCloseData.jsx`，除非用户另有要求。
+- 保留文件底部 `buildProcessedTableDataSource` 的处理逻辑。
+- 不要改动盘后页面组件样式和路由。
+- 完成后不要运行构建、测试、lint、预览或自动校验命令。
+- 最终回复说明更新了什么，并给出用户可手动运行的验证命令。

@@ -88,8 +88,8 @@ export default function AfterClosePage() {
   const resolvedTableColumns = tableColumns;
 
   return (
-    <main className="min-h-screen bg-[#f5f4ed] [font-family:'TsangerJinKai02','Source_Han_Serif_SC','Noto_Serif_CJK_SC','Songti_SC','STSong',Georgia,serif] text-[#141413]">
-      <article className='mx-auto w-full max-w-[210mm] px-4 py-6 md:px-[18mm] md:py-[14mm]'>
+    <main className="flex h-screen items-center justify-center overflow-hidden bg-[#f5f4ed] px-4 py-6 [font-family:'TsangerJinKai02','Source_Han_Serif_SC','Noto_Serif_CJK_SC','Songti_SC','STSong',Georgia,serif] text-[#141413]">
+      <article className='h-[90vh] w-full max-w-[210mm] overflow-y-auto px-4 py-6 md:px-[18mm] md:py-[14mm]'>
         <header className='mb-3 border-l-[2.5pt] border-[#1b365d] pl-3'>
           <p className='mb-1 text-[11px] tracking-[0.14em] text-[#1b365d] uppercase'>VANTASTACK RESEARCH</p>
           <h1 className='text-[20px] leading-tight font-medium md:text-[26px]'>盘后分析：主线分化，资金高低切加速</h1>

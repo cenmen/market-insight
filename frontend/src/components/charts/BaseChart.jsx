@@ -7,7 +7,7 @@ import {
   DataZoomComponent,
   TitleComponent,
 } from 'echarts/components'
-import { CandlestickChart, BarChart, PieChart } from 'echarts/charts'
+import { CandlestickChart, BarChart, PieChart, CustomChart } from 'echarts/charts'
 import { CanvasRenderer } from 'echarts/renderers'
 
 echarts.use([
@@ -19,6 +19,7 @@ echarts.use([
   CandlestickChart,
   BarChart,
   PieChart,
+  CustomChart,
   CanvasRenderer,
 ])
 

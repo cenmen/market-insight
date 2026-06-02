@@ -1,13 +1,13 @@
-import { useMemo } from 'react'
-import BaseChart from './BaseChart'
+import { useMemo } from 'react';
+import BaseChart from './BaseChart';
 
 function splitKlineData(data) {
-  const categoryData = []
-  const values = []
-  const volumes = []
+  const categoryData = [];
+  const values = [];
+  const volumes = [];
 
   data.forEach(function eachItem(item) {
-    categoryData.push(item.date)
+    categoryData.push(item.date);
     values.push({
       value: [item.open, item.close, item.low, item.high],
       open: item.open,
@@ -21,49 +21,200 @@ function splitKlineData(data) {
       changeAmount: item.changeAmount,
       turnoverRate: item.turnoverRate,
       date: item.date,
-    })
+    });
     volumes.push({
       value: item.volume ?? 0,
       itemStyle: {
         color: item.open <= item.close ? 'rgba(239, 68, 68, 0.35)' : 'rgba(34, 197, 94, 0.32)',
       },
-    })
-  })
+    });
+  });
 
-  return { categoryData, values, volumes }
+  return { categoryData, values, volumes };
 }
 
 function formatNumber(value, digits = 2) {
-  const num = Number(value)
+  const num = Number(value);
   if (!Number.isFinite(num)) {
-    return '--'
+    return '--';
   }
-  return num.toFixed(digits)
+  return num.toFixed(digits);
 }
 
 function formatAmountToYi(value) {
-  const num = Number(value)
+  const num = Number(value);
   if (!Number.isFinite(num)) {
-    return '--'
+    return '--';
   }
-  return `${(num / 100000000).toFixed(2)} 亿`
+  return `${(num / 100000000).toFixed(2)} 亿`;
 }
 
 function formatDateWithoutYear(value) {
   if (typeof value !== 'string') {
-    return value
+    return value;
   }
-  const parts = value.split('-')
+  const parts = value.split('-');
   if (parts.length === 3) {
-    return `${parts[1]}-${parts[2]}`
+    return `${parts[1]}-${parts[2]}`;
   }
-  return value
+  return value;
 }
 
-export default function BaseKLineChart({ data = [], height = 360, className }) {
+function resolveCandleMarkerIndex(marker, categoryData) {
+  if (Number.isInteger(marker.index)) {
+    return marker.index;
+  }
+
+  if (Number.isInteger(marker.dataIndex)) {
+    return marker.dataIndex;
+  }
+
+  if (typeof marker.date === 'string') {
+    return categoryData.indexOf(marker.date);
+  }
+
+  return -1;
+}
+
+function buildCandleMarkerData(data, categoryData, markers) {
+  if (!Array.isArray(markers) || markers.length === 0) {
+    return [];
+  }
+
+  const lows = data.map(function mapLow(item) {
+    return Number(item.low);
+  });
+  const highs = data.map(function mapHigh(item) {
+    return Number(item.high);
+  });
+  const minLow = Math.min(...lows.filter(Number.isFinite));
+  const maxHigh = Math.max(...highs.filter(Number.isFinite));
+  const priceRange = Number.isFinite(maxHigh - minLow) && maxHigh > minLow ? maxHigh - minLow : 1;
+  const markerGap = priceRange * 0.1;
+
+  return markers
+    .map(function mapMarker(marker) {
+      const dataIndex = resolveCandleMarkerIndex(marker, categoryData);
+      const candle = data[dataIndex];
+
+      if (!candle) {
+        return null;
+      }
+
+      const position = marker.position === 'below' ? 'below' : 'above';
+      const candleEdge = position === 'below' ? Number(candle.low) : Number(candle.high);
+      const targetPrice = Number.isFinite(Number(marker.price)) ? Number(marker.price) : candleEdge;
+
+      if (!Number.isFinite(targetPrice)) {
+        return null;
+      }
+
+      const labelPrice = position === 'below' ? targetPrice - markerGap : targetPrice + markerGap;
+      const label = marker.label || '锤子线';
+
+      return [dataIndex, targetPrice, labelPrice, label, position];
+    })
+    .filter(Boolean);
+}
+
+function makeCandleMarkerSeries(markerData) {
+  return {
+    name: 'K线标记',
+    type: 'custom',
+    coordinateSystem: 'cartesian2d',
+    data: markerData,
+    encode: { x: 0, y: [1, 2] },
+    silent: true,
+    clip: false,
+    z: 12,
+    renderItem(params, api) {
+      const targetPoint = api.coord([api.value(0), api.value(1)]);
+      const labelPoint = api.coord([api.value(0), api.value(2)]);
+      const label = api.value(3);
+      const position = api.value(4);
+      const isBelow = position === 'below';
+      const textOffset = isBelow ? 3 : -3;
+
+      return {
+        type: 'group',
+        children: [
+          {
+            type: 'line',
+            shape: {
+              x1: labelPoint[0],
+              y1: labelPoint[1],
+              x2: targetPoint[0],
+              y2: targetPoint[1],
+            },
+            style: {
+              stroke: '#1b365d',
+              lineWidth: 0.8,
+              opacity: 0.92,
+            },
+          },
+          {
+            type: 'circle',
+            shape: {
+              cx: targetPoint[0],
+              cy: targetPoint[1],
+              r: 1,
+            },
+            style: {
+              fill: '#faf9f5',
+              stroke: '#1b365d',
+              lineWidth: 0.8,
+              opacity: 0.96,
+            },
+          },
+          {
+            type: 'text',
+            style: {
+              x: labelPoint[0],
+              y: labelPoint[1] + textOffset,
+              text: label,
+              fill: '#1b365d',
+              font: '500 8px TsangerJinKai02, serif',
+              textAlign: 'center',
+              textVerticalAlign: isBelow ? 'top' : 'bottom',
+            },
+          },
+        ],
+      };
+    },
+  };
+}
+
+export default function BaseKLineChart({ data = [], height = 360, className, candleMarkers = [] }) {
   const option = useMemo(
     function makeOption() {
-      const dataset = splitKlineData(data)
+      const dataset = splitKlineData(data);
+      const candleMarkerData = buildCandleMarkerData(data, dataset.categoryData, candleMarkers);
+      const hasCandleMarkers = candleMarkerData.length > 0;
+      const series = [
+        {
+          name: '价格',
+          type: 'candlestick',
+          data: dataset.values,
+          itemStyle: {
+            color: '#ef4444',
+            color0: '#22c55e',
+            borderColor: '#ef4444',
+            borderColor0: '#22c55e',
+          },
+        },
+        {
+          name: '成交量',
+          type: 'bar',
+          xAxisIndex: 1,
+          yAxisIndex: 1,
+          data: dataset.volumes,
+          barWidth: '60%',
+        },
+      ];
+
+      if (hasCandleMarkers) {
+        series.push(makeCandleMarkerSeries(candleMarkerData));
+      }
 
       return {
         animation: false,
@@ -75,16 +226,16 @@ export default function BaseKLineChart({ data = [], height = 360, className }) {
           borderWidth: 1,
           borderColor: '#e8e6dc',
           backgroundColor: '#faf9f5',
-          textStyle: { color: '#141413' },
+          textStyle: { color: '#141413', fontFamily: 'TsangerJinKai02, serif' },
           formatter(params) {
-            const seriesItems = Array.isArray(params) ? params : [params]
+            const seriesItems = Array.isArray(params) ? params : [params];
             const klineItem = seriesItems.find(function findKLine(item) {
-              return item.seriesType === 'candlestick'
-            })
+              return item.seriesType === 'candlestick';
+            });
             if (!klineItem) {
-              return ''
+              return '';
             }
-            const raw = klineItem.data || {}
+            const raw = klineItem.data || {};
             return [
               `日期：${raw.date ?? klineItem.axisValue ?? '--'}`,
               `开盘：${formatNumber(raw.open)}`,
@@ -97,7 +248,7 @@ export default function BaseKLineChart({ data = [], height = 360, className }) {
               `涨跌幅：${formatNumber(raw.changePercent)}%`,
               `涨跌额：${formatNumber(raw.changeAmount)}`,
               `换手率：${formatNumber(raw.turnoverRate)}%`,
-            ].join('<br/>')
+            ].join('<br/>');
           },
         },
         axisPointer: {
@@ -107,8 +258,8 @@ export default function BaseKLineChart({ data = [], height = 360, className }) {
           },
         },
         grid: [
-          { left: 56, right: 16, top: 18, height: 220 },
-          { left: 56, right: 16, top: 262, height: 70 },
+          { left: 56, right: 16, top: hasCandleMarkers ? 34 : 18, height: hasCandleMarkers ? 204 : 220 },
+          { left: 56, right: 16, top: 252, height: 86 },
         ],
         xAxis: [
           {
@@ -118,11 +269,12 @@ export default function BaseKLineChart({ data = [], height = 360, className }) {
             axisLine: { lineStyle: { color: '#e8e6dc' } },
             axisTick: { show: false },
             axisLabel: {
-              color: '#6b6a64',
-              fontFamily: 'JetBrains Mono, monospace',
-              formatter(value) {
-                return formatDateWithoutYear(value)
-              },
+              show: false,
+              // color: '#6b6a64',
+              // fontFamily: 'JetBrains Mono, monospace',
+              // formatter(value) {
+              //   return formatDateWithoutYear(value)
+              // },
             },
             splitLine: { show: false },
             min: 'dataMin',
@@ -170,31 +322,11 @@ export default function BaseKLineChart({ data = [], height = 360, className }) {
             preventDefaultMouseMove: true,
           },
         ],
-        series: [
-          {
-            name: '价格',
-            type: 'candlestick',
-            data: dataset.values,
-            itemStyle: {
-              color: '#ef4444',
-              color0: '#22c55e',
-              borderColor: '#ef4444',
-              borderColor0: '#22c55e',
-            },
-          },
-          {
-            name: '成交量',
-            type: 'bar',
-            xAxisIndex: 1,
-            yAxisIndex: 1,
-            data: dataset.volumes,
-            barWidth: '60%',
-          },
-        ],
-      }
+        series,
+      };
     },
-    [data],
-  )
+    [data, candleMarkers],
+  );
 
-  return <BaseChart option={option} height={height} className={className} />
+  return <BaseChart option={option} height={height} className={className} />;
 }

@@ -4,65 +4,57 @@ const etf588200 = {
     name: '科创芯片ETF',
     index: '上证科创板芯片指数',
     intro: '跟踪上证科创板芯片指数，组合集中在晶圆制造、国产AI芯片、半导体设备、存储和高速光芯片等科创板硬科技方向，前十大权重对净值弹性影响较高。',
-    concepts: [
-      '科创芯片',
-      '国产半导体',
-      'AI算力芯片',
-      '晶圆制造',
-      '半导体设备',
-      '存储芯片',
-      'Chiplet',
-      '高速光芯片'
-    ],
-    scale: '386.07 亿元'
+    concepts: ['科创芯片', '国产半导体', 'AI算力芯片', '晶圆制造', '半导体设备', '存储芯片', 'Chiplet', '高速光芯片'],
+    scale: '386.07 亿元',
   },
   report: {
     date: '2026-06-02',
     headlineSignal: '规模与流动性观察',
     coreJudgment: '国产芯片主线的高弹性组合',
-    thesis: '跟踪上证科创板芯片指数，组合暴露集中在晶圆代工、AI算力芯片、内存接口、半导体设备和光芯片等方向。它不是低波动红利资产，而是偏国产半导体景气、AI算力需求和科创板风险偏好的高弹性ETF。',
+    thesis:
+      '跟踪上证科创板芯片指数，组合暴露集中在晶圆代工、AI算力芯片、内存接口、半导体设备和光芯片等方向。它不是低波动红利资产，而是偏国产半导体景气、AI算力需求和科创板风险偏好的高弹性ETF。',
     callout: '适合用来跟踪国产芯片和AI算力芯片主线的风险偏好，但短线涨跌受龙头股交易拥挤、设备订单验证和科创板情绪影响很大。',
     chartCaption: '近期走势显示芯片主线弹性明显放大，连续上冲后短线回撤和宽幅震荡也同步增加。',
     risks: [
       {
         title: '高波动风险',
-        description: '科创板芯片权重弹性较高，短线情绪降温时净值回撤可能明显放大。'
+        description: '科创板芯片权重弹性较高，短线情绪降温时净值回撤可能明显放大。',
       },
       {
         title: '业绩兑现风险',
-        description: 'AI芯片、设备和存储公司的高增速需要订单、交付和毛利率持续验证。'
+        description: 'AI芯片、设备和存储公司的高增速需要订单、交付和毛利率持续验证。',
       },
       {
         title: '估值拥挤风险',
-        description: '核心权重若涨幅过快，容易在放量滞涨或财报低于预期时出现估值压缩。'
+        description: '核心权重若涨幅过快，容易在放量滞涨或财报低于预期时出现估值压缩。',
       },
       {
         title: '产业周期风险',
-        description: '晶圆厂资本开支、存储价格周期和半导体设备招标节奏都会影响组合景气度。'
-      }
-    ]
+        description: '晶圆厂资本开支、存储价格周期和半导体设备招标节奏都会影响组合景气度。',
+      },
+    ],
   },
   metrics: [
     {
       label: '基金规模',
       value: '386.07 亿',
-      note: '资金流动性'
+      note: '资金流动性',
     },
     {
       label: '盈利增速',
       value: '227.55%',
-      note: '持仓盈利增速估算'
+      note: '持仓盈利增速估算',
     },
     {
       label: 'ROE',
       value: '4.61%',
-      note: '持仓加权 ROE 估算'
+      note: '持仓加权 ROE 估算',
     },
     {
       label: '业务增速',
       value: '93.91%',
-      note: '持仓业务增速估算'
-    }
+      note: '持仓业务增速估算',
+    },
   ],
   recentFiveDayAmplitude: '5.74%（4.26% ~ 7.61%）',
   recentFiveDayAmplitudeComment: '近 5 日振幅中枢偏高，说明资金分歧和价格弹性都在放大，短线更容易出现宽幅震荡。',
@@ -77,17 +69,17 @@ const etf588200 = {
       subItems: [
         {
           type: '海光信息',
-          rate: 9.66
+          rate: 9.66,
         },
         {
           type: '寒武纪',
-          rate: 9.56
+          rate: 9.56,
         },
         {
           type: '芯原股份',
-          rate: 4.05
-        }
-      ]
+          rate: 4.05,
+        },
+      ],
     },
     {
       type: '晶圆制造与特色工艺',
@@ -96,13 +88,13 @@ const etf588200 = {
       subItems: [
         {
           type: '中芯国际',
-          rate: 9.8
+          rate: 9.8,
         },
         {
           type: '华虹公司',
-          rate: 2.35
-        }
-      ]
+          rate: 2.35,
+        },
+      ],
     },
     {
       type: '存储与接口芯片',
@@ -111,13 +103,13 @@ const etf588200 = {
       subItems: [
         {
           type: '澜起科技',
-          rate: 7.8
+          rate: 7.8,
         },
         {
           type: '佰维存储',
-          rate: 3.77
-        }
-      ]
+          rate: 3.77,
+        },
+      ],
     },
     {
       type: '半导体设备',
@@ -126,13 +118,13 @@ const etf588200 = {
       subItems: [
         {
           type: '中微公司',
-          rate: 7.3
+          rate: 7.3,
         },
         {
           type: '拓荆科技',
-          rate: 3.39
-        }
-      ]
+          rate: 3.39,
+        },
+      ],
     },
     {
       type: '光芯片与高速互联',
@@ -141,55 +133,55 @@ const etf588200 = {
       subItems: [
         {
           type: '源杰科技',
-          rate: 3.29
-        }
-      ]
+          rate: 3.29,
+        },
+      ],
     },
     {
       type: '其他科创芯片成分',
       rate: 39.03,
-      desc: '剩余成分分布在半导体设计、制造、材料、设备和电子核心器件等环节。'
-    }
+      desc: '剩余成分分布在半导体设计、制造、材料、设备和电子核心器件等环节。',
+    },
   ],
   shortTermFactors: [
     {
       title: 'AI算力芯片订单',
-      description: '海光信息、寒武纪等权重的订单能见度和交付节奏决定组合进攻弹性。'
+      description: '海光信息、寒武纪等权重的订单能见度和交付节奏决定组合进攻弹性。',
     },
     {
       title: '晶圆厂资本开支',
-      description: '中芯国际、华虹公司扩产和设备采购节奏会影响制造与设备链情绪。'
+      description: '中芯国际、华虹公司扩产和设备采购节奏会影响制造与设备链情绪。',
     },
     {
       title: '半导体设备验证',
-      description: '刻蚀、薄膜沉积等国产设备的客户验证和招标进展影响业绩兑现预期。'
+      description: '刻蚀、薄膜沉积等国产设备的客户验证和招标进展影响业绩兑现预期。',
     },
     {
       title: '存储周期与服务器升级',
-      description: '存储价格、DDR5渗透和AI服务器平台升级会影响澜起科技、佰维存储等方向。'
+      description: '存储价格、DDR5渗透和AI服务器平台升级会影响澜起科技、佰维存储等方向。',
     },
     {
       title: '科创板交易拥挤度',
-      description: '核心权重涨幅和成交占比偏高时，放量滞涨容易放大ETF短线波动。'
-    }
+      description: '核心权重涨幅和成交占比偏高时，放量滞涨容易放大ETF短线波动。',
+    },
   ],
   styleCharacteristics: [
     {
       title: '国产芯片高弹性',
-      description: '组合集中在科创板半导体龙头，受国产替代、AI算力和产业政策共振影响。'
+      description: '组合集中在科创板半导体龙头，受国产替代、AI算力和产业政策共振影响。',
     },
     {
       title: '龙头权重集中',
-      description: '中芯国际、海光信息、寒武纪等权重较高，单股波动会显著影响净值。'
+      description: '中芯国际、海光信息、寒武纪等权重较高，单股波动会显著影响净值。',
     },
     {
       title: '景气验证驱动',
-      description: '行情持续性依赖财报增速、订单披露、设备招标和晶圆厂扩产验证。'
+      description: '行情持续性依赖财报增速、订单披露、设备招标和晶圆厂扩产验证。',
     },
     {
       title: '短线波动偏大',
-      description: '近期K线振幅抬升，适合关注回撤后的风险收益比，而不是追逐单日情绪。'
-    }
+      description: '近期K线振幅抬升，适合关注回撤后的风险收益比，而不是追逐单日情绪。',
+    },
   ],
   story: null,
   tPrinciples: null,
@@ -207,7 +199,7 @@ const etf588200 = {
       amplitude: 0,
       changePercent: 0,
       changeAmount: 0,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-03-06',
@@ -220,7 +212,7 @@ const etf588200 = {
       amplitude: 2.07,
       changePercent: 0.12,
       changeAmount: 0.003,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-03-09',
@@ -233,7 +225,7 @@ const etf588200 = {
       amplitude: 3.86,
       changePercent: -2.03,
       changeAmount: -0.052,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-03-10',
@@ -246,7 +238,7 @@ const etf588200 = {
       amplitude: 1.95,
       changePercent: 2.63,
       changeAmount: 0.066,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-03-11',
@@ -259,7 +251,7 @@ const etf588200 = {
       amplitude: 2.52,
       changePercent: -1.47,
       changeAmount: -0.038,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-03-12',
@@ -272,7 +264,7 @@ const etf588200 = {
       amplitude: 3.62,
       changePercent: -1.38,
       changeAmount: -0.035,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-03-13',
@@ -285,7 +277,7 @@ const etf588200 = {
       amplitude: 2.31,
       changePercent: -1.2,
       changeAmount: -0.03,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-03-16',
@@ -298,7 +290,7 @@ const etf588200 = {
       amplitude: 4.04,
       changePercent: 1.82,
       changeAmount: 0.045,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-03-17',
@@ -311,7 +303,7 @@ const etf588200 = {
       amplitude: 3.09,
       changePercent: -2.94,
       changeAmount: -0.074,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-03-18',
@@ -324,7 +316,7 @@ const etf588200 = {
       amplitude: 2.33,
       changePercent: 2,
       changeAmount: 0.049,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-03-19',
@@ -337,7 +329,7 @@ const etf588200 = {
       amplitude: 1.68,
       changePercent: -2.4,
       changeAmount: -0.06,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-03-20',
@@ -350,7 +342,7 @@ const etf588200 = {
       amplitude: 2.5,
       changePercent: -1.11,
       changeAmount: -0.027,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-03-23',
@@ -363,7 +355,7 @@ const etf588200 = {
       amplitude: 4.19,
       changePercent: -4.86,
       changeAmount: -0.117,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-03-24',
@@ -376,7 +368,7 @@ const etf588200 = {
       amplitude: 3.93,
       changePercent: 2.53,
       changeAmount: 0.058,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-03-25',
@@ -389,7 +381,7 @@ const etf588200 = {
       amplitude: 3.02,
       changePercent: 2.68,
       changeAmount: 0.063,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-03-26',
@@ -402,7 +394,7 @@ const etf588200 = {
       amplitude: 2.28,
       changePercent: -2.07,
       changeAmount: -0.05,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-03-27',
@@ -415,7 +407,7 @@ const etf588200 = {
       amplitude: 3.98,
       changePercent: 0.85,
       changeAmount: 0.02,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-03-30',
@@ -428,7 +420,7 @@ const etf588200 = {
       amplitude: 2.48,
       changePercent: -0.46,
       changeAmount: -0.011,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-03-31',
@@ -441,7 +433,7 @@ const etf588200 = {
       amplitude: 3.29,
       changePercent: -3.29,
       changeAmount: -0.078,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-04-01',
@@ -454,7 +446,7 @@ const etf588200 = {
       amplitude: 1.87,
       changePercent: 3.62,
       changeAmount: 0.083,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-04-02',
@@ -467,7 +459,7 @@ const etf588200 = {
       amplitude: 3.53,
       changePercent: -2.94,
       changeAmount: -0.07,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-04-03',
@@ -480,7 +472,7 @@ const etf588200 = {
       amplitude: 1.65,
       changePercent: 0.17,
       changeAmount: 0.004,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-04-07',
@@ -493,7 +485,7 @@ const etf588200 = {
       amplitude: 2.94,
       changePercent: 2.12,
       changeAmount: 0.049,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-04-08',
@@ -506,7 +498,7 @@ const etf588200 = {
       amplitude: 3.26,
       changePercent: 6.53,
       changeAmount: 0.154,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-04-09',
@@ -519,7 +511,7 @@ const etf588200 = {
       amplitude: 3.26,
       changePercent: 0.2,
       changeAmount: 0.005,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-04-10',
@@ -532,7 +524,7 @@ const etf588200 = {
       amplitude: 1.55,
       changePercent: 1.83,
       changeAmount: 0.046,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-04-13',
@@ -545,7 +537,7 @@ const etf588200 = {
       amplitude: 3.78,
       changePercent: 0.94,
       changeAmount: 0.024,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-04-14',
@@ -558,7 +550,7 @@ const etf588200 = {
       amplitude: 2.09,
       changePercent: 2.36,
       changeAmount: 0.061,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-04-15',
@@ -571,7 +563,7 @@ const etf588200 = {
       amplitude: 3.17,
       changePercent: -0.08,
       changeAmount: -0.002,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-04-16',
@@ -584,7 +576,7 @@ const etf588200 = {
       amplitude: 1.89,
       changePercent: 1.17,
       changeAmount: 0.031,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-04-17',
@@ -597,7 +589,7 @@ const etf588200 = {
       amplitude: 2.16,
       changePercent: 0.75,
       changeAmount: 0.02,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-04-20',
@@ -610,7 +602,7 @@ const etf588200 = {
       amplitude: 1.7,
       changePercent: 1.7,
       changeAmount: 0.046,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-04-21',
@@ -623,7 +615,7 @@ const etf588200 = {
       amplitude: 2.51,
       changePercent: -1.28,
       changeAmount: -0.035,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-04-22',
@@ -636,7 +628,7 @@ const etf588200 = {
       amplitude: 3.39,
       changePercent: 2.51,
       changeAmount: 0.068,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-04-23',
@@ -649,7 +641,7 @@ const etf588200 = {
       amplitude: 3.89,
       changePercent: -1.55,
       changeAmount: -0.043,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-04-24',
@@ -662,7 +654,7 @@ const etf588200 = {
       amplitude: 4.64,
       changePercent: 2.6,
       changeAmount: 0.071,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-04-27',
@@ -675,7 +667,7 @@ const etf588200 = {
       amplitude: 4.1,
       changePercent: 4.7,
       changeAmount: 0.132,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-04-28',
@@ -688,7 +680,7 @@ const etf588200 = {
       amplitude: 3.4,
       changePercent: -1.53,
       changeAmount: -0.045,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-04-29',
@@ -701,7 +693,7 @@ const etf588200 = {
       amplitude: 3.77,
       changePercent: 0.21,
       changeAmount: 0.006,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-04-30',
@@ -714,7 +706,7 @@ const etf588200 = {
       amplitude: 5.93,
       changePercent: 6.52,
       changeAmount: 0.189,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-05-06',
@@ -727,7 +719,7 @@ const etf588200 = {
       amplitude: 6.09,
       changePercent: 5.57,
       changeAmount: 0.172,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-05-07',
@@ -740,7 +732,7 @@ const etf588200 = {
       amplitude: 3.34,
       changePercent: 2.21,
       changeAmount: 0.072,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-05-08',
@@ -753,7 +745,7 @@ const etf588200 = {
       amplitude: 2.1,
       changePercent: -2.73,
       changeAmount: -0.091,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-05-11',
@@ -766,7 +758,7 @@ const etf588200 = {
       amplitude: 4.6,
       changePercent: 5.77,
       changeAmount: 0.187,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-05-12',
@@ -779,7 +771,7 @@ const etf588200 = {
       amplitude: 4.35,
       changePercent: 1.14,
       changeAmount: 0.039,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-05-13',
@@ -792,7 +784,7 @@ const etf588200 = {
       amplitude: 6.29,
       changePercent: 2.86,
       changeAmount: 0.099,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-05-14',
@@ -805,7 +797,7 @@ const etf588200 = {
       amplitude: 4.46,
       changePercent: -2.33,
       changeAmount: -0.083,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-05-15',
@@ -818,7 +810,7 @@ const etf588200 = {
       amplitude: 6.89,
       changePercent: -1.75,
       changeAmount: -0.061,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-05-18',
@@ -831,7 +823,7 @@ const etf588200 = {
       amplitude: 4.53,
       changePercent: 1.05,
       changeAmount: 0.036,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-05-19',
@@ -844,7 +836,7 @@ const etf588200 = {
       amplitude: 7.55,
       changePercent: 3.93,
       changeAmount: 0.136,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-05-20',
@@ -857,7 +849,7 @@ const etf588200 = {
       amplitude: 5.79,
       changePercent: 4.79,
       changeAmount: 0.172,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-05-21',
@@ -870,7 +862,7 @@ const etf588200 = {
       amplitude: 8.2,
       changePercent: -5.23,
       changeAmount: -0.197,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-05-22',
@@ -883,7 +875,7 @@ const etf588200 = {
       amplitude: 3.56,
       changePercent: 2.02,
       changeAmount: 0.072,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-05-25',
@@ -896,7 +888,7 @@ const etf588200 = {
       amplitude: 8.51,
       changePercent: 7.22,
       changeAmount: 0.263,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-05-26',
@@ -909,7 +901,7 @@ const etf588200 = {
       amplitude: 4.51,
       changePercent: -2.23,
       changeAmount: -0.087,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-05-27',
@@ -922,7 +914,7 @@ const etf588200 = {
       amplitude: 5.55,
       changePercent: -2.88,
       changeAmount: -0.11,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-05-28',
@@ -935,7 +927,7 @@ const etf588200 = {
       amplitude: 4.26,
       changePercent: 2.45,
       changeAmount: 0.091,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-05-29',
@@ -948,7 +940,7 @@ const etf588200 = {
       amplitude: 7.61,
       changePercent: -5.58,
       changeAmount: -0.212,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-06-01',
@@ -961,7 +953,7 @@ const etf588200 = {
       amplitude: 6.55,
       changePercent: -6.02,
       changeAmount: -0.216,
-      turnoverRate: 0
+      turnoverRate: 0,
     },
     {
       date: '2026-06-02',
@@ -974,19 +966,15 @@ const etf588200 = {
       amplitude: 4.75,
       changePercent: 3.59,
       changeAmount: 0.121,
-      turnoverRate: 0
-    }
+      turnoverRate: 0,
+    },
   ],
   financialRows: [
     {
       code: '688981',
       name: '中芯国际',
       weight: 9.8,
-      productTags: [
-        '晶圆代工',
-        '先进制程',
-        '成熟制程'
-      ],
+      productTags: ['晶圆代工', '先进制程', '成熟制程'],
       intro: '国内晶圆代工龙头，决定组合对先进制程、成熟制程和国产制造能力的核心暴露。',
       data: [
         {
@@ -997,19 +985,15 @@ const etf588200 = {
           netProfitMargin: 9.05,
           grossProfitMargin: 21.48,
           revenueGrowthRate: 8.07,
-          nonNetProfitGrowthRate: 5.32
-        }
-      ]
+          nonNetProfitGrowthRate: 5.32,
+        },
+      ],
     },
     {
       code: '688041',
       name: '海光信息',
       weight: 9.66,
-      productTags: [
-        '国产CPU',
-        'DCU',
-        'AI算力'
-      ],
+      productTags: ['国产CPU', 'DCU', 'AI算力'],
       intro: '国产高端处理器和DCU供应商，是组合中AI算力芯片国产替代弹性的重要来源。',
       data: [
         {
@@ -1020,19 +1004,15 @@ const etf588200 = {
           netProfitMargin: 21.75,
           grossProfitMargin: 55.6,
           revenueGrowthRate: 68.06,
-          nonNetProfitGrowthRate: 34.99
-        }
-      ]
+          nonNetProfitGrowthRate: 34.99,
+        },
+      ],
     },
     {
       code: '688256',
       name: '寒武纪',
       weight: 9.56,
-      productTags: [
-        'AI芯片',
-        '智能加速卡',
-        '云边端推理'
-      ],
+      productTags: ['AI芯片', '智能加速卡', '云边端推理'],
       intro: 'AI芯片和智能计算加速卡龙头，业绩高增强化组合的算力芯片进攻属性。',
       data: [
         {
@@ -1043,19 +1023,15 @@ const etf588200 = {
           netProfitMargin: 35.12,
           grossProfitMargin: 54.33,
           revenueGrowthRate: 159.56,
-          nonNetProfitGrowthRate: 238.56
-        }
-      ]
+          nonNetProfitGrowthRate: 238.56,
+        },
+      ],
     },
     {
       code: '688008',
       name: '澜起科技',
       weight: 7.8,
-      productTags: [
-        '内存接口芯片',
-        'PCIe/CXL',
-        '服务器平台'
-      ],
+      productTags: ['内存接口芯片', 'PCIe/CXL', '服务器平台'],
       intro: '内存接口与服务器平台芯片龙头，受益AI服务器内存带宽和互连升级。',
       data: [
         {
@@ -1066,19 +1042,15 @@ const etf588200 = {
           netProfitMargin: 56.8,
           grossProfitMargin: 69.79,
           revenueGrowthRate: 19.51,
-          nonNetProfitGrowthRate: 20.14
-        }
-      ]
+          nonNetProfitGrowthRate: 20.14,
+        },
+      ],
     },
     {
       code: '688012',
       name: '中微公司',
       weight: 7.3,
-      productTags: [
-        '刻蚀设备',
-        '薄膜设备',
-        '半导体设备'
-      ],
+      productTags: ['刻蚀设备', '薄膜设备', '半导体设备'],
       intro: '半导体刻蚀设备龙头，提供国产晶圆制造设备替代的关键弹性。',
       data: [
         {
@@ -1089,19 +1061,15 @@ const etf588200 = {
           netProfitMargin: 31.51,
           grossProfitMargin: 39.89,
           revenueGrowthRate: 34.13,
-          nonNetProfitGrowthRate: 60.09
-        }
-      ]
+          nonNetProfitGrowthRate: 60.09,
+        },
+      ],
     },
     {
       code: '688521',
       name: '芯原股份',
       weight: 4.05,
-      productTags: [
-        '芯片设计服务',
-        'IP授权',
-        'Chiplet'
-      ],
+      productTags: ['芯片设计服务', 'IP授权', 'Chiplet'],
       intro: '芯片IP授权和设计服务公司，代表定制芯片、Chiplet和半导体设计服务暴露。',
       data: [
         {
@@ -1112,19 +1080,15 @@ const etf588200 = {
           netProfitMargin: -40.78,
           grossProfitMargin: 32.29,
           revenueGrowthRate: 114.47,
-          nonNetProfitGrowthRate: -43.71
-        }
-      ]
+          nonNetProfitGrowthRate: -43.71,
+        },
+      ],
     },
     {
       code: '688525',
       name: '佰维存储',
       weight: 3.77,
-      productTags: [
-        '存储模组',
-        '先进封测',
-        'AI存储'
-      ],
+      productTags: ['存储模组', '先进封测', 'AI存储'],
       intro: '存储模组和先进封测相关公司，受益存储周期修复和AI终端存储升级。',
       data: [
         {
@@ -1135,19 +1099,15 @@ const etf588200 = {
           netProfitMargin: 42.22,
           grossProfitMargin: 53.3,
           revenueGrowthRate: 341.53,
-          nonNetProfitGrowthRate: 1405.58
-        }
-      ]
+          nonNetProfitGrowthRate: 1405.58,
+        },
+      ],
     },
     {
       code: '688072',
       name: '拓荆科技',
       weight: 3.39,
-      productTags: [
-        '薄膜沉积设备',
-        'PECVD',
-        '半导体设备'
-      ],
+      productTags: ['薄膜沉积设备', 'PECVD', '半导体设备'],
       intro: '薄膜沉积设备供应商，跟随晶圆厂资本开支和国产设备验证节奏。',
       data: [
         {
@@ -1158,19 +1118,15 @@ const etf588200 = {
           netProfitMargin: 50.54,
           grossProfitMargin: 41.69,
           revenueGrowthRate: 56.97,
-          nonNetProfitGrowthRate: 156.65
-        }
-      ]
+          nonNetProfitGrowthRate: 156.65,
+        },
+      ],
     },
     {
       code: '688498',
       name: '源杰科技',
       weight: 3.29,
-      productTags: [
-        '光芯片',
-        '激光器芯片',
-        '高速光通信'
-      ],
+      productTags: ['光芯片', '激光器芯片', '高速光通信'],
       intro: '高速光芯片和激光器芯片公司，为组合提供光通信与AI数据中心互联弹性。',
       data: [
         {
@@ -1181,19 +1137,15 @@ const etf588200 = {
           netProfitMargin: 50.51,
           grossProfitMargin: 77.81,
           revenueGrowthRate: 320.94,
-          nonNetProfitGrowthRate: 1173.64
-        }
-      ]
+          nonNetProfitGrowthRate: 1173.64,
+        },
+      ],
     },
     {
       code: '688347',
       name: '华虹公司',
       weight: 2.35,
-      productTags: [
-        '特色工艺',
-        '晶圆代工',
-        '功率半导体'
-      ],
+      productTags: ['特色工艺', '晶圆代工', '功率半导体'],
       intro: '特色工艺晶圆代工平台，补充功率、模拟和嵌入式非易失存储等成熟制程暴露。',
       data: [
         {
@@ -1204,12 +1156,13 @@ const etf588200 = {
           netProfitMargin: -2.75,
           grossProfitMargin: 17.63,
           revenueGrowthRate: 18.22,
-          nonNetProfitGrowthRate: 724.01
-        }
-      ]
-    }
+          nonNetProfitGrowthRate: 724.01,
+        },
+      ],
+    },
   ],
-  viewpoints: []
+  viewpoints: [],
+  kLineMarkers: [{ date: '2026-05-29', label: '锤子线', position: 'below' }],
 };
 
 export default etf588200;

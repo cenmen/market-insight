@@ -14,4 +14,9 @@ export const pageLinks = [
     title: '盘后分析',
     description: '三大指数、板块对照与资金行为复盘',
   },
+  {
+    path: '/pre-open',
+    title: '盘前分析',
+    description: '宏观要点、盘前消息与四大指数情景',
+  },
 ]

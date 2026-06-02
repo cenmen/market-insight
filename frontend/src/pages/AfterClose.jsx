@@ -1,104 +1,40 @@
 import ReportFooter from '@/components/ReportFooter.jsx';
-import KamiTable from '@/components/KamiTable.jsx';
 import afterCloseData from '@/data/afterCloseData.jsx';
 
-function formatSignedPercent(value) {
-  const numeric = Number(value);
-  const sign = numeric > 0 ? '+' : '';
-  return `${sign}${numeric.toFixed(2)}%`;
-}
+function formatUpdateDate(dateString) {
+  if (!dateString) return '';
 
-function formatPlainPercent(value) {
-  const numeric = Number(value);
-  return `${numeric.toFixed(2)}%`;
-}
+  const parts = dateString.split('-');
+  if (parts.length !== 3) return dateString;
 
-function formatAmountYi(value) {
-  const numeric = Number(value);
-  return `${numeric.toFixed(numeric >= 100 ? 1 : 2)}亿`;
-}
+  const year = parts[0];
+  const month = Number(parts[1]);
+  const day = Number(parts[2]);
 
-const tableColumns = [
-  {
-    title: '名称',
-    dataIndex: 'name',
-    key: 'name',
-    width: '100px',
-    render: function renderName(value) {
-      return <div className='font-medium text-[#141413]'>{value}</div>;
-    },
-  },
-  {
-    title: '涨跌幅',
-    dataIndex: 'changeRate',
-    key: 'changeRate',
-    align: 'right',
-    width: '100px',
-    render: function renderChangeRate(value) {
-      return <span className={`font-medium tabular-nums ${Number(value) >= 0 ? 'text-rise' : 'text-fall'}`}>{formatSignedPercent(value)}</span>;
-    },
-  },
-  {
-    title: '振幅',
-    dataIndex: 'maxDrawdown',
-    key: 'maxDrawdown',
-    align: 'right',
-    width: '100px',
-    render: function renderAmplitude(value) {
-      return <span className='tabular-nums'>{formatPlainPercent(value)}</span>;
-    },
-  },
-  {
-    title: '成交额',
-    dataIndex: 'maxTRise',
-    key: 'maxTRise',
-    align: 'right',
-    width: '100px',
-    render: function renderAmount(value) {
-      return <span className='tabular-nums'>{formatAmountYi(value)}</span>;
-    },
-  },
-  {
-    title: '换手率',
-    dataIndex: 'turnoverRate',
-    key: 'turnoverRate',
-    align: 'right',
-    width: '100px',
-    render: function renderTurnoverRate(value) {
-      return <span className='tabular-nums'>{formatPlainPercent(value)}</span>;
-    },
-  },
-  {
-    title: '主力净流入',
-    dataIndex: 'mainNetInflow',
-    key: 'mainNetInflow',
-    align: 'right',
-    width: '100px',
-    render: function renderMainNetInflow(value) {
-      return (
-        <span
-          className={`tabular-nums ${Number(value) >= 0 ? 'text-rise' : 'text-fall'}`}
-        >{`${Number(value) >= 0 ? '+' : ''}${Number(value).toFixed(2)}亿`}</span>
-      );
-    },
-  },
-];
+  if (Number.isNaN(month) || Number.isNaN(day)) return dateString;
+
+  return `${year} 年 ${month} 月 ${day} 日`;
+}
 
 export default function AfterClosePage() {
   const data = afterCloseData;
   const mainIndexes = data?.mainIndexes ?? [];
   const conclusion = data?.conclusion ?? null;
   const content = data?.content ?? null;
-  const tableDataSource = data?.tableDataSource ?? [];
-  const resolvedTableColumns = tableColumns;
+  const updateDate = data?.updateDate ?? null;
+  const titleDateText = formatUpdateDate(updateDate);
+  const footerDateText = updateDate ?? null;
 
   return (
     <main className="flex h-screen items-center justify-center overflow-hidden bg-[#f5f4ed] px-4 py-6 [font-family:'TsangerJinKai02','Source_Han_Serif_SC','Noto_Serif_CJK_SC','Songti_SC','STSong',Georgia,serif] text-[#141413]">
       <article className='h-[90vh] w-full max-w-[210mm] overflow-y-auto px-4 py-6 md:px-[18mm] md:py-[14mm]'>
         <header className='mb-3 border-l-[2.5pt] border-[#1b365d] pl-3'>
           <p className='mb-1 text-[11px] tracking-[0.14em] text-[#1b365d] uppercase'>VANTASTACK RESEARCH</p>
-          <h1 className='text-[20px] leading-tight font-medium md:text-[26px]'> 每日盘后分析（2026 年 6 月 2 日）</h1>
-          <p className='mt-1 text-[13px] text-[#504e49]'>2026-06-02 · 复盘视角：指数结构、板块强弱与资金行为</p>
+          <h1 className='text-[20px] leading-tight font-medium md:text-[26px]'>每日盘后分析{titleDateText ? `（${titleDateText}）` : ''}</h1>
+          <p className='mt-1 text-[13px] text-[#504e49]'>
+            {updateDate ? `${updateDate} · ` : ''}
+            复盘视角：指数结构、板块强弱与资金行为
+          </p>
         </header>
         <section className='mt-2'>
           <div className='grid grid-cols-2 gap-2 md:grid-cols-3'>
@@ -113,10 +49,6 @@ export default function AfterClosePage() {
             ))}
           </div>
         </section>
-
-        <section className='mt-4'>
-          <KamiTable dataSource={tableDataSource} columns={resolvedTableColumns} />
-        </section>
         <section className='mt-4 text-[15px] leading-7 text-[#2f2e2b] [&>p+p]:mt-2'>{content}</section>
         {conclusion ? (
           <section>
@@ -125,7 +57,7 @@ export default function AfterClosePage() {
             </div>
           </section>
         ) : null}
-        <ReportFooter />
+        <ReportFooter date={footerDateText} />
       </article>
     </main>
   );

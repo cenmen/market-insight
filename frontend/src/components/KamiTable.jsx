@@ -1,6 +1,6 @@
 function getCellValue(record, dataIndex) {
   if (!dataIndex) {
-    return undefined;
+    return null;
   }
   return record?.[dataIndex];
 }
@@ -15,7 +15,7 @@ export default function KamiTable(props) {
       <table className='financial striped w-full table-fixed border-collapse text-[10pt] text-[#2f2e2b]'>
         <colgroup>
           {columns.map(function mapCol(column) {
-            return <col key={column.key ?? column.dataIndex ?? column.title} style={column.width ? { width: column.width } : undefined} />;
+            return <col key={column.key ?? column.dataIndex ?? column.title} style={column.width ? { width: column.width } : null} />;
           })}
         </colgroup>
         <thead className='text-[#3d3d3a]'>

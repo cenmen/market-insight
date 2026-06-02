@@ -1,14 +1,8 @@
-import { useEffect, useRef } from 'react'
-import * as echarts from 'echarts/core'
-import {
-  GridComponent,
-  TooltipComponent,
-  LegendComponent,
-  DataZoomComponent,
-  TitleComponent,
-} from 'echarts/components'
-import { CandlestickChart, BarChart, PieChart, CustomChart } from 'echarts/charts'
-import { CanvasRenderer } from 'echarts/renderers'
+import { useEffect, useRef } from 'react';
+import * as echarts from 'echarts/core';
+import { GridComponent, TooltipComponent, LegendComponent, DataZoomComponent, TitleComponent } from 'echarts/components';
+import { CandlestickChart, BarChart, PieChart, CustomChart } from 'echarts/charts';
+import { CanvasRenderer } from 'echarts/renderers';
 
 echarts.use([
   GridComponent,
@@ -21,41 +15,41 @@ echarts.use([
   PieChart,
   CustomChart,
   CanvasRenderer,
-])
+]);
 
 export default function BaseChart({ option, height = 320, className, style, loading = false }) {
-  const containerRef = useRef(null)
-  const instanceRef = useRef(null)
+  const containerRef = useRef(null);
+  const instanceRef = useRef(null);
 
   useEffect(function initChart() {
     if (!containerRef.current) {
-      return undefined
+      return null;
     }
 
-    const instance = echarts.init(containerRef.current)
-    instanceRef.current = instance
+    const instance = echarts.init(containerRef.current);
+    instanceRef.current = instance;
 
     return function disposeChart() {
-      instance.dispose()
-      instanceRef.current = null
-    }
-  }, [])
+      instance.dispose();
+      instanceRef.current = null;
+    };
+  }, []);
 
   useEffect(
     function updateOption() {
       if (!instanceRef.current) {
-        return
+        return;
       }
 
-      instanceRef.current.setOption(option, true)
+      instanceRef.current.setOption(option, true);
     },
     [option],
-  )
+  );
 
   useEffect(
     function toggleLoading() {
       if (!instanceRef.current) {
-        return
+        return;
       }
 
       if (loading) {
@@ -64,32 +58,32 @@ export default function BaseChart({ option, height = 320, className, style, load
           color: '#1B365D',
           textColor: '#6b6a64',
           maskColor: 'rgba(245, 244, 237, 0.65)',
-        })
-        return
+        });
+        return;
       }
 
-      instanceRef.current.hideLoading()
+      instanceRef.current.hideLoading();
     },
     [loading],
-  )
+  );
 
   useEffect(function attachResize() {
     if (!containerRef.current || !instanceRef.current) {
-      return undefined
+      return null;
     }
 
     const resizeObserver = new ResizeObserver(function onResize() {
       if (instanceRef.current) {
-        instanceRef.current.resize()
+        instanceRef.current.resize();
       }
-    })
+    });
 
-    resizeObserver.observe(containerRef.current)
+    resizeObserver.observe(containerRef.current);
 
     return function detachResize() {
-      resizeObserver.disconnect()
-    }
-  }, [])
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   return (
     <div
@@ -101,5 +95,5 @@ export default function BaseChart({ option, height = 320, className, style, load
         ...style,
       }}
     />
-  )
+  );
 }

@@ -7,7 +7,12 @@ const recentEvents = [
     source: '盘后整理',
     statusTag: { label: '利好', kind: 'bullish' },
     summary: 'CPO、光模块、PCB、AI PC 等方向延续强势，资金继续围绕海外科技映射做文章。',
-    tags: ['CPO', '光模块', 'AI PC'],
+    tags: [
+      { label: '贵州茅台 +2.09%', kind: 'stock', change: 2.09 },
+      { label: 'CPO', kind: 'default' },
+      { label: '光模块', kind: 'default' },
+      { label: 'AI PC', kind: 'default' },
+    ],
   },
   {
     datetime: '2026-06-01 18:40:11',
@@ -15,7 +20,11 @@ const recentEvents = [
     source: '盘后整理',
     statusTag: { label: '中性', kind: 'neutral' },
     summary: '半导体和算力链出现高位震荡，资金开始尝试往电力、消费等低位方向切换。',
-    tags: ['算力', '电力', '切换'],
+    tags: [
+      { label: '算力', kind: 'default' },
+      { label: '电力', kind: 'default' },
+      { label: '切换', kind: 'default' },
+    ],
   },
   {
     datetime: '2026-05-30 21:08:05',
@@ -23,7 +32,11 @@ const recentEvents = [
     source: '盘后整理',
     statusTag: { label: '利好', kind: 'bullish' },
     summary: '火电、绿电和电网设备被重新定价，市场开始讨论 AI 时代的能源底座。',
-    tags: ['火电', '绿电', '电网设备'],
+    tags: [
+      { label: '火电', kind: 'default' },
+      { label: '绿电', kind: 'default' },
+      { label: '电网设备', kind: 'default' },
+    ],
   },
   {
     datetime: '2026-05-29 20:14:22',
@@ -31,7 +44,11 @@ const recentEvents = [
     source: '盘后整理',
     statusTag: { label: '利好', kind: 'bullish' },
     summary: '美股科技股走强后，A 股资金快速寻找算力硬件、存储和服务器材料的映射标的。',
-    tags: ['美股科技', '存储', '服务器'],
+    tags: [
+      { label: '美股科技', kind: 'default' },
+      { label: '存储', kind: 'default' },
+      { label: '服务器', kind: 'default' },
+    ],
   },
   {
     datetime: '2026-05-28 17:56:39',
@@ -39,7 +56,11 @@ const recentEvents = [
     source: '盘后整理',
     statusTag: { label: '中性', kind: 'neutral' },
     summary: '市场成交明显抬升，成长风格占优，科技主线的弹性开始变得更突出。',
-    tags: ['成交放大', '成长风格', '弹性'],
+    tags: [
+      { label: '成交放大', kind: 'default' },
+      { label: '成长风格', kind: 'default' },
+      { label: '弹性', kind: 'default' },
+    ],
   },
   {
     datetime: '2026-05-27 19:03:18',
@@ -47,7 +68,11 @@ const recentEvents = [
     source: '盘后整理',
     statusTag: { label: '利空', kind: 'bearish' },
     summary: '市场从单点芯片扩散到 PCB、光模块、封装、存储等更完整的产业链条。',
-    tags: ['芯片', 'PCB', '封装'],
+    tags: [
+      { label: '芯片', kind: 'default' },
+      { label: 'PCB', kind: 'default' },
+      { label: '封装', kind: 'default' },
+    ],
   },
 ];
 

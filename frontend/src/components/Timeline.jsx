@@ -1,5 +1,30 @@
 import clsx from 'clsx';
 
+function getTagTone(tag) {
+  if (typeof tag === 'string') {
+    return 'default';
+  }
+
+  if (tag.kind === 'stock') {
+    const changeValue = Number.parseFloat(String(tag.change ?? tag.value ?? ''));
+    if (Number.isFinite(changeValue)) {
+      if (changeValue > 0) {
+        return 'stock-up';
+      }
+
+      if (changeValue < 0) {
+        return 'stock-down';
+      }
+    }
+  }
+
+  return tag.kind ?? 'default';
+}
+
+function getTagLabel(tag) {
+  return typeof tag === 'string' ? tag : tag.label;
+}
+
 export default function Timeline(props) {
   const { items } = props;
 
@@ -37,9 +62,21 @@ export default function Timeline(props) {
               {detailTags.length > 0 ? (
                 <div className='mt-[6pt] flex flex-wrap gap-[4pt]'>
                   {detailTags.map(function mapTag(tag) {
+                    const tone = getTagTone(tag);
                     return (
-                      <span className='inline-block rounded-[3pt] bg-[#e4ecf5] px-[6pt] py-[1pt] text-[8.5pt] font-medium text-[#1b365d]' key={tag}>
-                        {tag}
+                      <span
+                        className={clsx(
+                          'inline-block rounded-[3pt] px-[6pt] py-[1pt] text-[8.5pt] font-medium',
+                          tone === 'stock-up' && 'bg-[#f7e6e6] text-[#b84e4e]',
+                          tone === 'stock-down' && 'bg-[#e7f0df] text-[#6f9157]',
+                          tone === 'bearish' && 'bg-[#e7f0df] text-[#6f9157]',
+                          tone === 'bullish' && 'bg-[#f7e6e6] text-[#b84e4e]',
+                          tone === 'neutral' && 'bg-[#efe9d8] text-[#7d6d3f]',
+                          tone === 'default' && 'bg-[#e4ecf5] text-[#1b365d]',
+                        )}
+                        key={getTagLabel(tag)}
+                      >
+                        {getTagLabel(tag)}
                       </span>
                     );
                   })}

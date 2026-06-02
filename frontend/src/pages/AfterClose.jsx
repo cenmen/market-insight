@@ -13,6 +13,11 @@ function formatPlainPercent(value) {
   return `${numeric.toFixed(2)}%`;
 }
 
+function formatAmountYi(value) {
+  const numeric = Number(value);
+  return `${numeric.toFixed(numeric >= 100 ? 1 : 2)}亿`;
+}
+
 const tableColumns = [
   {
     title: '名称',
@@ -34,23 +39,23 @@ const tableColumns = [
     },
   },
   {
-    title: '最大回撤',
+    title: '振幅',
     dataIndex: 'maxDrawdown',
     key: 'maxDrawdown',
     align: 'right',
     width: '100px',
-    render: function renderMaxDrawdown(value) {
-      return <span className='text-fall tabular-nums'>{formatSignedPercent(value)}</span>;
+    render: function renderAmplitude(value) {
+      return <span className='tabular-nums'>{formatPlainPercent(value)}</span>;
     },
   },
   {
-    title: '最大 T 涨幅',
+    title: '成交额',
     dataIndex: 'maxTRise',
     key: 'maxTRise',
     align: 'right',
     width: '100px',
-    render: function renderMaxTRise(value) {
-      return <span className='tabular-nums'>{formatPlainPercent(value)}</span>;
+    render: function renderAmount(value) {
+      return <span className='tabular-nums'>{formatAmountYi(value)}</span>;
     },
   },
   {
@@ -92,8 +97,8 @@ export default function AfterClosePage() {
       <article className='h-[90vh] w-full max-w-[210mm] overflow-y-auto px-4 py-6 md:px-[18mm] md:py-[14mm]'>
         <header className='mb-3 border-l-[2.5pt] border-[#1b365d] pl-3'>
           <p className='mb-1 text-[11px] tracking-[0.14em] text-[#1b365d] uppercase'>VANTASTACK RESEARCH</p>
-          <h1 className='text-[20px] leading-tight font-medium md:text-[26px]'>盘后分析：主线分化，资金高低切加速</h1>
-          <p className='mt-1 text-[13px] text-[#504e49]'>2026-06-01 · 复盘视角：指数结构、板块强弱与资金行为</p>
+          <h1 className='text-[20px] leading-tight font-medium md:text-[26px]'> 每日盘后分析（2026 年 6 月 2 日）</h1>
+          <p className='mt-1 text-[13px] text-[#504e49]'>2026-06-02 · 复盘视角：指数结构、板块强弱与资金行为</p>
         </header>
         <section className='mt-2'>
           <div className='grid grid-cols-2 gap-2 md:grid-cols-3'>

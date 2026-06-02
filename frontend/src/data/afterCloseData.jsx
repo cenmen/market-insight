@@ -1,58 +1,53 @@
 const afterCloseData = {
   mainIndexes: [
-    { name: '上证指数', indexValue: '4057.74', changeRate: -0.27 },
-    { name: '创业板指', indexValue: '3950.94', changeRate: -2.15 },
-    { name: '科创50', indexValue: '1663.69', changeRate: -5.0 },
+    { name: '上证指数', indexValue: '4075.10', changeRate: 0.43 },
+    { name: '创业板指', indexValue: '4055.87', changeRate: 2.66 },
+    { name: '科创50', indexValue: '1690.56', changeRate: 1.62 },
   ],
   tableDataSource: [
-    { key: '588200', name: '芯片', changeRate: 1.23, maxDrawdown: -4.51, maxTRise: 2.45, turnoverRate: 3.18, mainNetInflow: 1.26, isPinned: true },
-    { key: '515880', name: '通信', changeRate: -0.58, maxDrawdown: -3.06, maxTRise: 1.77, turnoverRate: 2.44, mainNetInflow: -0.85, isPinned: true },
-    { key: '159516', name: '半导体设备', changeRate: -1.16, maxDrawdown: -5.23, maxTRise: 2.91, turnoverRate: 4.02, mainNetInflow: -1.12, isPinned: true },
-    { key: '159819', name: '人工智能', changeRate: 2.11, maxDrawdown: -6.34, maxTRise: 3.84, turnoverRate: 5.15, mainNetInflow: 2.68 },
-    { key: '562500', name: '机器人', changeRate: 0.73, maxDrawdown: -4.62, maxTRise: 2.22, turnoverRate: 3.29, mainNetInflow: 0.44 },
-    { key: '159206', name: '卫星', changeRate: -0.94, maxDrawdown: -5.48, maxTRise: 2.41, turnoverRate: 2.88, mainNetInflow: -0.36 },
-    { key: '516160', name: '新能源', changeRate: 1.34, maxDrawdown: -4.95, maxTRise: 2.69, turnoverRate: 3.72, mainNetInflow: 1.15 },
-    { key: '159755', name: '电池', changeRate: -0.72, maxDrawdown: -5.11, maxTRise: 2.13, turnoverRate: 2.97, mainNetInflow: -0.57 },
-    { key: '515790', name: '光伏', changeRate: 0.48, maxDrawdown: -4.21, maxTRise: 1.96, turnoverRate: 2.63, mainNetInflow: 0.22 },
-    { key: '512400', name: '有色', changeRate: 1.67, maxDrawdown: -3.75, maxTRise: 2.58, turnoverRate: 2.51, mainNetInflow: 1.91 },
-    { key: '159326', name: '电网设备', changeRate: 0.89, maxDrawdown: -3.42, maxTRise: 1.84, turnoverRate: 2.19, mainNetInflow: 0.68, isPinned: true },
-    { key: '159870', name: '化工', changeRate: -0.31, maxDrawdown: -2.87, maxTRise: 1.53, turnoverRate: 1.98, mainNetInflow: -0.14 },
-    { key: '159865', name: '养殖', changeRate: 0.56, maxDrawdown: -3.03, maxTRise: 1.62, turnoverRate: 1.86, mainNetInflow: 0.19 },
-    { key: '159825', name: '农业', changeRate: 0.42, maxDrawdown: -2.65, maxTRise: 1.49, turnoverRate: 1.74, mainNetInflow: 0.11 },
-    { key: '515220', name: '煤炭', changeRate: 2.08, maxDrawdown: -2.44, maxTRise: 2.11, turnoverRate: 2.33, mainNetInflow: 2.16 },
-    { key: '516150', name: '稀土', changeRate: -0.67, maxDrawdown: -4.06, maxTRise: 2.35, turnoverRate: 2.68, mainNetInflow: -0.49 },
-    { key: '159732', name: '消费电子', changeRate: 1.72, maxDrawdown: -4.58, maxTRise: 2.74, turnoverRate: 3.41, mainNetInflow: 1.47 },
-    { key: '510880', name: '红利', changeRate: 0.63, maxDrawdown: -1.96, maxTRise: 1.24, turnoverRate: 1.29, mainNetInflow: 0.77 },
-    { key: '512880', name: '证券', changeRate: 1.95, maxDrawdown: -3.88, maxTRise: 2.48, turnoverRate: 3.06, mainNetInflow: 1.84 },
-    { key: '512800', name: '银行', changeRate: 0.38, maxDrawdown: -1.74, maxTRise: 0.96, turnoverRate: 1.12, mainNetInflow: 0.93 },
-    { key: '562510', name: '旅游', changeRate: -0.27, maxDrawdown: -2.93, maxTRise: 1.68, turnoverRate: 1.67, mainNetInflow: -0.08 },
-    { key: '159928', name: '消费', changeRate: 0.84, maxDrawdown: -2.38, maxTRise: 1.42, turnoverRate: 1.53, mainNetInflow: 0.35 },
-    { key: '512690', name: '白酒', changeRate: -0.49, maxDrawdown: -3.32, maxTRise: 1.87, turnoverRate: 1.95, mainNetInflow: -0.26 },
-    { key: '512200', name: '房地产', changeRate: 0.93, maxDrawdown: -4.17, maxTRise: 2.06, turnoverRate: 2.22, mainNetInflow: 0.41 },
-    { key: '159745', name: '建筑材料', changeRate: -0.14, maxDrawdown: -2.71, maxTRise: 1.33, turnoverRate: 1.48, mainNetInflow: -0.03 },
-    { key: '512170', name: '医疗', changeRate: -1.03, maxDrawdown: -5.02, maxTRise: 2.57, turnoverRate: 2.76, mainNetInflow: -0.95 },
+    { key: '588200', name: '芯片', changeRate: 2.39, maxDrawdown: 4.95, maxTRise: 1558, turnoverRate: 3.56, mainNetInflow: -11.62, isPinned: true },
+    { key: '515880', name: '通信', changeRate: 6.41, maxDrawdown: 6.06, maxTRise: 2460, turnoverRate: 4.02, mainNetInflow: 179.3, isPinned: true },
+    { key: '159516', name: '半导体设备', changeRate: 1.81, maxDrawdown: 4.53, maxTRise: 748.6, turnoverRate: 4.98, mainNetInflow: -7.07, isPinned: true },
+    { key: '159819', name: '人工智能', changeRate: 2.87, maxDrawdown: 4.13, maxTRise: 1810, turnoverRate: 2.37, mainNetInflow: 26.16 },
+    { key: '562500', name: '机器人', changeRate: 1.57, maxDrawdown: 2.41, maxTRise: 485.4, turnoverRate: 3.19, mainNetInflow: 1.94 },
+    { key: '159206', name: '卫星', changeRate: 0.4, maxDrawdown: 4.4, maxTRise: 473.2, turnoverRate: 3.11, mainNetInflow: -13.5 },
+    { key: '516160', name: '新能源', changeRate: -0.43, maxDrawdown: 3.47, maxTRise: 1381, turnoverRate: 2.14, mainNetInflow: -32.73 },
+    { key: '159755', name: '电池', changeRate: 0.83, maxDrawdown: 3.08, maxTRise: 777.2, turnoverRate: 2.9, mainNetInflow: 1.32 },
+    { key: '515790', name: '光伏', changeRate: -1.05, maxDrawdown: 4.35, maxTRise: 695.2, turnoverRate: 3.33, mainNetInflow: -25.27 },
+    { key: '512400', name: '有色', changeRate: 3.46, maxDrawdown: 4.78, maxTRise: 1049, turnoverRate: 2.69, mainNetInflow: 67.81 },
+    { key: '159326', name: '电网设备', changeRate: 0.49, maxDrawdown: 3.27, maxTRise: 886.9, turnoverRate: 3.73, mainNetInflow: 13.75, isPinned: true },
+    { key: '159870', name: '化工', changeRate: 0.3, maxDrawdown: 2.27, maxTRise: 479.3, turnoverRate: 1.47, mainNetInflow: -0.02 },
+    { key: '159865', name: '养殖', changeRate: -2.16, maxDrawdown: 2.54, maxTRise: 72.82, turnoverRate: 1.45, mainNetInflow: -7.29 },
+    { key: '159825', name: '农业', changeRate: -1.36, maxDrawdown: 2.2, maxTRise: 135.3, turnoverRate: 1.4, mainNetInflow: -6.69 },
+    { key: '515220', name: '煤炭', changeRate: -1.0, maxDrawdown: 5.14, maxTRise: 309.2, turnoverRate: 2.83, mainNetInflow: -13.65 },
+    { key: '516150', name: '稀土', changeRate: 1.36, maxDrawdown: 4.22, maxTRise: 413.2, turnoverRate: 2.46, mainNetInflow: 2.62 },
+    { key: '159732', name: '消费电子', changeRate: 2.49, maxDrawdown: 4.95, maxTRise: 2234, turnoverRate: 5.12, mainNetInflow: 1.94 },
+    { key: '510880', name: '红利', changeRate: -0.05, maxDrawdown: 2.12, maxTRise: 469.3, turnoverRate: 0.32, mainNetInflow: -2.83 },
+    { key: '512880', name: '证券', changeRate: 0.14, maxDrawdown: 1.63, maxTRise: 323.9, turnoverRate: 0.99, mainNetInflow: -4.93 },
+    { key: '512800', name: '银行', changeRate: 0.61, maxDrawdown: 1.47, maxTRise: 300.4, turnoverRate: 0.28, mainNetInflow: 4.56 },
+    { key: '562510', name: '旅游', changeRate: -1.82, maxDrawdown: 1.89, maxTRise: 106.6, turnoverRate: 1.26, mainNetInflow: -3.44 },
+    { key: '159928', name: '消费', changeRate: -1.58, maxDrawdown: 1.63, maxTRise: 256.1, turnoverRate: 1.08, mainNetInflow: -17.0 },
+    { key: '512690', name: '白酒', changeRate: -1.59, maxDrawdown: 2.37, maxTRise: 169.9, turnoverRate: 1.6, mainNetInflow: -10.25 },
+    { key: '512200', name: '房地产', changeRate: -1.73, maxDrawdown: 2.45, maxTRise: 188.6, turnoverRate: 2.04, mainNetInflow: -4.9 },
+    { key: '159745', name: '建筑材料', changeRate: -2.03, maxDrawdown: 2.24, maxTRise: 79.65, turnoverRate: 1.59, mainNetInflow: -3.89 },
+    { key: '512170', name: '医疗', changeRate: -0.92, maxDrawdown: 1.78, maxTRise: 210.9, turnoverRate: 1.55, mainNetInflow: -6.33 },
   ],
-  conclusion: '维持主线，降低追高频率。主线逻辑未破坏，但高位波动显著抬升，优先聚焦有业绩与订单验证的核心环节。',
+  conclusion: '操作节奏上，别把结构行情当普涨行情。主线回调可以观察，高潮追涨要谨慎。仓位上保持弹性，核心方向不补跌、成交不塌，可以继续看；如果高位科技开始放量滞涨，后排跟不上，就要适当防守。',
   content: (
     <>
-      <p>今天这盘，表面看只是指数分化，里面其实是资金在高速换座位。上证指数收在4057.74点，跌0.27%；深证成指收15340.36点，跌1.51%；创业板指收3950.94点，跌2.15%；科创50收1663.69点，跌5.00%。四个数字摆在一起，画面就很清楚：大盘没塌，但高弹性的科技成长被砸得比较疼。</p>
-      <p><strong>第一，今天市场到底怎么走。</strong></p>
-      <p>早盘不是没有抵抗。指数开出来以后，资金还试着往前冲，像雨天路口那种大家都想抢一个绿灯。但越往后走，分歧越明显。上证相对稳，说明权重、红利、部分周期和防御方向还在托底；深成指和创业板指明显弱，说明成长股这边抛压更重；科创50跌到5%，基本就是把全天情绪的温度计直接摁到了冰水里。</p>
-      <p>所以今天不能简单说是普跌，也不能说是全面退潮。更准确的说法是：指数被大块头撑住了，弹性资产被资金重新估价。场子还在，桌子也没掀，但最热闹的那几桌开始有人结账离席。</p>
-      <p><strong>第二，资金在买什么、卖什么。</strong></p>
-      <p>今天资金最明显的动作，是从高拥挤、高预期、高波动的方向往确定性更强的地方挪。前期涨得猛的科技线，尤其是科创、AI硬件、半导体链条里位置偏高、兑现压力大的票，容易被先卖。不是产业逻辑一夜之间坏了，而是交易层面太挤了。一个房间里人太多，门又不够宽，稍微有人往外走，后面就会互相踩脚。</p>
-      <p>资金愿意留下来的，还是两类东西。一类是有业绩、有订单、有产业趋势支撑的硬逻辑，跌下来有人接。另一类是低波动、现金流、政策预期或者防御属性更强的方向，市场紧张时它们像路边亮着灯的小店，不一定最刺激，但让人想进去躲一躲。</p>
-      <p><strong>第三，主线逻辑怎么拆。</strong></p>
-      <p>科技仍然是中期主线，但今天提醒大家一点：主线不等于每天涨，主线更不等于任何位置都能追。AI、算力、半导体、端侧设备，这些产业趋势还在，政策和国产替代的底层逻辑也还在。问题在于，股价跑得太快时，资金会先问一句：兑现在哪里？业绩什么时候落地？估值还能不能继续讲故事？</p>
-      <p>这就是今天的关键矛盾。产业趋势是长线的，交易情绪是短线的。长线像河道，方向大概清楚；短线像水面，风一吹就起浪。今天跌得多的，不全是逻辑坏了，很多是水面风浪太大。后面真正值得看的，是那些在调整里还能缩量、还能守住趋势、还能有资金回流的细分方向。</p>
-      <p>反过来，轮动和避险也要分清楚。有些方向涨，是因为自己基本面变好了；有些方向涨，只是因为别人跌了，资金临时找个地方站一站。前者可能走成阶段主线，后者更多是过桥板块。过桥可以走，但别把桥当成家。</p>
-      <p><strong>第四，后面看什么信号。</strong></p>
-      <p>如果接下来上证继续稳住，深成指、创业板指不再加速杀，科创50能从急跌变成横住，那说明市场只是做一次风险偏好的降温，后面还有机会回到“主线震荡、分支轮动”的节奏。尤其要看科技核心票有没有缩量企稳，板块内部有没有从少数抱团扩散到更多细分。</p>
-      <p>但如果科创继续放量下探，创业板也跟着破位，强势股补跌越来越多，那就要把防守放到前面。那种情况下，别急着证明自己看得远，市场短期看的不是远方，是脚下有没有坑。</p>
-      <p><strong>第五，对应到操作节奏。</strong></p>
-      <p>还能看的，依然是产业趋势清楚、业绩能跟上、调整时承接不差的科技核心，以及受益于政策预期和订单验证的细分环节。不能追的，是刚从高位掉下来、成交还没缩、筹码还在松的情绪票。那种票看起来跌了不少，其实可能只是第一口气喘完。</p>
-      <p>节奏上，今天这种盘面不适合把仓位一把推满。更舒服的方式，是保留一点底仓看主线，留出现金等分歧后的确认。涨急了不追，跌急了也不急着捞。先看有没有止跌，再看有没有回流，最后再看能不能带队。</p>
-      <p>总结一句，今天市场的核心矛盾就是：指数还在高位附近撑着，但高弹性资产已经开始接受资金的重新审问。后面行情能不能继续，不看故事讲得多热闹，要看跌下来以后，真正愿意买单的人还在不在。</p>
+      <p>今天盘面看起来挺热闹，但别只看指数。</p>
+      <p>6月2日收盘，上证指数涨0.43%，深成指涨1.63%，创业板指涨2.66%。沪深两市成交接近2.8万亿元，量还在高位。但个股并不好看，全市场3800多只股票下跌。也就是说，指数红得挺体面，账户未必都舒服。</p>
+      <p>今天真正强的，是AI硬件链。</p>
+      <p>CPO、光模块、光纤、PCB、电子元件、MLCC、AI PC这些方向都在涨。逻辑也不难理解，昨晚美股先把火点起来了。英伟达大涨超6%，美光涨逾6%，甲骨文涨近10%。一个代表GPU和端侧AI，一个代表存储和HBM，一个代表云和算力需求。美股这么一拉，A股资金今天自然去找映射。</p>
+      <p>英伟达强，资金就找光模块、CPO、AI PC、服务器链。美光强，就找存储、MLCC、电子元件。甲骨文强，就找云计算、数据中心、算力基础设施。</p>
+      <p>所以今天不是随便炒科技，而是沿着“海外AI大票上涨，到A股硬件链映射”这条线在走。</p>
+      <p>弱的方向也很明显。影视、游戏、体育、互联网电商、AI应用这些跌得比较多。资金今天不太爱听故事，更想看订单、看涨价、看产业趋势。那些只有概念、没有兑现的方向，就容易被先扔到一边。</p>
+      <p>这也是今天盘面的核心矛盾：指数是被硬科技拉起来的，但市场不是普涨。少数主线在开席，大多数板块还在门口排队。</p>
+      <p>后面要看三个信号。</p>
+      <p>第一个，看成交额能不能维持。现在两市成交还在高位，这是行情继续折腾的基础。如果指数上涨但成交缩得很快，那就要小心变成权重硬撑。</p>
+      <p>第二个，看CPO、PCB、光模块能不能扛住分歧。真正的主线，不是一天大涨，而是回调有人接，分歧后还能修复。</p>
+      <p>第三个，看隔夜美股科技股脸色。英伟达、美光、甲骨文如果继续强，A股AI硬件链就还有锚。如果它们突然大跌，第二天A股高位方向就容易晃。</p>
+      <p>能看的，还是AI硬件链里有产业支撑的环节，比如CPO、光模块、PCB、AI PC、存储、MLCC、服务器、铜缆高速连接。不能追的，是那种盘中突然拉起来、没有业绩也没有产业催化的纯题材。</p>
     </>
   ),
 };

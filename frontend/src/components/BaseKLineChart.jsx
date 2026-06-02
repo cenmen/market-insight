@@ -82,6 +82,7 @@ function normalizeMarkerGroups(markers) {
       candleMarkers: markers,
       supportMarkers: [],
       resistanceMarkers: [],
+      keyInfoMarkers: [],
     };
   }
 
@@ -90,6 +91,7 @@ function normalizeMarkerGroups(markers) {
       candleMarkers: [],
       supportMarkers: [],
       resistanceMarkers: [],
+      keyInfoMarkers: [],
     };
   }
 
@@ -97,6 +99,7 @@ function normalizeMarkerGroups(markers) {
     candleMarkers: Array.isArray(markers.candleMarkers) ? markers.candleMarkers : [],
     supportMarkers: Array.isArray(markers.supportMarkers) ? markers.supportMarkers : [],
     resistanceMarkers: Array.isArray(markers.resistanceMarkers) ? markers.resistanceMarkers : [],
+    keyInfoMarkers: Array.isArray(markers.keyInfoMarkers) ? markers.keyInfoMarkers : [],
   };
 }
 
@@ -133,16 +136,21 @@ function buildCandleMarkerData(data, categoryData, markers, kind) {
         return null;
       }
 
-      const labelPrice = position === 'below' ? targetPrice - markerGap : targetPrice + markerGap;
+      const lineLength = Number.isFinite(Number(marker.lineLength)) && Number(marker.lineLength) > 0 ? Number(marker.lineLength) : 1;
+      const labelPrice = position === 'below' ? targetPrice - markerGap * lineLength : targetPrice + markerGap * lineLength;
       const defaultLabel =
         kind === 'support'
           ? '支撑位'
           : kind === 'resistance'
             ? '压力位'
-            : '锤子线';
+            : kind === 'keyInfo'
+              ? '关键信息位'
+              : '锤子线';
       const label = marker.label || defaultLabel;
+      const lineWidth = Number.isFinite(Number(marker.lineWidth)) && Number(marker.lineWidth) > 0 ? Number(marker.lineWidth) : undefined;
+      const fontSize = Number.isFinite(Number(marker.fontSize)) && Number(marker.fontSize) > 0 ? Number(marker.fontSize) : undefined;
 
-      return [dataIndex, targetPrice, labelPrice, label, position, kind];
+      return [dataIndex, targetPrice, labelPrice, label, position, kind, lineWidth, fontSize];
     })
     .filter(Boolean);
 }
@@ -154,6 +162,8 @@ function makeCandleMarkerSeries(markerData) {
         line: '#16a34a',
         fill: '#f0fdf4',
         text: '#166534',
+        lineWidth: 0.8,
+        fontSize: 8,
       };
     }
 
@@ -162,6 +172,18 @@ function makeCandleMarkerSeries(markerData) {
         line: '#dc2626',
         fill: '#fff1f2',
         text: '#991b1b',
+        lineWidth: 0.8,
+        fontSize: 8,
+      };
+    }
+
+    if (kind === 'keyInfo') {
+      return {
+        line: '#6b6a64',
+        fill: '#faf9f5',
+        text: '#504e49',
+        lineWidth: 0.6,
+        fontSize: 7,
       };
     }
 
@@ -169,6 +191,8 @@ function makeCandleMarkerSeries(markerData) {
       line: '#1b365d',
       fill: '#faf9f5',
       text: '#1b365d',
+      lineWidth: 0.8,
+      fontSize: 8,
     };
   }
 
@@ -187,9 +211,13 @@ function makeCandleMarkerSeries(markerData) {
       const label = api.value(3);
       const position = api.value(4);
       const kind = api.value(5);
+      const markerLineWidth = api.value(6);
+      const markerFontSize = api.value(7);
       const isBelow = position === 'below';
       const textOffset = isBelow ? 3 : -3;
       const markerStyle = resolveMarkerStyle(kind);
+      const lineWidth = Number.isFinite(Number(markerLineWidth)) ? Number(markerLineWidth) : markerStyle.lineWidth;
+      const fontSize = Number.isFinite(Number(markerFontSize)) ? Number(markerFontSize) : markerStyle.fontSize;
 
       return {
         type: 'group',
@@ -204,7 +232,7 @@ function makeCandleMarkerSeries(markerData) {
             },
             style: {
               stroke: markerStyle.line,
-              lineWidth: 0.8,
+              lineWidth,
               opacity: 0.92,
             },
           },
@@ -218,7 +246,7 @@ function makeCandleMarkerSeries(markerData) {
             style: {
               fill: markerStyle.fill,
               stroke: markerStyle.line,
-              lineWidth: 0.8,
+              lineWidth,
               opacity: 0.96,
             },
           },
@@ -229,7 +257,7 @@ function makeCandleMarkerSeries(markerData) {
               y: labelPoint[1] + textOffset,
               text: label,
               fill: markerStyle.text,
-              font: '500 8px TsangerJinKai02, serif',
+              font: `500 ${fontSize}px TsangerJinKai02, serif`,
               textAlign: 'center',
               textVerticalAlign: isBelow ? 'top' : 'bottom',
             },
@@ -253,7 +281,8 @@ export default function BaseKLineChart({ data = [], height = 360, className, mar
         normalizedMarkers.resistanceMarkers,
         'resistance',
       );
-      const markerSeriesData = candleMarkerData.concat(supportMarkerData, resistanceMarkerData);
+      const keyInfoMarkerData = buildCandleMarkerData(data, dataset.categoryData, normalizedMarkers.keyInfoMarkers, 'keyInfo');
+      const markerSeriesData = candleMarkerData.concat(supportMarkerData, resistanceMarkerData, keyInfoMarkerData);
       const hasMarkers = markerSeriesData.length > 0;
       const series = [
         {

@@ -1,5 +1,7 @@
 import BaseKLineChart from '@/components/BaseKLineChart';
 import BasePieChart from '@/components/BasePieChart';
+import HiddenStoryLine from '@/components/HiddenStoryLine.jsx';
+import EtfSharePrompt from '@/components/EtfSharePrompt.jsx';
 import ReportFooter from '@/components/ReportFooter.jsx';
 import Timeline from '@/components/Timeline.jsx';
 import etfs from '@/data/etfs';
@@ -120,6 +122,8 @@ export default function EtfReportPage() {
           </ol>
         </section>
 
+        <HiddenStoryLine value={data.report.hiddenStoryLine} />
+
         <section>
           <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>业务分布</h2>
           <div className='my-[8pt] grid grid-cols-2 gap-[10pt] max-[820px]:block'>
@@ -239,7 +243,9 @@ export default function EtfReportPage() {
           </div>
         </section>
 
-        <ReportFooter />
+        <EtfSharePrompt />
+
+        <ReportFooter date={data.report.date} />
       </article>
     </main>
   );

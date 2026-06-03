@@ -1,13 +1,13 @@
 ---
 name: etf-analysis
-description: Market Insight 项目专用的 ETF 分析工作流。通过本地 server 接口获取 ETF 持仓、持仓公司业绩和基金 K 线数据，结合数据补全分析内容，并输出 frontend/src/data/etfs 使用的 ETF 静态 JavaScript 数据。仅当用户显式调用 $etf-analysis 或明确要求使用 ETF 分析 skill 时使用；不要因为上下文自动调用。
+description: Market Insight 项目专用的 ETF 分析工作流。通过本地 server 接口获取 ETF 持仓、持仓公司业绩和基金 K 线数据，结合数据补全分析内容，并输出 frontend/src/data/etfs 使用的 ETF 静态 JavaScript 数据。需要同步生成 K 线技术分析、画线参数和带行情推演的图注。仅当用户显式调用 $etf-analysis 或明确要求使用 ETF 分析 skill 时使用；不要因为上下文自动调用。
 ---
 
 # ETF 分析
 
 ## 目标
 
-为本仓库生成 ETF 分析静态数据。流程先抓取 ETF 前十大持仓、持仓公司核心财务指标和基金最近 60 根日 K 线，再整理成 `frontend/src/pages/EtfReport.jsx` 当前消费的数据结构。
+为本仓库生成 ETF 分析静态数据。流程先抓取 ETF 前十大持仓、持仓公司核心财务指标和基金最近 60 根日 K 线，再整理成 `frontend/src/pages/EtfReport.jsx` 当前消费的数据结构，并补齐 K 线技术分析画线参数。
 
 固定输出目录：
 
@@ -25,6 +25,37 @@ frontend/src/data/etfs/etf<ETF_CODE>.js
 
 ```text
 frontend/src/data/etfs/etf515880.js
+```
+
+页面会直接读取 `kLineMarkers`，所以数据文件里需要同步写入：
+
+```js
+kLineMarkers: {
+  candleMarkers: [
+    { date: '2026-05-29', label: '锤子线', position: 'below', lineLength: 1 },
+  ],
+  supportMarkers: [
+    { date: '2026-05-22', price: 3.53, label: '支撑位', position: 'below', lineLength: 1 },
+  ],
+  resistanceMarkers: [
+    { date: '2026-05-19', price: 3.82, label: '压力位', position: 'above', lineLength: 1 },
+  ],
+  keyInfoMarkers: [
+    { date: '2026-05-28', label: '关键信息位', position: 'above', lineLength: 1.5, lineWidth: 0.6, fontSize: 7 },
+  ],
+  polyLines: [
+    {
+      points: [
+        { date: '2026-05-25', price: 3.91 },
+        { date: '2026-05-28', price: 3.82 },
+        { date: '2026-06-02', price: 3.49 },
+      ],
+      lineWidth: 1.1,
+      lineType: 'dashed',
+      color: '#1b365d',
+    },
+  ],
+}
 ```
 
 ## 开始前检查
@@ -56,7 +87,7 @@ const etf588200 = {
     coreJudgment: '一句短判断',
     thesis: '投资逻辑正文。',
     callout: '一句话看法：...',
-    chartCaption: '近期走势说明。',
+    chartCaption: '近期走势总结 + 对接下来 1 到 3 个交易日的推演。',
     disclaimer: '仅供参考，不构成任何投资建议；市场有风险，决策需谨慎，风险自负。',
     risks: [],
   },
@@ -84,6 +115,7 @@ export default etf588200;
 - `report` 必须存在，页面 header、投资逻辑、风险提示和图注都会读取它。
 - `metrics` 必须是 4 项：基金规模、盈利增速、ROE、业务增速。
 - `businessRatio`、`shortTermFactors`、`styleCharacteristics`、`kLineData`、`financialRows` 必须是数组。
+- `kLineMarkers` 必须是对象，当前页面读取 `candleMarkers`、`supportMarkers`、`resistanceMarkers`、`keyInfoMarkers`、`polyLines` 五个字段。
 - `viewpoints` 使用数组；没有可靠事件时写 `[]`，不要写 `null`，因为页面直接传给 `EventTimeline`。
 - `story`、`tPrinciples`、`tReferences`、`strategies` 当前页面不消费，没有可靠内容时写 `null`。
 
@@ -143,6 +175,19 @@ export default etf588200;
 - `recentTenDayMaxDrawdown`：从 `kLineData` 最近 10 条计算最大区间跌幅，格式如 `-8.42%`。
 - `recentTenDayMaxDrawdownDate`：写入最大跌幅发生日，格式如 `2026.05.21`。
 
+## K 线技术分析与 `chartCaption`
+
+生成或更新 ETF 数据时，必须按 `references/kline-technical-analysis.md` 执行 K 线技术分析，并把结果写入：
+
+- `report.chartCaption`
+- `kLineMarkers.candleMarkers`
+- `kLineMarkers.supportMarkers`
+- `kLineMarkers.resistanceMarkers`
+- `kLineMarkers.keyInfoMarkers`
+- `kLineMarkers.polyLines`
+
+`chartCaption` 必须是 K 线技术分析总结，并带接下来 1 到 3 个交易日的行情推演。
+
 权重指标计算规则：
 
 1. 只使用最新一期财务数据存在的持仓。
@@ -201,9 +246,10 @@ curl "http://localhost:8000/api/skill/etf/base-data?code=<ETF_CODE>&klineLimit=6
 - 定性分析要基于持仓公司的真实业务暴露，不要只根据 ETF 名称推断。
 - `businessRatio` 的权重需要和持仓权重保持可解释的一致性。如果分组没有覆盖全部持仓，增加“其他”分组承接剩余暴露。
 - `report.thesis`、`report.callout`、`shortTermFactors`、`styleCharacteristics` 用简洁中文，风格参考现有 `etf515880.js`。
+- `report.chartCaption` 必须是 K 线技术分析总结，不要写成泛泛图注，也不要只描述历史走势不谈后续行情。
 - 不要把 JSX 放进 ETF 静态数据；所有叙事字段使用纯字符串或数组对象。
 - 缺少来源时，不要编造精确规模、指数代码或财务数值；使用保守表达并明确不确定性。
 
 ## 参考
 
-需要确认旧字段语义时，可读取 `references/output-schema.md`，但以 `frontend/src/data/etfs/etf515880.js` 和 `frontend/src/pages/EtfReport.jsx` 为准。
+需要确认旧字段语义时，可读取 `references/output-schema.md`；需要生成 K 线技术分析、支撑压力、折线和 `chartCaption` 时，读取 `references/kline-technical-analysis.md`。字段最终以 `frontend/src/data/etfs/etf515880.js` 和 `frontend/src/pages/EtfReport.jsx` 为准。

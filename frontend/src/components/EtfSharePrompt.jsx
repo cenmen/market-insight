@@ -1,9 +1,13 @@
 import { QrCode, Search } from 'lucide-react';
+import douyinIcon from '@/assets/douyin.svg';
 import avatar from '@/assets/zhuxianzhentan.png';
+import xianyuQrcode from '@/assets/xianyu_qrcode.png';
+import xiaohongshuIcon from '@/assets/xiaohongshu.svg';
 
-function Pill({ children }) {
+function Pill({ icon, children }) {
   return (
     <span className='inline-flex items-center rounded-[3pt] border border-[#e1d6ba] bg-[#f8f1e1] px-[6pt] py-[2pt] text-[8.5pt] font-medium text-[#6b5727]'>
+      {icon && <img alt='' aria-hidden='true' className='mr-[4pt] h-[10pt] w-[10pt] shrink-0 object-contain' src={icon} />}
       {children}
     </span>
   );
@@ -28,11 +32,8 @@ export default function EtfSharePrompt() {
             扫码或搜索
           </div>
           <div className='grid grid-cols-[auto_1fr] gap-[10pt]'>
-            <div className='flex min-h-[84pt] min-w-[84pt] items-center justify-center rounded-[4pt] border border-dashed border-[#d0c2a1] bg-[#f8f3e8] text-[#8a7750]'>
-              <div className='text-center'>
-                <QrCode className='mx-auto h-[28px] w-[28px]' />
-                <div className='mt-[5pt] text-[8pt]'>预留二维码位</div>
-              </div>
+            <div className='flex h-[84pt] w-[84pt] items-center justify-center overflow-hidden rounded-[4pt] border border-dashed border-[#d0c2a1] bg-[#f8f3e8]'>
+              <img alt='闲鱼二维码' className='h-full w-full object-contain' src={xianyuQrcode} />
             </div>
             <div className='flex flex-col justify-between'>
               <div className='text-[9pt] leading-[1.5] text-[#5f5a50]'>
@@ -47,14 +48,16 @@ export default function EtfSharePrompt() {
           </div>
         </div>
 
-        <div className='rounded-[4pt] border border-[#e1d6ba] bg-[#fbf7ee] px-[10pt] py-[9pt]'>
+        <div className='flex h-full flex-col rounded-[4pt] border border-[#e1d6ba] bg-[#fbf7ee] px-[10pt] py-[9pt]'>
           <div className='mb-[6pt] flex items-center gap-[6pt] text-[9pt] font-medium text-[#7d6d3f]'>
             <Search className='h-[13px] w-[13px]' />
-            自己查询
+            关注我们
           </div>
-          <p className='text-[9pt] leading-[1.6] text-[#5f5a50]'>
-            闲鱼直接搜 <strong>ETF 主线侦探</strong>，就能找到店铺。要是你是转发过来的，也欢迎顺手收藏一下，后面看 ETF 图和主线节奏会方便很多。
-          </p>
+          <p className='text-[9pt] leading-[1.55] text-[#5f5a50]'>持续更新盘前判断、盘后复盘和市场热点，适合想跟着主线节奏看 ETF 的朋友。</p>
+          <div className='mt-auto flex flex-wrap gap-[6pt] pt-[8pt]'>
+            <Pill icon={xiaohongshuIcon}>韭菜练习生</Pill>
+            <Pill icon={douyinIcon}>ETF 主线侦探</Pill>
+          </div>
         </div>
       </div>
     </section>

@@ -16,7 +16,6 @@ frontend/src/data/afterCloseData.jsx
 需要更新：
 
 - `afterCloseData.mainIndexes`
-- `afterCloseData.tableDataSource`
 - `afterCloseData.conclusion`
 - `afterCloseData.content`
 
@@ -55,41 +54,6 @@ mainIndexes: [
 - `indexValue` 使用字符串，保留两位小数。
 - `changeRate` 使用数字，单位是百分比，不带 `%`。
 - 指数顺序保持：上证指数、创业板指、科创50。
-
-### tableDataSource
-
-对 `frontend/src/data/etfBaseList.js` 中每只 ETF 的跟踪指数获取今日数据：
-
-- 涨跌幅
-- 开盘价
-- 收盘价
-- 最低价
-- 最高价
-- 换手率
-- 主力净流入
-
-派生字段：
-
-```text
-maxDrawdown = (最低价 - 开盘价) / 开盘价 * 100
-maxTRise = (最高价 - 最低价) / 最低价 * 100
-```
-
-写入 `tableDataSource` 的每行格式：
-
-```jsx
-{ key: '588200', name: '芯片', changeRate: 1.23, maxDrawdown: -4.51, maxTRise: 2.45, turnoverRate: 3.18, mainNetInflow: 1.26, isPinned: true }
-```
-
-要求：
-
-- `key` 使用 ETF 代码。
-- `name` 使用 `etfBaseList.js` 里的 `alias`。
-- `changeRate`、`maxDrawdown`、`maxTRise`、`turnoverRate`、`mainNetInflow` 都使用数字，保留两位小数。
-- `mainNetInflow` 单位为亿元，不带单位文本；流出写负数。
-- 芯片、通信、半导体设备、电网设备必须补回 `isPinned: true`。
-- 其他行不主动添加 `isPinned`。
-- 如果某个跟踪指数没有可靠 `indexCode` 或主力净流入数据，不要编造；换用可靠行情源补齐。确实无法补齐时，先向用户说明缺失字段和来源限制，不要写假数。
 
 ## 推荐数据来源顺序
 
@@ -132,6 +96,7 @@ maxTRise = (最高价 - 最低价) / 最低价 * 100
 - `afterCloseData.conclusion` 写一句浓缩结论，适合页面高亮展示。
 - `afterCloseData.content` 使用 JSX 片段，尽量只用 `<p>` 分段。
 - 可以用 `<strong>` 强调“ETF主线侦探结论：”，但不要加小标题式分段结构。
+- 当前版本的 `afterCloseData.jsx` 不再包含 `tableDataSource`，不要按旧格式补写表格数据字段。
 
 示例结构：
 
@@ -149,7 +114,7 @@ content: (
 
 - 使用 `apply_patch` 修改文件。
 - 尽量只改 `frontend/src/data/afterCloseData.jsx`，除非用户另有要求。
-- 保留文件底部 `buildProcessedTableDataSource` 的处理逻辑。
+- 不要再按旧版格式补 `tableDataSource`；以当前文件里的数据结构为准。
 - 不要改动盘后页面组件样式和路由。
 - 完成后不要运行构建、测试、lint、预览或自动校验命令。
 - 最终回复说明更新了什么，并给出用户可手动运行的验证命令。

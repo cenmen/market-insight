@@ -211,6 +211,13 @@ export default function EtfReportPage() {
           </figure>
         </section>
 
+        {data.report.timelineEvents?.length > 0 ? (
+          <section>
+            <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>近期事件影响</h2>
+            <Timeline items={data.report.timelineEvents} />
+          </section>
+        ) : null}
+
         {data.viewpoints?.length > 0 && (
           <section>
             <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>跟踪事件</h2>

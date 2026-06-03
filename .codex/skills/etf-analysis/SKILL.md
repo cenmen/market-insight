@@ -212,6 +212,13 @@ K 线指标计算规则：
 curl "http://localhost:8000/api/skill/etf/base-data?code=<ETF_CODE>&klineLimit=90"
 ```
 
+在发起本地 server 调用之前，必须先在会话里输出本次调用的参数和接口地址，再执行抓取。格式要求：
+
+- `调用参数：...`
+- `调用接口：...`
+
+如果是多个参数，按 JSON 或 key-value 形式原样输出，保证可读且可复现。
+
 接口会返回：
 
 - ETF 前十大持仓
@@ -222,7 +229,20 @@ curl "http://localhost:8000/api/skill/etf/base-data?code=<ETF_CODE>&klineLimit=9
 
 如果因为沙箱、server 未启动或超时导致失败，按当前环境规则处理；无法取数时说明原因，不要编造数据。
 
-2. 基于接口返回 JSON 进行分析和补全，生成最终 JS：
+2. 每次本地 server 接口返回成功后，必须在会话里输出：
+
+- `xx 接口调用已完成`
+- `xx 数据成功获取`
+
+其中 `xx` 替换为实际接口名或数据主题，例如 `ETF 基础数据`、`K 线数据`。
+
+3. 如果接口调用失败，必须立即停止后续分析、计算和写文件操作，并在会话里输出：
+
+- `调用接口失败，参数是 xx`
+
+其中 `xx` 写入本次请求的完整参数或关键参数摘要，不要继续执行任何后续步骤。
+
+4. 基于接口返回 JSON 进行分析和补全，生成最终 JS：
    - 输出文件为 `frontend/src/data/etfs/etf<ETF_CODE>.js`。
    - 顶层变量名为 `etf<ETF_CODE>`，例如 `etf515880`。
    - 补全 `etf.name`、`etf.index`、`etf.intro`、`etf.concepts`、`etf.scale`。
@@ -235,9 +255,9 @@ curl "http://localhost:8000/api/skill/etf/base-data?code=<ETF_CODE>&klineLimit=9
    - `viewpoints` 没有可靠事件时写 `[]`。
    - 不要保留接口返回里的辅助字段，例如 `source`、`fetched_at`、`target_quarter_end`、`report_type`、`position_report`、`holdings`。
 
-3. `frontend/src/data/etfs/index.js` 会用 `import.meta.glob` 自动导出目录下的 ETF 数据，`EtfReportPage` 通过 `/etf/:code` 动态读取 `etf<code>`。新增 ETF 数据文件后通常不需要改页面；如果用户要求新增特殊路由或展示逻辑，再按页面现有结构调整。
+5. `frontend/src/data/etfs/index.js` 会用 `import.meta.glob` 自动导出目录下的 ETF 数据，`EtfReportPage` 通过 `/etf/:code` 动态读取 `etf<code>`。新增 ETF 数据文件后通常不需要改页面；如果用户要求新增特殊路由或展示逻辑，再按页面现有结构调整。
 
-4. 生成后只做只读检查，例如确认字段名、导出名和文件路径。不要自动运行 preview、build、test、lint 或自校验命令；把可手动执行的命令交给用户。
+6. 生成后只做只读检查，例如确认字段名、导出名和文件路径。不要自动运行 preview、build、test、lint 或自校验命令；把可手动执行的命令交给用户。
 
 ## 分析规则
 

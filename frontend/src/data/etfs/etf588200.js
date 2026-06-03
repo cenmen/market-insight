@@ -1167,6 +1167,18 @@ const etf588200 = {
     supportMarkers: [{ date: '2026-05-22', price: 3.533, label: '支撑位', position: 'below' }],
     resistanceMarkers: [{ date: '2026-05-19', price: 3.822, label: '压力位', position: 'above' }],
     keyInfoMarkers: [{ date: '2026-05-28', label: '关键信息位', position: 'above', lineLength: 1.5 }],
+    polyLines: [
+      {
+        points: [
+          { date: '2026-05-25', price: 3.91 },
+          { date: '2026-05-28', price: 3.818 },
+          { date: '2026-06-02', price: 3.492 },
+        ],
+        lineWidth: 0.8,
+        lineType: 'dashed',
+        color: '#666666',
+      },
+    ],
   },
 };
 

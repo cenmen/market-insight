@@ -223,7 +223,7 @@ export default function EtfReportPage() {
           <div className='my-[8pt] grid grid-cols-2 gap-[10pt] max-[820px]:block'>
             {data.report.risks.map(function mapRisk(risk) {
               return (
-                <div className='mb-[8pt] break-inside-avoid rounded-[3pt] bg-[#faf9f5] px-[10pt] py-[6pt]' key={risk.title}>
+                <div className='break-inside-avoid rounded-[3pt] bg-[#faf9f5] px-[10pt] py-[6pt]' key={risk.title}>
                   <div className='mb-[2pt] text-[9pt] font-medium text-[#1b365d]'>{risk.title}</div>
                   <div className='text-[9pt] leading-[1.4] text-[#504e49]'>{risk.description}</div>
                 </div>

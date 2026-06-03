@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import * as echarts from 'echarts/core';
 import { GridComponent, TooltipComponent, LegendComponent, DataZoomComponent, TitleComponent } from 'echarts/components';
-import { CandlestickChart, BarChart, PieChart, CustomChart } from 'echarts/charts';
+import { CandlestickChart, BarChart, PieChart, LineChart, CustomChart } from 'echarts/charts';
 import { CanvasRenderer } from 'echarts/renderers';
 
 echarts.use([
@@ -13,6 +13,7 @@ echarts.use([
   CandlestickChart,
   BarChart,
   PieChart,
+  LineChart,
   CustomChart,
   CanvasRenderer,
 ]);

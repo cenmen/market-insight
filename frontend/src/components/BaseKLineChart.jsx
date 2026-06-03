@@ -76,6 +76,50 @@ function resolveCandleMarkerIndex(marker, categoryData) {
   return -1;
 }
 
+function resolveMarkerPrice(point, candle) {
+  if (!point || typeof point !== 'object') {
+    return Number.isFinite(Number(candle?.close)) ? Number(candle.close) : NaN;
+  }
+
+  if (Number.isFinite(Number(point.price))) {
+    return Number(point.price);
+  }
+
+  if (Number.isFinite(Number(point.value))) {
+    return Number(point.value);
+  }
+
+  if (Number.isFinite(Number(candle?.close))) {
+    return Number(candle.close);
+  }
+
+  if (Number.isFinite(Number(candle?.open))) {
+    return Number(candle.open);
+  }
+
+  return NaN;
+}
+
+function resolveMarkerIndex(point, categoryData) {
+  if (!point || typeof point !== 'object') {
+    return -1;
+  }
+
+  if (Number.isInteger(point.index)) {
+    return point.index;
+  }
+
+  if (Number.isInteger(point.dataIndex)) {
+    return point.dataIndex;
+  }
+
+  if (typeof point.date === 'string') {
+    return categoryData.indexOf(point.date);
+  }
+
+  return -1;
+}
+
 function normalizeMarkerGroups(markers) {
   if (Array.isArray(markers)) {
     return {
@@ -83,6 +127,7 @@ function normalizeMarkerGroups(markers) {
       supportMarkers: [],
       resistanceMarkers: [],
       keyInfoMarkers: [],
+      polyLines: [],
     };
   }
 
@@ -92,6 +137,7 @@ function normalizeMarkerGroups(markers) {
       supportMarkers: [],
       resistanceMarkers: [],
       keyInfoMarkers: [],
+      polyLines: [],
     };
   }
 
@@ -100,6 +146,7 @@ function normalizeMarkerGroups(markers) {
     supportMarkers: Array.isArray(markers.supportMarkers) ? markers.supportMarkers : [],
     resistanceMarkers: Array.isArray(markers.resistanceMarkers) ? markers.resistanceMarkers : [],
     keyInfoMarkers: Array.isArray(markers.keyInfoMarkers) ? markers.keyInfoMarkers : [],
+    polyLines: Array.isArray(markers.polyLines) ? markers.polyLines : [],
   };
 }
 
@@ -151,6 +198,48 @@ function buildCandleMarkerData(data, categoryData, markers, kind) {
       const fontSize = Number.isFinite(Number(marker.fontSize)) && Number(marker.fontSize) > 0 ? Number(marker.fontSize) : undefined;
 
       return [dataIndex, targetPrice, labelPrice, label, position, kind, lineWidth, fontSize];
+    })
+    .filter(Boolean);
+}
+
+function buildPolylineData(data, categoryData, polyLines) {
+  if (!Array.isArray(polyLines) || polyLines.length === 0) {
+    return [];
+  }
+
+  return polyLines
+    .map(function mapPolyLine(line) {
+      const rawPoints = Array.isArray(line.points) ? line.points : [];
+      const points = rawPoints
+        .map(function mapPoint(point) {
+          const pointIndex = resolveMarkerIndex(point, categoryData);
+          const pointCandle = data[pointIndex];
+          const pointPrice = resolveMarkerPrice(point, pointCandle);
+
+          if (!Number.isFinite(pointIndex) || pointIndex < 0 || !Number.isFinite(pointPrice)) {
+            return null;
+          }
+
+          return [pointIndex, pointPrice];
+        })
+        .filter(Boolean);
+
+      if (points.length < 2) {
+        return null;
+      }
+
+      const lineWidth = Number.isFinite(Number(line.lineWidth)) && Number(line.lineWidth) > 0 ? Number(line.lineWidth) : 1;
+      const color = line.color || '#1b365d';
+      const lineType = line.lineType || 'solid';
+
+      return {
+        points: points.map(function mapPoint(point) {
+          return [categoryData[point[0]], point[1]];
+        }),
+        color,
+        lineWidth,
+        lineType,
+      };
     })
     .filter(Boolean);
 }
@@ -268,6 +357,35 @@ function makeCandleMarkerSeries(markerData) {
   };
 }
 
+function makePolylineSeries(polyLineData) {
+  return polyLineData
+    .map(function mapPolyline(line, index) {
+      return {
+        name: `折线${index + 1}`,
+        type: 'line',
+        data: line.points,
+        xAxisIndex: 0,
+        yAxisIndex: 0,
+        showSymbol: false,
+        symbol: 'none',
+        smooth: false,
+        silent: true,
+        clip: true,
+        z: 20,
+        lineStyle: {
+          color: line.color || '#1b365d',
+          width: line.lineWidth || 1,
+          type: line.lineType || 'solid',
+          opacity: 0.9,
+        },
+        emphasis: {
+          disabled: true,
+        },
+      };
+    })
+    .filter(Boolean);
+}
+
 export default function BaseKLineChart({ data = [], height = 360, className, markers = {} }) {
   const option = useMemo(
     function makeOption() {
@@ -282,8 +400,9 @@ export default function BaseKLineChart({ data = [], height = 360, className, mar
         'resistance',
       );
       const keyInfoMarkerData = buildCandleMarkerData(data, dataset.categoryData, normalizedMarkers.keyInfoMarkers, 'keyInfo');
+      const polyLineData = buildPolylineData(data, dataset.categoryData, normalizedMarkers.polyLines);
       const markerSeriesData = candleMarkerData.concat(supportMarkerData, resistanceMarkerData, keyInfoMarkerData);
-      const hasMarkers = markerSeriesData.length > 0;
+      const hasPointMarkers = markerSeriesData.length > 0;
       const series = [
         {
           name: '价格',
@@ -306,7 +425,11 @@ export default function BaseKLineChart({ data = [], height = 360, className, mar
         },
       ];
 
-      if (hasMarkers) {
+      if (polyLineData.length > 0) {
+        series.push(...makePolylineSeries(polyLineData));
+      }
+
+      if (hasPointMarkers) {
         series.push(makeCandleMarkerSeries(markerSeriesData));
       }
 
@@ -352,7 +475,7 @@ export default function BaseKLineChart({ data = [], height = 360, className, mar
           },
         },
         grid: [
-          { left: 56, right: 16, top: hasMarkers ? 34 : 18, height: hasMarkers ? 204 : 220 },
+          { left: 56, right: 16, top: hasPointMarkers ? 34 : 18, height: hasPointMarkers ? 204 : 220 },
           { left: 56, right: 16, top: 252, height: 86 },
         ],
         xAxis: [

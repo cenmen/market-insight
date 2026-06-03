@@ -64,7 +64,7 @@ export default etf588200;
 - `chartCaption` 必须是 K 线技术分析总结，并带接下来 1 到 3 个交易日的行情推演，不要写成纯新闻摘要。
 - `kLineMarkers` 必须按对象写入，当前页面使用 `candleMarkers`、`supportMarkers`、`resistanceMarkers`、`keyInfoMarkers`、`polyLines`。
 - `story`、`tPrinciples`、`tReferences`、`strategies` 没有可靠内容时写 `null`。
-- `kLineData` 使用脚本抓取的基金最近 60 根日 K 线。
+- `kLineData` 使用脚本抓取的基金最近 90 根日 K 线。
 - 保持 TypeScript 对象格式，使用 `satisfies EtfAnalysisData`。
 
 ## `metrics[]`
@@ -174,7 +174,7 @@ recentTenDayMaxDrawdownDate: '2026.05.21',
 
 写法要求：
 
-- 使用脚本输出的最近 60 根日 K 线。
+- 使用脚本输出的最近 90 根日 K 线。
 - 字段保留 `date`、`open`、`close`、`low`、`high`、`volume`、`amount`、`amplitude`、`changePercent`、`changeAmount`、`turnoverRate`。
 - 所有数值字段保持 number，不要转成字符串。
 

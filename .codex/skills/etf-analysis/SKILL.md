@@ -7,7 +7,7 @@ description: Market Insight 项目专用的 ETF 分析工作流。通过本地 s
 
 ## 目标
 
-为本仓库生成 ETF 分析静态数据。流程先抓取 ETF 前十大持仓、持仓公司核心财务指标和基金最近 60 根日 K 线，再整理成 `frontend/src/pages/EtfReport.jsx` 当前消费的数据结构，并补齐 K 线技术分析画线参数。
+为本仓库生成 ETF 分析静态数据。流程先抓取 ETF 前十大持仓、持仓公司核心财务指标和基金最近 90 根日 K 线，再整理成 `frontend/src/pages/EtfReport.jsx` 当前消费的数据结构，并补齐 K 线技术分析画线参数。
 
 固定输出目录：
 
@@ -209,14 +209,14 @@ K 线指标计算规则：
 1. 通过本地 server 接口抓取 ETF 基础数据。接口返回 JSON，不直接写文件：
 
 ```bash
-curl "http://localhost:8000/api/skill/etf/base-data?code=<ETF_CODE>&klineLimit=60"
+curl "http://localhost:8000/api/skill/etf/base-data?code=<ETF_CODE>&klineLimit=90"
 ```
 
 接口会返回：
 
 - ETF 前十大持仓
 - 持仓公司的目标季度核心财务数据
-- 基金最近 60 根日 K 线
+- 基金最近 90 根日 K 线
 
 当一次任务涉及多个 ETF 代码时，必须按代码逐个串行抓取和整理。禁止并行请求多个 `/api/skill/etf/base-data`、禁止用 shell 循环或一条命令连续请求多个 ETF，也不要用 `multi_tool_use.parallel` 同时发起多个抓取请求；东方财富接口容易触发风控或封禁。每完成一个 ETF 的抓取、整理和文件写入后，再处理下一个。
 
@@ -229,7 +229,7 @@ curl "http://localhost:8000/api/skill/etf/base-data?code=<ETF_CODE>&klineLimit=6
    - 补全 `report`，文案风格参考 `frontend/src/data/etfs/etf515880.js`。
    - 根据持仓真实业务暴露生成 `businessRatio`，并补全 `desc` 和必要的 `subItems`。
    - 将接口返回的持仓整理成 `financialRows`，为每个持仓补全 `productTags` 和 `intro`。
-   - 将接口返回的基金 K 线直接写入 `kLineData`，保留最近 60 根数据。
+   - 将接口返回的基金 K 线直接写入 `kLineData`，保留最近 90 根数据。
    - 根据 `financialRows` 和 `kLineData` 计算并写入 `metrics`、`recentFiveDayAmplitude`、`recentTenDayMaxDrawdown`、`recentTenDayMaxDrawdownDate`。
    - 补全 `shortTermFactors` 和 `styleCharacteristics`。
    - `viewpoints` 没有可靠事件时写 `[]`。

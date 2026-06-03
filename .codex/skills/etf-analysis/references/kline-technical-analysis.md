@@ -18,7 +18,7 @@
 优先级：
 
 1. 优先使用用户提供的 K 线数据、截图、表格、CSV、Excel 或网页链接。
-2. 用户没有提供数据时，优先使用 `/api/skill/etf/base-data?code=<ETF_CODE>&klineLimit=60` 返回的基金最近 60 根日 K 线。
+2. 用户没有提供数据时，优先使用 `/api/skill/etf/base-data?code=<ETF_CODE>&klineLimit=90` 返回的基金最近 90 根日 K 线。
 3. 如果只需要补 K 线数据，可使用基金 K 线接口：
 
 ```bash
@@ -33,7 +33,7 @@ date, open, close, high, low, volume, amount, amplitude, changePercent, changeAm
 
 要求：
 
-- 默认分析最近 60 根日 K 线；需要更长趋势时可取最近 120 根，但写入 `kLineData` 仍保留最近 60 根。
+- 默认分析最近 90 根日 K 线；需要更长趋势时可取最近 120 根，但写入 `kLineData` 仍保留最近 90 根。
 - 不要凭模型记忆编造最新行情、价格、日期和成交量。
 - 如果接口不可用或数据不完整，说明缺失字段，不要写假点位。
 
@@ -52,14 +52,14 @@ date, open, close, high, low, volume, amount, amplitude, changePercent, changeAm
 
 支撑位：
 
-- 最近 20 到 60 根 K 线里的明显低点。
+- 最近 20 到 90 根 K 线里的明显低点。
 - 长下影最低点和收回位置。
 - 前平台整理区下沿。
 - 向上突破后的回踩确认位。
 
 压力位：
 
-- 最近 20 到 60 根 K 线里的明显高点。
+- 最近 20 到 90 根 K 线里的明显高点。
 - 长上影最高点和实体上沿。
 - 前平台整理区上沿。
 - 跌破后的反抽确认位。
@@ -83,7 +83,7 @@ date, open, close, high, low, volume, amount, amplitude, changePercent, changeAm
 
 写法要求：
 
-- 基于 `kLineData` 最近 20 到 60 根日 K 线。
+- 基于 `kLineData` 最近 20 到 90 根日 K 线。
 - 覆盖蜡烛图形态、趋势、量价关系、支撑位、压力位和关键折线。
 - 建议写成 1 到 2 句，像交易员复盘，不要写成新闻摘要。
 - 必须带对接下来 1 到 3 个交易日的推演，使用“偏强、偏弱、震荡、回踩、冲高回落、探底回升”等表达。

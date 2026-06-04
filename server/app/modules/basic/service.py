@@ -62,7 +62,7 @@ def secid(code_value: str) -> str:
 def ths_market(code_value: str) -> str:
     """转换同花顺 K 线接口要求的市场代码。"""
     code = str(code_value).zfill(6)
-    return "20" if code.startswith(("5", "6", "9")) else "33"
+    return "20" if code.startswith(("5", "6", "9")) else "36"
 
 
 def normalize_quarter_date(value: Any) -> str | None:
@@ -383,6 +383,26 @@ def fetch_fund_kline(code: str, limit: int) -> List[Dict[str, Any]]:
         raise ValueError("limit 必须大于 0")
 
     normalized_code = str(code).zfill(6)
+    request_body = {
+        "code_list": [{"codes": [normalized_code], "market": ths_market(normalized_code)}],
+        "trade_class": "intraday",
+        "time_period": "day_1",
+        "trade_date": -1,
+        "begin_time": -limit,
+        "end_time": 0,
+        "adjust_type": "forward",
+        "gpid": 1,
+    }
+    print(
+        "[fetch_fund_kline] request params:",
+        {
+            "code": code,
+            "limit": limit,
+            "normalized_code": normalized_code,
+            "market": ths_market(normalized_code),
+            "body": request_body,
+        },
+    )
     try:
         response = httpx.post(
             "https://quota-h.10jqka.com.cn/fuyao/common_hq_aggr/quote/v1/single_kline",
@@ -400,16 +420,7 @@ def fetch_fund_kline(code: str, limit: int) -> List[Dict[str, Any]]:
                 "x-auth-version": "1.0",
                 "x-fuyao-auth": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdXRob3JpemVyX25hbWVzcGFjZSI6ImNvbW1vbi1ocS1hZ2dyIiwibGljZW5zZWVfdHlwZSI6IkZST05UX0FQUCIsImxpY2Vuc2VlX25hbWVzcGFjZSI6Imh4a2xpbmUtTkVXU19hcHBOZXdzRmxvd0hvbWVfUGFnZSJ9.ldrvWTheNnGOa_rH_buA6OoUpLtW2bhcdr3fABrGHbk",
             },
-            json={
-                "code_list": [{"codes": [normalized_code], "market": ths_market(normalized_code)}],
-                "trade_class": "intraday",
-                "time_period": "day_1",
-                "trade_date": -1,
-                "begin_time": -limit,
-                "end_time": 0,
-                "adjust_type": "forward",
-                "gpid": 1,
-            },
+            json=request_body,
             timeout=20.0,
             follow_redirects=True,
         )

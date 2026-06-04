@@ -1,4 +1,4 @@
-const modules = import.meta.glob('./**.js', {
+const modules = import.meta.glob(['./**.js', './**.jsx'], {
   eager: true,
   import: 'default',
 });
@@ -6,7 +6,7 @@ const modules = import.meta.glob('./**.js', {
 const etfs = {};
 
 for (const path in modules) {
-  const name = path.match(/\/([^/]+)\.js$/)?.[1];
+  const name = path.match(/\/([^/]+)\.(?:js|jsx)$/)?.[1];
 
   if (name && name !== 'index') {
     etfs[name] = modules[path];

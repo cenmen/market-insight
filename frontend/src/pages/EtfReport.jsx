@@ -7,20 +7,20 @@ import Timeline from '@/components/Timeline.jsx';
 import etfs from '@/data/etfs';
 import { Navigate, useParams, useSearchParams } from 'react-router-dom';
 
-function formatRate(rate) {
+const formatRate = (rate) => {
   return `${Number(rate).toFixed(2)}%`;
-}
+};
 
-function getLatestFinancial(row) {
+const getLatestFinancial = (row) => {
   return row.data?.[0] ?? {};
-}
+};
 
-function formatQuarter(financial) {
+const formatQuarter = (financial) => {
   if (!financial.year || !financial.quarter) {
     return '--';
   }
   return `${financial.year}Q${financial.quarter}`;
-}
+};
 
 export default function EtfReportPage() {
   const { code } = useParams();
@@ -32,7 +32,7 @@ export default function EtfReportPage() {
     return <Navigate to='/' replace />;
   }
 
-  const pieData = data.businessRatio.map(function mapBucket(item) {
+  const pieData = data.businessRatio.map((item) => {
     return {
       name: item.type,
       value: Number(item.rate.toFixed(2)),
@@ -66,7 +66,7 @@ export default function EtfReportPage() {
         </header>
 
         <div className='mb-[13pt] flex flex-wrap gap-[5pt]'>
-          {data.etf.concepts.map(function mapConcept(concept) {
+          {data.etf.concepts.map((concept) => {
             return (
               <span className='inline-block rounded-[3pt] bg-[#e4ecf5] px-[6pt] py-[1pt] text-[9pt] font-medium text-[#1b365d]' key={concept}>
                 {concept}
@@ -75,7 +75,7 @@ export default function EtfReportPage() {
           })}
         </div>
         <section className='mb-[16pt] grid grid-cols-4 gap-[10pt] max-[820px]:grid-cols-2 max-[820px]:gap-[6pt]'>
-          {data.metrics.map(function mapMetric(metric) {
+          {data.metrics.map((metric) => {
             return (
               <div className='rounded-[4pt] bg-[#faf9f5] p-[10pt]' key={metric.label}>
                 <div className='text-[10pt] font-medium text-[#3d3d3a]'>{metric.label}</div>
@@ -97,7 +97,7 @@ export default function EtfReportPage() {
         <section>
           <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>短期影响因素</h2>
           <ol className='my-[8pt] ml-0 list-decimal pl-[18pt] leading-[1.5] marker:font-medium marker:text-[#1b365d] [&>li]:my-[2pt]'>
-            {data.shortTermFactors.map(function mapFactor(item) {
+            {data.shortTermFactors.map((item) => {
               return (
                 <li key={item.title}>
                   <strong>{item.title}：</strong>
@@ -111,7 +111,7 @@ export default function EtfReportPage() {
         <section>
           <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>风格特征</h2>
           <ol className='my-[8pt] ml-0 list-decimal pl-[18pt] leading-[1.5] marker:font-medium marker:text-[#1b365d] [&>li]:my-[2pt]'>
-            {data.styleCharacteristics.map(function mapCharacteristic(item) {
+            {data.styleCharacteristics.map((item) => {
               return (
                 <li key={item.title}>
                   <strong>{item.title}：</strong>
@@ -127,7 +127,7 @@ export default function EtfReportPage() {
         <section>
           <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>业务分布</h2>
           <div className='my-[8pt] grid grid-cols-2 gap-[10pt] max-[820px]:block'>
-            {data.businessRatio.map(function mapBucket(item) {
+            {data.businessRatio.map((item) => {
               return (
                 <div className='break-inside-avoid rounded-[4pt] bg-[#faf9f5] px-[10pt] py-[8pt]' key={item.type}>
                   <div className='mb-[3pt] flex justify-between gap-[8pt] font-medium text-[#3d3d3a]'>
@@ -147,7 +147,7 @@ export default function EtfReportPage() {
         <section>
           <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>持仓明细</h2>
           <div className='mt-[8pt] grid grid-cols-2 gap-[10pt] max-[820px]:grid-cols-1 max-[820px]:gap-[8pt]'>
-            {data.financialRows.map(function mapHolding(row) {
+            {data.financialRows.map((row) => {
               const financial = getLatestFinancial(row);
               return (
                 <article className='break-inside-avoid rounded-[4pt] bg-[#faf9f5] p-[10pt]' key={row.code}>
@@ -162,7 +162,7 @@ export default function EtfReportPage() {
                     </div>
                   </header>
                   <div className='mt-[4pt] flex flex-wrap gap-[3pt]'>
-                    {row.productTags.map(function mapProductTag(tag) {
+                    {row.productTags.map((tag) => {
                       return (
                         <span className='inline-block rounded-[3pt] bg-[#eef2f7] px-[4pt] py-[1pt] text-[8pt] whitespace-nowrap text-[#1b365d]' key={tag}>
                           {tag}
@@ -211,7 +211,7 @@ export default function EtfReportPage() {
           </div>
           <figure className='my-[12pt] break-inside-avoid'>
             <BaseKLineChart data={data.kLineData} markers={data.kLineMarkers} height={364} />
-            <figcaption className='mt-[4pt] text-[9pt] text-[#6b6a64]'>{data.report.chartCaption}</figcaption>
+            <figcaption className='mt-[4pt] text-[9pt] leading-[1.5] text-[#6b6a64]'>{data.report.chartCaption}</figcaption>
           </figure>
         </section>
 
@@ -231,7 +231,7 @@ export default function EtfReportPage() {
         <section>
           <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>风险提示</h2>
           <div className='my-[8pt] grid grid-cols-2 gap-[10pt] max-[820px]:block'>
-            {data.report.risks.map(function mapRisk(risk) {
+            {data.report.risks.map((risk) => {
               return (
                 <div className='break-inside-avoid rounded-[3pt] bg-[#faf9f5] px-[10pt] py-[6pt]' key={risk.title}>
                   <div className='mb-[2pt] text-[9pt] font-medium text-[#1b365d]'>{risk.title}</div>

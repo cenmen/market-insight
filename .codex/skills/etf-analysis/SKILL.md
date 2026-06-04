@@ -277,6 +277,7 @@ curl "http://localhost:8000/api/skill/etf/base-data?code=<ETF_CODE>&klineLimit=9
 - `report.thesis`、`report.callout`、`shortTermFactors`、`styleCharacteristics` 用简洁中文，风格参考现有 `etf515880.js`。
 - `report.chartCaption` 必须是完整 K 线技术分析总结，分 3 段，每段 100 到 180 个汉字，并带接下来 1 到 3 个交易日的推演。
 - 不要把 JSX 放进 ETF 静态数据；所有叙事字段使用纯字符串或数组对象。
+- `report.chartCaption` 是唯一允许使用 JSX 的叙事字段。若需要分段排版，请使用 JSX 片段并把每段包在单独的 `<p>` 中，段落使用 `className='indent-[2em]'` 做段前缩进；如果某个 ETF 文件包含 JSX，文件后缀必须使用 `.jsx`，同时确保 `frontend/src/data/etfs/index.js` 的聚合规则能加载 `.jsx`。
 - 缺少来源时，不要编造精确规模、指数代码或财务数值；使用保守表达并明确不确定性。
 
 ## 参考

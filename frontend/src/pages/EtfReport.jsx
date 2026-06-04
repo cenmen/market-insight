@@ -247,11 +247,11 @@ export default function EtfReportPage() {
                 />
               </div>
             </div>
-            <div className='mb-[8pt] rounded-[4pt] bg-[#faf9f5] p-[10pt]'>
-              <div className='text-[10pt] font-medium text-[#3d3d3a]'>最近 10 日最大跌幅</div>
-              <div className='mt-[4pt] text-[14pt] font-medium text-[#1b365d] tabular-nums'>{recentTenDayMaxDrawdown}</div>
-              <div className='mt-[4pt] text-[9pt] text-[#504e49]'>{data.recentTenDayMaxDrawdownComment}</div>
-              <div className=''>
+            <div className='mb-[8pt] rounded-[4pt] bg-[#faf9f5] pt-[10pt]'>
+              <div className='px-[10pt] text-[10pt] font-medium text-[#3d3d3a]'>最近 10 日最大回撤</div>
+              <div className='mt-[4pt] px-[10pt] text-[14pt] font-medium text-[#1b365d] tabular-nums'>{recentTenDayMaxDrawdown}</div>
+              <div className='mt-[4pt] px-[10pt] text-[9pt] text-[#504e49]'>{data.recentTenDayMaxDrawdownComment}</div>
+              <div className='mt-[4pt]'>
                 <BaseLineChart
                   data={recentTenDayKLine}
                   height={110}

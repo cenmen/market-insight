@@ -86,7 +86,7 @@ const etf588200 = {
     headlineSignal: '规模与流动性观察',
     coreJudgment: '一句短判断',
     thesis: '投资逻辑正文。',
-    callout: '一句话看法：...',
+    callout: '总结性提示或对用户的直接建议，要求简洁有力，字数控制在 20 字以内。',
     chartCaption: '近期走势总结 + 对接下来 1 到 3 个交易日的推演。',
     disclaimer: '仅供参考，不构成任何投资建议；市场有风险，决策需谨慎，风险自负。',
     risks: [],
@@ -167,7 +167,7 @@ export default etf588200;
 
 计算来源：
 
-- `metrics[0]` 基金规模：直接使用 `etf.scale`，`value` 可写成 `291.05 亿`。
+- `metrics[0]` 基金规模：使用 `fetch_fund_snapshot` 返回的流通市值换算成亿元后写入 `etf.scale`，`value` 可写成 `291.05 亿`。
 - `metrics[1]` 盈利增速：从 `financialRows[].data[0].nonNetProfitGrowthRate` 按持仓权重计算。
 - `metrics[2]` ROE：从 `financialRows[].data[0].roe` 按持仓权重计算。
 - `metrics[3]` 业务增速：从 `financialRows[].data[0].mainBusinessGrowthRate` 按持仓权重计算。

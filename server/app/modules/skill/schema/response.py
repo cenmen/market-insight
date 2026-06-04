@@ -12,5 +12,6 @@ class FetchEtfBaseDataResponse(BaseModel):
     target_quarter_end: str = Field()
     report_type: str = Field()
     position_report: Optional[str] = Field(default=None)
+    scale: Optional[str] = Field(default=None)
     kLineData: List[Dict[str, Any]] = Field()
     holdings: List[Dict[str, Any]] = Field()

@@ -6,6 +6,7 @@ from app.core.context import Context, build_context
 from app.core.response import ResponseModel
 from app.modules.basic.schema.request import (
     FundKlineParams,
+    FundSnapshotParams,
     FundTopHoldingsParams,
     KlineParams,
     SearchStockParams,
@@ -14,6 +15,7 @@ from app.modules.basic.schema.request import (
 from app.modules.basic.schema.response import (
     FundKlineItem,
     FundKlineResponse,
+    FundSnapshotItem,
     FundTopHoldingItem,
     FundTopHoldingsResponse,
     KlineBar,
@@ -24,6 +26,7 @@ from app.modules.basic.schema.response import (
 )
 from app.modules.basic.service import (
     fetch_fund_kline,
+    fetch_fund_snapshot,
     fetch_fund_top_holdings,
     fetch_stock_main_finance,
     load_kline_by_tx_cached,
@@ -88,6 +91,18 @@ def get_fund_kline(params: FundKlineParams = Depends(), context: Context = Depen
     records = fetch_fund_kline(params.code, params.limit)
     items = [FundKlineItem.model_validate(r) for r in records]
     data = FundKlineResponse(code=params.code, count=len(items), lines=items)
+    return ResponseModel.success(data=data, request_id=context.request_id)
+
+
+@router.get(
+    "/fund/snapshot",
+    response_model=ResponseModel,
+    summary="获取ETF基金最新快照",
+    description="按基金代码返回最新行情快照信息",
+)
+def get_fund_snapshot(params: FundSnapshotParams = Depends(), context: Context = Depends(build_context)):
+    record = fetch_fund_snapshot(params.code)
+    data = FundSnapshotItem.model_validate(record) if record else None
     return ResponseModel.success(data=data, request_id=context.request_id)
 
 

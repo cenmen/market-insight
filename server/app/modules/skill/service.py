@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Dict
 
-from app.modules.basic.service import fetch_fund_kline, fetch_fund_top_holdings, fetch_stock_main_finance
+from app.modules.basic.service import fetch_fund_kline, fetch_fund_snapshot, fetch_fund_top_holdings, fetch_stock_main_finance
 
 
 def target_quarter_end(today: datetime) -> str:
@@ -34,6 +34,10 @@ def fetch_etf_base_data(code: str, kline_limit: int = 60) -> Dict[str, Any]:
     """一次性抓取 skill 所需 ETF 基础数据（K线、持仓、持仓股核心财务）。"""
     quarter_end = target_quarter_end(datetime.now())
     current_report_type = report_type(quarter_end)
+    try:
+        snapshot = fetch_fund_snapshot(code)
+    except Exception:
+        snapshot = None
     holdings, position_report = fetch_fund_top_holdings(code)
     k_line_data = fetch_fund_kline(code, kline_limit)
 
@@ -52,6 +56,11 @@ def fetch_etf_base_data(code: str, kline_limit: int = 60) -> Dict[str, Any]:
         "target_quarter_end": quarter_end,
         "report_type": current_report_type,
         "position_report": position_report,
+        "scale": (
+            f"{(snapshot.get('circulatingMarketValue') or 0) / 100000000:.2f} 亿元"
+            if snapshot and snapshot.get("circulatingMarketValue") is not None
+            else None
+        ),
         "kLineData": k_line_data,
         "holdings": holdings,
     }

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -76,3 +76,23 @@ class FundKlineResponse(BaseModel):
     code: str = Field()
     count: int = Field()
     lines: List[FundKlineItem] = Field()
+
+
+class FundSnapshotItem(BaseModel):
+    code: str = Field()
+    market: Optional[str] = Field(default=None)
+    tradeClass: Optional[str] = Field(default=None)
+    previousClose: Optional[float] = Field(default=None)
+    open: Optional[float] = Field(default=None)
+    high: Optional[float] = Field(default=None)
+    low: Optional[float] = Field(default=None)
+    latest: Optional[float] = Field(default=None)
+    averagePrice: Optional[float] = Field(default=None)
+    volume: Optional[float] = Field(default=None)
+    amount: Optional[float] = Field(default=None)
+    changeAmount: Optional[float] = Field(default=None)
+    changePercent: Optional[float] = Field(default=None)
+    amplitude: Optional[float] = Field(default=None)
+    turnoverRate: Optional[float] = Field(default=None)
+    totalMarketValue: Optional[float] = Field(default=None)
+    circulatingMarketValue: Optional[float] = Field(default=None)

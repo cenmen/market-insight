@@ -80,7 +80,7 @@ export default etf588200;
 
 计算规则：
 
-- 基金规模直接使用 `etf.scale`。
+- 基金规模使用 `fetch_fund_snapshot` 返回的流通市值换算成 `etf.scale`。
 - 盈利增速使用 `financialRows[].data` 最新一期的 `nonNetProfitGrowthRate`。
 - ROE 使用 `financialRows[].data` 最新一期的 `roe`。
 - 业务增速使用 `financialRows[].data` 最新一期的 `mainBusinessGrowthRate`。

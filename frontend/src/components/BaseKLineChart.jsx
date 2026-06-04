@@ -150,11 +150,7 @@ function normalizeMarkerGroups(markers) {
   };
 }
 
-function buildCandleMarkerData(data, categoryData, markers, kind) {
-  if (!Array.isArray(markers) || markers.length === 0) {
-    return [];
-  }
-
+function buildMarkerData(data, categoryData, markerGroups) {
   const lows = data.map(function mapLow(item) {
     return Number(item.low);
   });
@@ -165,41 +161,111 @@ function buildCandleMarkerData(data, categoryData, markers, kind) {
   const maxHigh = Math.max(...highs.filter(Number.isFinite));
   const priceRange = Number.isFinite(maxHigh - minLow) && maxHigh > minLow ? maxHigh - minLow : 1;
   const markerGap = priceRange * 0.1;
+  const collisionBand = priceRange * 0.045;
+  const maxShift = priceRange * 0.14;
 
-  return markers
-    .map(function mapMarker(marker) {
-      const dataIndex = resolveCandleMarkerIndex(marker, categoryData);
-      const candle = data[dataIndex];
+  const markerEntries = markerGroups
+    .flatMap(function mapGroup(group) {
+      const markers = Array.isArray(group.markers) ? group.markers : [];
 
-      if (!candle) {
-        return null;
-      }
+      return markers.map(function mapMarker(marker) {
+        const dataIndex = resolveCandleMarkerIndex(marker, categoryData);
+        const candle = data[dataIndex];
 
-      const position = marker.position === 'below' ? 'below' : 'above';
-      const candleEdge = position === 'below' ? Number(candle.low) : Number(candle.high);
-      const targetPrice = Number.isFinite(Number(marker.price)) ? Number(marker.price) : candleEdge;
+        if (!candle) {
+          return null;
+        }
 
-      if (!Number.isFinite(targetPrice)) {
-        return null;
-      }
+        const position = marker.position === 'below' ? 'below' : 'above';
+        const candleEdge = position === 'below' ? Number(candle.low) : Number(candle.high);
+        const targetPrice = Number.isFinite(Number(marker.price)) ? Number(marker.price) : candleEdge;
 
-      const lineLength = Number.isFinite(Number(marker.lineLength)) && Number(marker.lineLength) > 0 ? Number(marker.lineLength) : 1;
-      const labelPrice = position === 'below' ? targetPrice - markerGap * lineLength : targetPrice + markerGap * lineLength;
-      const defaultLabel =
-        kind === 'support'
-          ? '支撑位'
-          : kind === 'resistance'
-            ? '压力位'
-            : kind === 'keyInfo'
-              ? '关键信息位'
-              : '锤子线';
-      const label = marker.label || defaultLabel;
-      const lineWidth = Number.isFinite(Number(marker.lineWidth)) && Number(marker.lineWidth) > 0 ? Number(marker.lineWidth) : undefined;
-      const fontSize = Number.isFinite(Number(marker.fontSize)) && Number(marker.fontSize) > 0 ? Number(marker.fontSize) : undefined;
+        if (!Number.isFinite(targetPrice)) {
+          return null;
+        }
 
-      return [dataIndex, targetPrice, labelPrice, label, position, kind, lineWidth, fontSize];
+        const lineLength = Number.isFinite(Number(marker.lineLength)) && Number(marker.lineLength) > 0 ? Number(marker.lineLength) : 1;
+        const labelPrice = position === 'below' ? targetPrice - markerGap * lineLength : targetPrice + markerGap * lineLength;
+        const defaultLabel =
+          group.kind === 'support'
+            ? '支撑位'
+            : group.kind === 'resistance'
+              ? '压力位'
+              : group.kind === 'keyInfo'
+                ? '关键信息位'
+                : '锤子线';
+        const label = marker.label || defaultLabel;
+        const lineWidth = Number.isFinite(Number(marker.lineWidth)) && Number(marker.lineWidth) > 0 ? Number(marker.lineWidth) : undefined;
+        const fontSize = Number.isFinite(Number(marker.fontSize)) && Number(marker.fontSize) > 0 ? Number(marker.fontSize) : undefined;
+
+        return {
+          dataIndex,
+          targetPrice,
+          labelPrice,
+          label,
+          position,
+          kind: group.kind,
+          lineWidth,
+          fontSize,
+        };
+      });
     })
-    .filter(Boolean);
+    .filter(Boolean)
+    .sort(function sortMarker(left, right) {
+      if (left.position !== right.position) {
+        return left.position === 'above' ? -1 : 1;
+      }
+
+      if (left.dataIndex !== right.dataIndex) {
+        return left.dataIndex - right.dataIndex;
+      }
+
+      return left.labelPrice - right.labelPrice;
+    });
+
+  const placedMarkers = [];
+
+  return markerEntries.map(function mapPlacedMarker(marker) {
+    let shiftLevel = 0;
+
+    for (const placedMarker of placedMarkers) {
+      if (placedMarker.position !== marker.position) {
+        continue;
+      }
+
+      if (Math.abs(placedMarker.dataIndex - marker.dataIndex) > 3) {
+        continue;
+      }
+
+      if (Math.abs(placedMarker.labelPrice - marker.labelPrice) > collisionBand) {
+        continue;
+      }
+
+      shiftLevel = Math.max(shiftLevel, placedMarker.shiftLevel + 1);
+    }
+
+    const shiftDistance = Math.min(shiftLevel * markerGap * 0.55, maxShift);
+    const direction = marker.position === 'below' ? -1 : 1;
+    const adjustedLabelPrice = marker.labelPrice + direction * shiftDistance;
+    const placedMarker = {
+      ...marker,
+      labelPrice: adjustedLabelPrice,
+      shiftLevel,
+    };
+
+    placedMarkers.push(placedMarker);
+    return [
+      placedMarker.dataIndex,
+      placedMarker.targetPrice,
+      placedMarker.labelPrice,
+      placedMarker.label,
+      placedMarker.position,
+      placedMarker.kind,
+      placedMarker.lineWidth,
+      placedMarker.fontSize,
+      placedMarker.shiftLevel,
+    ];
+  });
 }
 
 function buildPolylineData(data, categoryData, polyLines) {
@@ -229,7 +295,7 @@ function buildPolylineData(data, categoryData, polyLines) {
       }
 
       const lineWidth = Number.isFinite(Number(line.lineWidth)) && Number(line.lineWidth) > 0 ? Number(line.lineWidth) : 1;
-      const color = line.color || '#1b365d';
+      const color = line.color || ['#d39a55', '#7f9cc1', '#8a7f74', '#c7b28d'][index % 4];
       const lineType = line.lineType || 'solid';
 
       return {
@@ -248,39 +314,39 @@ function makeCandleMarkerSeries(markerData) {
   function resolveMarkerStyle(kind) {
     if (kind === 'support') {
       return {
-        line: '#16a34a',
-        fill: '#f0fdf4',
-        text: '#166534',
-        lineWidth: 0.8,
+        line: '#d39a55',
+        fill: '#fff6ea',
+        text: '#8a5d25',
+        lineWidth: 0.75,
         fontSize: 8,
       };
     }
 
     if (kind === 'resistance') {
       return {
-        line: '#dc2626',
-        fill: '#fff1f2',
-        text: '#991b1b',
-        lineWidth: 0.8,
+        line: '#7f9cc1',
+        fill: '#eff4fb',
+        text: '#506b8b',
+        lineWidth: 0.75,
         fontSize: 8,
       };
     }
 
     if (kind === 'keyInfo') {
       return {
-        line: '#6b6a64',
-        fill: '#faf9f5',
-        text: '#504e49',
-        lineWidth: 0.6,
+        line: '#8a7f74',
+        fill: '#f7f4ef',
+        text: '#66605a',
+        lineWidth: 0.65,
         fontSize: 7,
       };
     }
 
     return {
-      line: '#1b365d',
-      fill: '#faf9f5',
-      text: '#1b365d',
-      lineWidth: 0.8,
+      line: '#8c897f',
+      fill: '#faf8f3',
+      text: '#6a6056',
+      lineWidth: 0.75,
       fontSize: 8,
     };
   }
@@ -296,17 +362,22 @@ function makeCandleMarkerSeries(markerData) {
     z: 12,
     renderItem(params, api) {
       const targetPoint = api.coord([api.value(0), api.value(1)]);
-      const labelPoint = api.coord([api.value(0), api.value(2)]);
+      const baseLabelPoint = api.coord([api.value(0), api.value(2)]);
       const label = api.value(3);
       const position = api.value(4);
       const kind = api.value(5);
       const markerLineWidth = api.value(6);
       const markerFontSize = api.value(7);
+      const shiftLevel = Number.isFinite(Number(api.value(8))) ? Number(api.value(8)) : 0;
       const isBelow = position === 'below';
+      const lane = Math.ceil(shiftLevel / 2);
+      const horizontalOffset = shiftLevel === 0 ? 0 : (shiftLevel % 2 === 1 ? -1 : 1) * lane * 14;
+      const verticalOffset = (isBelow ? 1 : -1) * lane * 12;
       const textOffset = isBelow ? 3 : -3;
       const markerStyle = resolveMarkerStyle(kind);
       const lineWidth = Number.isFinite(Number(markerLineWidth)) ? Number(markerLineWidth) : markerStyle.lineWidth;
       const fontSize = Number.isFinite(Number(markerFontSize)) ? Number(markerFontSize) : markerStyle.fontSize;
+      const labelPoint = [baseLabelPoint[0] + horizontalOffset, baseLabelPoint[1] + verticalOffset];
 
       return {
         type: 'group',
@@ -347,7 +418,7 @@ function makeCandleMarkerSeries(markerData) {
               text: label,
               fill: markerStyle.text,
               font: `500 ${fontSize}px TsangerJinKai02, serif`,
-              textAlign: 'center',
+              textAlign: horizontalOffset < 0 ? 'right' : horizontalOffset > 0 ? 'left' : 'center',
               textVerticalAlign: isBelow ? 'top' : 'bottom',
             },
           },
@@ -391,18 +462,14 @@ export default function BaseKLineChart({ data = [], height = 360, className, mar
     function makeOption() {
       const dataset = splitKlineData(data);
       const normalizedMarkers = normalizeMarkerGroups(markers);
-      const candleMarkerData = buildCandleMarkerData(data, dataset.categoryData, normalizedMarkers.candleMarkers, 'candle');
-      const supportMarkerData = buildCandleMarkerData(data, dataset.categoryData, normalizedMarkers.supportMarkers, 'support');
-      const resistanceMarkerData = buildCandleMarkerData(
-        data,
-        dataset.categoryData,
-        normalizedMarkers.resistanceMarkers,
-        'resistance',
-      );
-      const keyInfoMarkerData = buildCandleMarkerData(data, dataset.categoryData, normalizedMarkers.keyInfoMarkers, 'keyInfo');
+      const markerData = buildMarkerData(data, dataset.categoryData, [
+        { kind: 'candle', markers: normalizedMarkers.candleMarkers },
+        { kind: 'support', markers: normalizedMarkers.supportMarkers },
+        { kind: 'resistance', markers: normalizedMarkers.resistanceMarkers },
+        { kind: 'keyInfo', markers: normalizedMarkers.keyInfoMarkers },
+      ]);
       const polyLineData = buildPolylineData(data, dataset.categoryData, normalizedMarkers.polyLines);
-      const markerSeriesData = candleMarkerData.concat(supportMarkerData, resistanceMarkerData, keyInfoMarkerData);
-      const hasPointMarkers = markerSeriesData.length > 0;
+      const hasPointMarkers = markerData.length > 0;
       const series = [
         {
           name: '价格',
@@ -430,7 +497,7 @@ export default function BaseKLineChart({ data = [], height = 360, className, mar
       }
 
       if (hasPointMarkers) {
-        series.push(makeCandleMarkerSeries(markerSeriesData));
+        series.push(makeCandleMarkerSeries(markerData));
       }
 
       return {

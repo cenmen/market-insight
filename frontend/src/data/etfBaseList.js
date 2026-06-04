@@ -27,4 +27,17 @@ const etfBaseList = [
   { code: '512170', name: '医疗ETF华宝', indexCode: '399989', indexName: '中证医疗指数', alias: '医疗' },
 ];
 
+function buildEtfAliasMap(list) {
+  const aliasMap = {};
+
+  for (const item of list) {
+    aliasMap[item.alias] = item;
+  }
+
+  return aliasMap;
+}
+
+const etfAliasMap = buildEtfAliasMap(etfBaseList);
+
 export default etfBaseList;
+export { etfAliasMap };

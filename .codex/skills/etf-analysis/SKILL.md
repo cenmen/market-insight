@@ -186,7 +186,16 @@ export default etf588200;
 - `kLineMarkers.keyInfoMarkers`
 - `kLineMarkers.polyLines`
 
-`chartCaption` 必须是 K 线技术分析总结，并带接下来 1 到 3 个交易日的行情推演。
+`chartCaption` 必须是完整的 K 线技术分析总结，并带接下来 1 到 3 个交易日的行情推演。
+
+写作要求：
+
+- 必须分成 3 段。
+- 每段控制在 100 到 180 个汉字之间。
+- 第 1 段写当前走势、量能和结构。
+- 第 2 段写关键支撑、压力、均线或形态变化。
+- 第 3 段写接下来 1 到 3 个交易日的推演和操作节奏。
+- 不要写成短句拼接，也不要只下结论不展开。
 
 权重指标计算规则：
 
@@ -266,7 +275,7 @@ curl "http://localhost:8000/api/skill/etf/base-data?code=<ETF_CODE>&klineLimit=9
 - 定性分析要基于持仓公司的真实业务暴露，不要只根据 ETF 名称推断。
 - `businessRatio` 的权重需要和持仓权重保持可解释的一致性。如果分组没有覆盖全部持仓，增加“其他”分组承接剩余暴露。
 - `report.thesis`、`report.callout`、`shortTermFactors`、`styleCharacteristics` 用简洁中文，风格参考现有 `etf515880.js`。
-- `report.chartCaption` 必须是 K 线技术分析总结，不要写成泛泛图注，也不要只描述历史走势不谈后续行情。
+- `report.chartCaption` 必须是完整 K 线技术分析总结，分 3 段，每段 100 到 180 个汉字，并带接下来 1 到 3 个交易日的推演。
 - 不要把 JSX 放进 ETF 静态数据；所有叙事字段使用纯字符串或数组对象。
 - 缺少来源时，不要编造精确规模、指数代码或财务数值；使用保守表达并明确不确定性。
 

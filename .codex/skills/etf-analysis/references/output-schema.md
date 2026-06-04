@@ -61,7 +61,7 @@ export default etf588200;
 
 - 单个 ETF 文件必须写完整展示数据，包括 `metrics`、`recentFiveDayAmplitude`、`recentTenDayMaxDrawdown`、`recentTenDayMaxDrawdownDate`。
 - 网站只负责展示，不负责计算这些字段；不要把计算逻辑放到 `apps/website/src/static-json/etf/index.ts`。
-- `chartCaption` 必须是 K 线技术分析总结，并带接下来 1 到 3 个交易日的行情推演，不要写成纯新闻摘要。
+- `chartCaption` 必须是完整的 K 线技术分析总结，分 3 段，每段 100 到 180 个汉字，并带接下来 1 到 3 个交易日的行情推演，不要写成纯新闻摘要。
 - `kLineMarkers` 必须按对象写入，当前页面使用 `candleMarkers`、`supportMarkers`、`resistanceMarkers`、`keyInfoMarkers`、`polyLines`。
 - `story`、`tPrinciples`、`tReferences`、`strategies` 没有可靠内容时写 `null`。
 - `kLineData` 使用脚本抓取的基金最近 90 根日 K 线。

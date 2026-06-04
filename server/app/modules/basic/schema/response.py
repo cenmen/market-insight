@@ -67,6 +67,7 @@ class FundKlineItem(BaseModel):
     volume: Optional[float] = Field(default=None)
     amount: Optional[float] = Field(default=None)
     amplitude: Optional[float] = Field(default=None)
+    maxDrawdown: Optional[float] = Field(default=None)  # 最大跌幅（%），(最低-开盘)/开盘*100
     changePercent: Optional[float] = Field(default=None)
     changeAmount: Optional[float] = Field(default=None)
     turnoverRate: Optional[float] = Field(default=None)

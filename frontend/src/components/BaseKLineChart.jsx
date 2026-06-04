@@ -8,20 +8,21 @@ function splitKlineData(data) {
 
   data.forEach(function eachItem(item) {
     categoryData.push(item.date);
-    values.push({
-      value: [item.open, item.close, item.low, item.high],
-      open: item.open,
-      close: item.close,
-      low: item.low,
-      high: item.high,
-      volume: item.volume,
-      amount: item.amount,
-      amplitude: item.amplitude,
-      changePercent: item.changePercent,
-      changeAmount: item.changeAmount,
-      turnoverRate: item.turnoverRate,
-      date: item.date,
-    });
+      values.push({
+        value: [item.open, item.close, item.low, item.high],
+        open: item.open,
+        close: item.close,
+        low: item.low,
+        high: item.high,
+        volume: item.volume,
+        amount: item.amount,
+        amplitude: item.amplitude,
+        maxDrawdown: item.maxDrawdown,
+        changePercent: item.changePercent,
+        changeAmount: item.changeAmount,
+        turnoverRate: item.turnoverRate,
+        date: item.date,
+      });
     volumes.push({
       value: item.volume ?? 0,
       itemStyle: {
@@ -529,6 +530,7 @@ export default function BaseKLineChart({ data = [], height = 360, className, mar
               `成交量：${formatAmountToYi(raw.volume)}`,
               `成交额：${formatAmountToYi(raw.amount)}`,
               `振幅：${formatNumber(raw.amplitude)}%`,
+              `最大跌幅：${formatNumber(raw.maxDrawdown)}%`,
               `涨跌幅：${formatNumber(raw.changePercent)}%`,
               `涨跌额：${formatNumber(raw.changeAmount)}`,
               `换手率：${formatNumber(raw.turnoverRate)}%`,

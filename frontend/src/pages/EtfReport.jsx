@@ -1,4 +1,5 @@
 import BaseKLineChart from '@/components/BaseKLineChart';
+import BaseLineChart from '@/components/BaseLineChart';
 import BasePieChart from '@/components/BasePieChart';
 import HiddenStoryLine from '@/components/HiddenStoryLine.jsx';
 import EtfSharePrompt from '@/components/EtfSharePrompt.jsx';
@@ -14,6 +15,28 @@ const formatRate = (rate) => {
 const getLatestFinancial = (row) => {
   return row.data?.[0] ?? {};
 };
+
+function getRecentTenDayKLineData(kLineData) {
+  return Array.isArray(kLineData) ? kLineData.slice(-10) : [];
+}
+
+function getAveragePercent(data, key) {
+  const values = (Array.isArray(data) ? data : [])
+    .map(function mapValue(item) {
+      return Number(item?.[key]);
+    })
+    .filter(Number.isFinite);
+
+  if (values.length === 0) {
+    return '--';
+  }
+
+  const total = values.reduce(function sumValue(sum, value) {
+    return sum + value;
+  }, 0);
+
+  return `${(total / values.length).toFixed(2)}%`;
+}
 
 const formatQuarter = (financial) => {
   if (!financial.year || !financial.quarter) {
@@ -31,6 +54,10 @@ export default function EtfReportPage() {
   if (!data) {
     return <Navigate to='/' replace />;
   }
+
+  const recentTenDayKLine = getRecentTenDayKLineData(data.kLineData);
+  const recentTenDayAmplitude = getAveragePercent(recentTenDayKLine, 'amplitude');
+  const recentTenDayMaxDrawdown = getAveragePercent(recentTenDayKLine, 'maxDrawdown');
 
   const pieData = data.businessRatio.map((item) => {
     return {
@@ -197,16 +224,50 @@ export default function EtfReportPage() {
 
         <section>
           <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>技术观察</h2>
-          <div className='my-[8pt] grid grid-cols-2 gap-[10pt] max-[820px]:grid-cols-2'>
-            <div className='mb-[8pt] rounded-[4pt] bg-[#faf9f5] p-[10pt]'>
-              <div className='text-[10pt] font-medium text-[#3d3d3a]'>最近 5 日振幅</div>
-              <div className='mt-[4pt] text-[14pt] font-medium text-[#1b365d] tabular-nums'>{data.recentFiveDayAmplitude}</div>
-              <div className='mt-[4pt] text-[9pt] text-[#504e49]'>{data.recentFiveDayAmplitudeComment}</div>
+          <div className='my-[8pt] grid grid-cols-2 gap-[10pt] max-[820px]:grid-cols-1'>
+            <div className='mb-[8pt] rounded-[4pt] bg-[#faf9f5] pt-[10pt]'>
+              <div className='px-[10pt] text-[10pt] font-medium text-[#3d3d3a]'>最近 10 日振幅</div>
+              <div className='mt-[4pt] px-[10pt] text-[14pt] font-medium text-[#1b365d] tabular-nums'>{recentTenDayAmplitude}</div>
+              <div className='mt-[4pt] px-[10pt] text-[9pt] text-[#504e49]'>{data.recentFiveDayAmplitudeComment ?? data.recentTenDayAmplitudeComment}</div>
+              <div className='mt-[4pt]'>
+                <BaseLineChart
+                  data={recentTenDayKLine}
+                  height={110}
+                  series={[
+                    {
+                      key: 'amplitude',
+                      name: '振幅',
+                      color: '#1b365d',
+                      areaColor: 'rgba(27, 54, 93, 0.14)',
+                      formatValue: function formatAmplitudeValue(value) {
+                        return `${Number(value).toFixed(2)}%`;
+                      },
+                    },
+                  ]}
+                />
+              </div>
             </div>
             <div className='mb-[8pt] rounded-[4pt] bg-[#faf9f5] p-[10pt]'>
-              <div className='text-[10pt] font-medium text-[#3d3d3a]'>最近 10 日最大跌幅（{data.recentTenDayMaxDrawdownDate}）</div>
-              <div className='mt-[4pt] text-[14pt] font-medium text-[#1b365d] tabular-nums'>{data.recentTenDayMaxDrawdown}</div>
+              <div className='text-[10pt] font-medium text-[#3d3d3a]'>最近 10 日最大跌幅</div>
+              <div className='mt-[4pt] text-[14pt] font-medium text-[#1b365d] tabular-nums'>{recentTenDayMaxDrawdown}</div>
               <div className='mt-[4pt] text-[9pt] text-[#504e49]'>{data.recentTenDayMaxDrawdownComment}</div>
+              <div className=''>
+                <BaseLineChart
+                  data={recentTenDayKLine}
+                  height={110}
+                  series={[
+                    {
+                      key: 'maxDrawdown',
+                      name: '最大跌幅',
+                      color: '#8a5d25',
+                      areaColor: 'rgba(138, 93, 37, 0.14)',
+                      formatValue: function formatDrawdownValue(value) {
+                        return `${Number(value).toFixed(2)}%`;
+                      },
+                    },
+                  ]}
+                />
+              </div>
             </div>
           </div>
           <figure className='my-[12pt] break-inside-avoid'>

@@ -28,9 +28,9 @@ from app.modules.basic.service import (
     fetch_fund_kline,
     fetch_fund_snapshot,
     fetch_fund_top_holdings,
+    fetch_kline_by_tx_cached,
+    fetch_search_stocks,
     fetch_stock_main_finance,
-    load_kline_by_tx_cached,
-    search_stocks,
 )
 
 router = APIRouter()
@@ -43,7 +43,7 @@ router = APIRouter()
     description="按股票代码与周期返回K线列表",
 )
 async def get_kline(params: KlineParams = Depends(), context: Context = Depends(build_context)):
-    df = await load_kline_by_tx_cached(params)
+    df = await fetch_kline_by_tx_cached(params)
     records = df.to_dicts()
     bars = [KlineBar.model_validate(r) for r in records]
     data = KlineResponse(code=params.code, count=len(bars), lines=bars)
@@ -57,7 +57,7 @@ async def get_kline(params: KlineParams = Depends(), context: Context = Depends(
     description="根据关键词匹配股票代码与名称",
 )
 def search(params: SearchStockParams = Depends(), context: Context = Depends(build_context)):
-    records = search_stocks(params)
+    records = fetch_search_stocks(params)
     items = [SearchStockItem.model_validate(r) for r in records]
     data = SearchStockResponse(count=len(items), items=items)
     return ResponseModel.success(data=data, request_id=context.request_id)

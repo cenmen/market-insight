@@ -2,9 +2,9 @@
 
 ## 目标
 
-为 ETF 分析数据生成轻量 K 线技术分析，并输出页面可直接消费的 `kLineMarkers` 和 `report.chartCaption`。
+为 ETF 分析数据生成轻量 K 线技术分析，并输出 skill 定义结构可直接消费的 `kLineMarkers` 和 `report.chartCaption`。
 
-技术分析必须服务于 `frontend/src/pages/EtfReport.jsx` 的 K 线图展示：
+技术分析必须服务于 ETF skill 结构中的 K 线展示字段：
 
 - `chartCaption`：技术分析总结，并带接下来 1 到 3 个交易日的行情推演。
 - `candleMarkers`：蜡烛图形态标记。

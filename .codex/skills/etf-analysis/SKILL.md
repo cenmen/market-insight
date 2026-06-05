@@ -13,15 +13,15 @@ description: Market Insight 项目专用的 ETF 分析工作流。通过本地 s
 frontend/src/data/etfs/etf<ETF_CODE>.jsx
 ```
 
-输出结果必须完全匹配 [`EtfReport.jsx`](/Users/cenmen/Desktop/work/projects/web/market-insight/frontend/src/pages/EtfReport.jsx) 的实际消费结构。页面只负责展示，不负责计算。
+输出结果必须匹配本 skill 定义的结构。页面只负责展示，不负责计算。
 
 ## 开始前检查
 
-每次生成或更新前，必须先读：
+每次生成或更新前，必须先做：
 
-1. [`frontend/src/pages/EtfReport.jsx`](/Users/cenmen/Desktop/work/projects/web/market-insight/frontend/src/pages/EtfReport.jsx)
-2. 当前工作区改动，避免覆盖用户已有修改
-3. 本 skill 自带的完整参考结构和字段生成要求
+1. 检查当前工作区改动，避免覆盖用户已有修改
+2. 读取本 skill 自带的完整参考结构和字段生成要求
+3. 如需快速确认字段形状，再读取 TS 参考文件
 
 如需用类型视角快速确认字段形状，可读取：
 
@@ -29,11 +29,11 @@ frontend/src/data/etfs/etf<ETF_CODE>.jsx
 .codex/skills/etf-analysis/references/etf-schema-reference.ts
 ```
 
-注意：这份 TS 文件只做参考，不是运行时代码，也不是页面真实类型来源。页面真实字段仍以 `EtfReport.jsx` 为准。
+注意：这份 TS 文件只做参考，不是运行时代码。
 
 ## 参考结构
 
-单个 ETF 文件使用普通 JavaScript 对象导出。只要文件中包含 JSX 字段，例如 `report.chartCaption`，文件后缀就必须使用 `.jsx`。
+输出文件统一使用 `.jsx`。
 
 下面这份结构是本 skill 的唯一结构参考。缺什么字段、每个字段应该长什么样，都以这份示例为准。
 
@@ -84,9 +84,7 @@ const etf588200 = {
     { label: 'ROE', value: '6.06%', note: '持仓公司权重加权 ROE 估算' },
     { label: '业务增速', value: '114.91%', note: '持仓公司权重业务增速估算' },
   ],
-  recentFiveDayAmplitude: '5.76%（5.10% ~ 6.61%）',
-  recentTenDayMaxDrawdown: '-8.42%',
-  recentTenDayMaxDrawdownDate: '2026.05.21',
+  recentFiveDayAmplitude: '5.76%',
   businessRatio: [
     {
       type: 'AI算力与通用计算芯片',
@@ -155,10 +153,6 @@ const etf588200 = {
       description: '组合既受订单、产能和利润率驱动，也受主线情绪强化影响；一旦两者共振，上涨效率很高，但若情绪先降温，回撤速度也会快于基本面恶化本身。',
     },
   ],
-  story: null,
-  tPrinciples: null,
-  tReferences: null,
-  strategies: null,
   kLineData: [
     {
       date: '2026-05-28',
@@ -169,6 +163,7 @@ const etf588200 = {
       volume: 6452849,
       amount: 678213657,
       amplitude: 1.69,
+      maxDrawdown: -2.84,
       changePercent: -1.97,
       changeAmount: -0.021,
       turnoverRate: 3.14,
@@ -236,7 +231,6 @@ export default etf588200;
 - `businessRatio`、`shortTermFactors`、`styleCharacteristics`、`kLineData`、`financialRows` 必须是数组。
 - `kLineMarkers` 必须是对象，包含 `candleMarkers`、`supportMarkers`、`resistanceMarkers`、`keyInfoMarkers`、`polyLines`。
 - `viewpoints` 没有可靠事件时写 `[]`，不要写 `null`。
-- `story`、`tPrinciples`、`tReferences`、`strategies` 当前页面不消费，没有可靠内容时写 `null`。
 - `report.chartCaption` 是唯一允许使用 JSX 的叙事字段；其他叙事字段使用纯字符串或数组对象。
 
 ### `etf`
@@ -283,7 +277,7 @@ export default etf588200;
 ### `kLineData`
 
 - 保留最近 90 根日 K 线。
-- 字段只保留 `date`、`open`、`close`、`low`、`high`、`volume`、`amount`、`amplitude`、`changePercent`、`changeAmount`、`turnoverRate`。
+- 字段保留 `date`、`open`、`close`、`low`、`high`、`volume`、`amount`、`amplitude`、`maxDrawdown`、`changePercent`、`changeAmount`、`turnoverRate`。
 - 所有数值字段保持 number，不转字符串。
 
 ### 核心文案
@@ -335,8 +329,6 @@ export default etf588200;
 
 - `metrics`
 - `recentFiveDayAmplitude`
-- `recentTenDayMaxDrawdown`
-- `recentTenDayMaxDrawdownDate`
 
 计算要求：
 
@@ -344,9 +336,7 @@ export default etf588200;
 - `metrics[1]` 盈利增速：来自 `financialRows[].data[0].nonNetProfitGrowthRate` 的加权结果。
 - `metrics[2]` ROE：来自 `financialRows[].data[0].roe` 的加权结果。
 - `metrics[3]` 业务增速：来自 `financialRows[].data[0].mainBusinessGrowthRate` 的加权结果。
-- 最近 5 日振幅写平均值，并附最小值和最大值区间，格式如 `5.67%（5.04% ~ 6.48%）`。
-- 最近 10 日最大回撤写最小跌幅值，格式如 `-8.42%`。
-- 最大回撤日期格式必须是 `YYYY.MM.DD`。
+- 最近 5 日振幅只写平均值，格式如 `5.67%`。
 
 权重指标计算规则：
 
@@ -360,9 +350,8 @@ K 线指标计算规则：
 
 1. `recentFiveDays = kLineData.slice(-5)`。
 2. 单日振幅优先使用接口返回的 `amplitude`；缺失时用 `(high - low) / low * 100`。
-3. 平均、最小、最大振幅保留两位小数。
-4. `recentTenDays = kLineData.slice(-10)`。
-5. 最近 10 日最大跌幅按 `(todayLow - previousClose) / previousClose * 100` 逐日计算后取最小值，并写入对应 `today.date`。
+3. 平均振幅保留两位小数。
+4. `maxDrawdown` 直接保留接口返回值并写入每条 `kLineData`，不要在 skill 中额外生成顶层 `recentTenDayMaxDrawdown` 或 `recentTenDayMaxDrawdownDate`。
 
 ## K 线技术分析
 
@@ -404,6 +393,12 @@ curl "http://localhost:8000/api/skill/etf/base-data?code=<ETF_CODE>&klineLimit=9
 5. 基于返回 JSON 生成最终数据文件。
 6. 生成后只做只读检查，不运行 preview、build、test、lint 或自校验命令。
 
+## 覆盖规则
+
+- 写文件前先检查目标文件是否已存在。
+- 如果目标文件已存在，必须先询问用户是否覆盖，未得到确认前不要改写原文件。
+- 只有新文件不存在时，才可以直接创建。
+
 ## 抓取约束
 
 - 多个 ETF 必须按代码逐个串行处理。
@@ -422,7 +417,8 @@ curl "http://localhost:8000/api/skill/etf/base-data?code=<ETF_CODE>&klineLimit=9
 - 根据真实业务暴露生成 `businessRatio`，并补全 `desc` 和必要的 `subItems`。
 - 将持仓整理成 `financialRows`，为每个持仓补全 `productTags` 和 `intro`。
 - 将基金 K 线直接写入 `kLineData`，保留最近 90 根数据。
-- 计算并写入 `metrics`、`recentFiveDayAmplitude`、`recentTenDayMaxDrawdown`、`recentTenDayMaxDrawdownDate`。
+- `kLineData` 中保留接口返回的 `maxDrawdown`。
+- 计算并写入 `metrics`、`recentFiveDayAmplitude`。
 - 补全 `shortTermFactors` 和 `styleCharacteristics`，不得套固定模板。
 - `viewpoints` 没有可靠事件时写 `[]`。
 - 不保留接口返回中的辅助字段，例如 `source`、`fetched_at`、`target_quarter_end`、`report_type`、`position_report`、`holdings`。
@@ -439,4 +435,3 @@ curl "http://localhost:8000/api/skill/etf/base-data?code=<ETF_CODE>&klineLimit=9
 
 - K 线技术分析、支撑压力、折线和 `chartCaption` 生成规则见 `references/kline-technical-analysis.md`。
 - 字段形状的 TS 参考见 `references/etf-schema-reference.ts`。
-- 页面真实消费字段最终以 [`EtfReport.jsx`](/Users/cenmen/Desktop/work/projects/web/market-insight/frontend/src/pages/EtfReport.jsx) 为准。

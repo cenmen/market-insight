@@ -51,10 +51,10 @@ export interface KLineItem {
   volume: number;
   amount: number;
   amplitude: number;
+  maxDrawdown: number;
   changePercent: number;
   changeAmount: number;
   turnoverRate: number;
-  maxDrawdown?: number;
 }
 
 export interface CandleMarker {
@@ -144,17 +144,11 @@ export interface EtfStaticDataReference {
   report: EtfReport;
   metrics: [MetricItem, MetricItem, MetricItem, MetricItem];
   recentFiveDayAmplitude: string;
-  recentTenDayMaxDrawdown: string;
-  recentTenDayMaxDrawdownDate: string;
   recentTenDayAmplitudeComment?: string;
   recentTenDayMaxDrawdownComment?: string;
   businessRatio: BusinessRatioItem[];
   shortTermFactors: FactorItem[];
   styleCharacteristics: FactorItem[];
-  story: string | null;
-  tPrinciples: string | null;
-  tReferences: string | null;
-  strategies: string | null;
   kLineData: KLineItem[];
   kLineMarkers: KLineMarkers;
   financialRows: FinancialRow[];

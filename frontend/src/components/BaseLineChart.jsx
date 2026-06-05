@@ -90,7 +90,7 @@ export default function BaseLineChart({ data = [], series = [], height = 160, cl
         grid: {
           left: 2,
           right: 2,
-          top: 12,
+          top: 16,
           bottom: 6,
           containLabel: true,
         },

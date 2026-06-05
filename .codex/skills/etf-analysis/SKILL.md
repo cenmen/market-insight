@@ -1,197 +1,267 @@
 ---
 name: etf-analysis
-description: Market Insight 项目专用的 ETF 分析工作流。通过本地 server 接口获取 ETF 持仓、持仓公司业绩和基金 K 线数据，结合数据补全分析内容，并输出 frontend/src/data/etfs 使用的 ETF 静态数据。需要同步生成 K 线技术分析、画线参数和带行情推演的图注。仅当用户显式调用 $etf-analysis 或明确要求使用 ETF 分析 skill 时使用；不要因为上下文自动调用。
+description: Market Insight 项目专用的 ETF 分析工作流。通过本地 server 接口抓取 ETF 前十大持仓、持仓公司核心财务数据和基金最近 90 根日 K 线，整理为 frontend/src/data/etfs 使用的静态数据，并同步生成 K 线技术分析、画线参数和行情推演图注。仅当用户显式调用 $etf-analysis 或明确要求使用 ETF 分析 skill 时使用；不要因为上下文自动调用。
 ---
 
 # ETF 分析
 
 ## 目标
 
-为本仓库生成 ETF 分析静态数据。流程先抓取 ETF 前十大持仓、持仓公司核心财务指标和基金最近 90 根日 K 线，再整理成 `frontend/src/pages/EtfReport.jsx` 当前消费的数据结构，并补齐 K 线技术分析画线参数。
-
-固定输出目录：
-
-```text
-frontend/src/data/etfs
-```
-
-单个 ETF 文件命名：
+生成或更新单个 ETF 的静态分析数据文件：
 
 ```text
 frontend/src/data/etfs/etf<ETF_CODE>.jsx
 ```
 
-例如：
-
-```text
-frontend/src/data/etfs/etf515880.jsx
-```
-
-页面会直接读取 `kLineMarkers`，所以数据文件里需要同步写入：
-
-```js
-kLineMarkers: {
-  candleMarkers: [
-    { date: '2026-05-29', label: '锤子线', position: 'below', lineLength: 1 },
-  ],
-  supportMarkers: [
-    { date: '2026-05-22', price: 3.53, label: '支撑位', position: 'below', lineLength: 1 },
-  ],
-  resistanceMarkers: [
-    { date: '2026-05-19', price: 3.82, label: '压力位', position: 'above', lineLength: 1 },
-  ],
-  keyInfoMarkers: [
-    { date: '2026-05-28', label: '关键信息位', position: 'above', lineLength: 1.5, lineWidth: 0.6, fontSize: 7 },
-  ],
-  polyLines: [
-    {
-      points: [
-        { date: '2026-05-25', price: 3.91 },
-        { date: '2026-05-28', price: 3.82 },
-        { date: '2026-06-02', price: 3.49 },
-      ],
-      lineWidth: 1.1,
-      lineType: 'dashed',
-      color: '#1b365d',
-    },
-  ],
-}
-```
+输出结果必须完全匹配 [`EtfReport.jsx`](/Users/cenmen/Desktop/work/projects/web/market-insight/frontend/src/pages/EtfReport.jsx) 的实际消费结构。页面只负责展示，不负责计算。
 
 ## 开始前检查
 
-每次生成或更新 ETF 数据前，必须先检查当前代码结构，不要依赖旧 schema：
+每次生成或更新前，必须先读：
 
-1. 读取 `frontend/src/data/etfs/etf515880.jsx`，以它作为字段顺序、命名、文案风格和导出格式的主要参考。
-2. 读取 `frontend/src/pages/EtfReport.jsx`，确认页面实际消费字段。
-3. 检查工作区已有改动，避免覆盖用户或旧任务留下的相关修改。
+1. [`frontend/src/pages/EtfReport.jsx`](/Users/cenmen/Desktop/work/projects/web/market-insight/frontend/src/pages/EtfReport.jsx)
+2. 当前工作区改动，避免覆盖用户已有修改
+3. 本 skill 自带的完整参考结构和字段生成要求
 
-## 当前目标类型
+如需用类型视角快速确认字段形状，可读取：
 
-生成的单个 ETF 文件应优先使用 JSX 文件后缀 `.jsx`。只要文件内包含任何 JSX 片段字段，例如 `report.chartCaption`，就必须使用 `.jsx`，不要写成 `.js`。文件内容仍然是普通 JavaScript 对象，不要写 TypeScript 类型导入或 `satisfies`：
+```text
+.codex/skills/etf-analysis/references/etf-schema-reference.ts
+```
 
-```js
+注意：这份 TS 文件只做参考，不是运行时代码，也不是页面真实类型来源。页面真实字段仍以 `EtfReport.jsx` 为准。
+
+## 参考结构
+
+单个 ETF 文件使用普通 JavaScript 对象导出。只要文件中包含 JSX 字段，例如 `report.chartCaption`，文件后缀就必须使用 `.jsx`。
+
+下面这份结构是本 skill 的唯一结构参考。缺什么字段、每个字段应该长什么样，都以这份示例为准。
+
+```jsx
 const etf588200 = {
   etf: {
     code: '588200',
     name: '科创芯片ETF',
     index: '上证科创板芯片指数',
-    intro: '一句到两句概括 ETF 的核心暴露、权重结构和适用场景。',
-    concepts: ['主题1', '主题2'],
+    intro: '组合主要暴露在 GPU、AI ASIC、存储、先进封装和半导体材料环节，前十大权重决定了它更像高景气算力链的弹性组合，而不是分散化半导体宽基。',
+    concepts: ['科创芯片', 'AI算力芯片', '先进封装', 'HBM'],
     scale: '386.07 亿元',
   },
   report: {
     date: '2026-06-02',
     author: '抖音 · ETF主线侦探',
     headlineSignal: '规模与流动性观察',
-    coreJudgment: '一句短判断',
-    thesis: '投资逻辑正文。',
-    callout: '对整篇 ETF 研究结论的高浓缩概括，要求简洁有力，字数控制在 20 到 40 字。',
+    coreJudgment: 'AI算力链中偏高弹性的芯片制造与配套组合',
+    thesis: '这只 ETF 的收益弹性主要来自算力资本开支向芯片设计、晶圆制造、先进封装和高端存储链条的传导，而不是单纯依赖情绪交易。权重结构决定了它对上游订单、产能利用率、产品涨价和国产替代进展更敏感。若景气验证继续强化，龙头权重股的盈利兑现会直接抬升组合定价；若资本开支和订单预期回落，估值压缩通常也会更快反映到净值波动上。',
+    callout: '组合本质是算力资本开支映射到芯片制造链的高弹性定价工具。',
     chartCaption: (
       <>
-        <p>近期走势总结……</p>
-        <p>关键支撑/压力……</p>
-        <p>接下来 1 到 3 个交易日的推演……</p>
+        <p>近 90 根日 K 线整体保持震荡抬升后的高位整固，前期快速拉升把价格推升到阶段高位，随后量能回落、振幅收敛，说明短线从情绪驱动转向分歧消化。当前价格仍运行在中期均线之上，但进攻斜率已经放缓，资金更关注高位筹码交换后的承接质量。</p>
+        <p>短线关键支撑先看最近两次回踩确认的密集成交区，若失守则容易回到前一轮放量启动平台；上方压力则集中在前高附近和放量长上影区间，只有重新放量站稳，才说明趋势资金愿意继续抬升估值。均线结构尚未走坏，但需要警惕缩量反抽后的再度回踩。</p>
+        <p>接下来 1 到 3 个交易日更可能围绕支撑与前高之间做震荡换手：如果放量突破压力位，短线有继续向上试探的空间；如果缩量上冲无果或跌破支撑，行情大概率回到平台整理，操作节奏更适合等回踩确认，而不是在情绪拉升阶段盲目追价。</p>
       </>
     ),
-    hiddenStoryLine: '市场可能炒作的故事线，必须有想象空间。',
+    hiddenStoryLine: '如果国产算力生态从单点突破走向整机、存储、封装和材料协同放量，市场很容易把这类 ETF 从“景气主题”进一步交易成“国产替代基础设施”的长期叙事。',
     disclaimer: '仅供参考，不构成任何投资建议；市场有风险，决策需谨慎，风险自负。',
-    risks: [],
+    risks: [
+      {
+        title: '资本开支回落风险',
+        description: '若云厂商和大模型厂商下修算力投入，芯片、封装和材料链的订单预期会先于业绩下修。',
+      },
+      {
+        title: '估值压缩风险',
+        description: '高景气赛道一旦进入验证空窗期，市场会先交易估值回落，净值波动通常快于基本面变化。',
+      },
+      {
+        title: '权重集中风险',
+        description: '龙头权重占比较高，单一公司订单、良率或产品价格波动会被直接放大到组合表现。',
+      },
+    ],
   },
-  metrics: [],
-  recentFiveDayAmplitude: '5.67%（5.04% ~ 6.48%）',
+  metrics: [
+    { label: '基金规模', value: '386.07 亿元', note: '资金流动性' },
+    { label: '盈利增速', value: '251.90%', note: '持仓公司权重盈利增速估算' },
+    { label: 'ROE', value: '6.06%', note: '持仓公司权重加权 ROE 估算' },
+    { label: '业务增速', value: '114.91%', note: '持仓公司权重业务增速估算' },
+  ],
+  recentFiveDayAmplitude: '5.76%（5.10% ~ 6.61%）',
   recentTenDayMaxDrawdown: '-8.42%',
   recentTenDayMaxDrawdownDate: '2026.05.21',
-  businessRatio: [],
-  shortTermFactors: [],
-  styleCharacteristics: [],
+  businessRatio: [
+    {
+      type: 'AI算力与通用计算芯片',
+      rate: 29.18,
+      desc: '这部分决定组合对算力资本开支和高端芯片景气度的直接敏感性，是最核心的业绩弹性来源。',
+      subItems: [
+        { type: 'GPU / AI ASIC', rate: 15.32 },
+        { type: '国产通用CPU', rate: 8.67 },
+        { type: '边缘与专用处理器', rate: 5.19 },
+      ],
+    },
+    {
+      type: '先进封装与制造配套',
+      rate: 24.46,
+      desc: '封装、测试和制造配套承担产能扩张与良率提升的兑现路径，是算力需求外溢到产业链中游的重要抓手。',
+      subItems: [
+        { type: 'CoWoS / 2.5D封装', rate: 11.24 },
+        { type: '测试与制造服务', rate: 8.02 },
+        { type: '设备与材料配套', rate: 5.2 },
+      ],
+    },
+    {
+      type: '高端存储与互连材料',
+      rate: 18.33,
+      desc: 'HBM、存储和高速互连材料决定算力系统瓶颈环节的扩产节奏，既影响景气验证，也影响估值溢价。',
+    },
+    {
+      type: '其他芯片相关成分',
+      rate: 28.03,
+      desc: '剩余成分分布在设计服务、模拟器件、特色工艺和半导体材料等环节，提供补充暴露。',
+    },
+  ],
+  shortTermFactors: [
+    {
+      title: '算力资本开支验证',
+      description: '重点跟踪云厂商和大模型厂商的 GPU、服务器和数据中心投入是否继续上修，因为预算兑现会先传导到芯片、封装和存储链订单预期，再反映到权重股估值抬升。',
+    },
+    {
+      title: '上游供给与交付节奏',
+      description: '若晶圆、封装和高端存储的供给仍偏紧，交付周期延长通常意味着需求没有降温，市场会据此上修未来几个季度的收入兑现节奏。',
+    },
+    {
+      title: '产品价格与良率变化',
+      description: '高端芯片、先进封装和存储产品价格若维持强势，同时良率持续提升，利润率弹性会快于收入释放，市场往往会提前交易盈利上修。',
+    },
+    {
+      title: '国产替代订单落地',
+      description: '若核心客户导入国产芯片、封装或材料方案，订单质量会从主题叙事转为真实收入来源，这类验证通常会显著改变市场对组合中长期溢价的定价方式。',
+    },
+  ],
+  styleCharacteristics: [
+    {
+      title: '龙头权重驱动明显',
+      description: '组合表现高度依赖少数龙头公司订单和盈利兑现，权重集中意味着上涨时弹性更强，但一旦龙头预期松动，净值回撤也会快于宽基。',
+    },
+    {
+      title: '成长估值敏感度高',
+      description: '这类 ETF 的定价不仅看当期利润，更看未来几个季度的景气延续和资本开支斜率，因此估值切换和预期修正对价格的影响通常早于财报落地。',
+    },
+    {
+      title: '主题资金参与度高',
+      description: '当市场主线集中在 AI 算力时，增量资金更容易把这类组合作为高弹性映射工具，成交放大时上行斜率会更陡，但缩量后也更容易进入平台震荡。',
+    },
+    {
+      title: '基本面与情绪共振',
+      description: '组合既受订单、产能和利润率驱动，也受主线情绪强化影响；一旦两者共振，上涨效率很高，但若情绪先降温，回撤速度也会快于基本面恶化本身。',
+    },
+  ],
   story: null,
   tPrinciples: null,
   tReferences: null,
   strategies: null,
-  kLineData: [],
-  financialRows: [],
+  kLineData: [
+    {
+      date: '2026-05-28',
+      open: 42.66,
+      close: 41.2,
+      low: 38.39,
+      high: 43.35,
+      volume: 6452849,
+      amount: 678213657,
+      amplitude: 1.69,
+      changePercent: -1.97,
+      changeAmount: -0.021,
+      turnoverRate: 3.14,
+    },
+  ],
+  kLineMarkers: {
+    candleMarkers: [
+      { date: '2026-05-29', label: '锤子线', position: 'below', lineLength: 1 },
+    ],
+    supportMarkers: [
+      { date: '2026-05-22', price: 39.53, label: '支撑位', position: 'below', lineLength: 1 },
+    ],
+    resistanceMarkers: [
+      { date: '2026-05-19', price: 43.82, label: '压力位', position: 'above', lineLength: 1 },
+    ],
+    keyInfoMarkers: [
+      { date: '2026-05-28', label: '关键信息位', position: 'above', lineLength: 1.5, lineWidth: 0.6, fontSize: 7 },
+    ],
+    polyLines: [
+      {
+        points: [
+          { date: '2026-05-25', price: 43.91 },
+          { date: '2026-05-28', price: 42.82 },
+          { date: '2026-06-02', price: 39.49 },
+        ],
+        lineWidth: 1.1,
+        lineType: 'dashed',
+        color: '#1b365d',
+      },
+    ],
+  },
+  financialRows: [
+    {
+      code: '300308',
+      name: '中际旭创',
+      weight: 13.66,
+      productTags: ['800G光模块', '数据中心互联', '硅光配套'],
+      intro: '组合中最直接映射高速光互联景气度的核心权重之一，订单与产品升级节奏影响净值弹性。',
+      data: [
+        {
+          year: 2026,
+          quarter: 1,
+          roe: 8.69,
+          mainBusinessGrowthRate: 66.23,
+          netProfitMargin: 18.32,
+          grossProfitMargin: 34.21,
+          revenueGrowthRate: 66.23,
+          nonNetProfitGrowthRate: 76.65,
+        },
+      ],
+    },
+  ],
   viewpoints: [],
 };
 
 export default etf588200;
 ```
 
-字段要求：
+## 字段生成要求
 
-- `report` 必须存在，页面 header、投资逻辑、风险提示和图注都会读取它。
-- `metrics` 必须是 4 项：基金规模、盈利增速、ROE、业务增速。
+### 顶层要求
+
+- `report` 必须存在。
+- `metrics` 固定为 4 项：基金规模、盈利增速、ROE、业务增速。
 - `businessRatio`、`shortTermFactors`、`styleCharacteristics`、`kLineData`、`financialRows` 必须是数组。
-- `kLineMarkers` 必须是对象，当前页面读取 `candleMarkers`、`supportMarkers`、`resistanceMarkers`、`keyInfoMarkers`、`polyLines` 五个字段。
-- `viewpoints` 使用数组；没有可靠事件时写 `[]`，不要写 `null`，因为页面直接传给 `EventTimeline`。
+- `kLineMarkers` 必须是对象，包含 `candleMarkers`、`supportMarkers`、`resistanceMarkers`、`keyInfoMarkers`、`polyLines`。
+- `viewpoints` 没有可靠事件时写 `[]`，不要写 `null`。
 - `story`、`tPrinciples`、`tReferences`、`strategies` 当前页面不消费，没有可靠内容时写 `null`。
-- `report.hiddenStoryLine` 如果有内容，写成一段带想象力的市场叙事，不是基本面总结，也不是财务描述。重点是市场可能会炒作的故事线，例如“国产航天未来可能演进到什么程度”“某个新技术如果规模化落地会引发什么交易机会”。
+- `report.chartCaption` 是唯一允许使用 JSX 的叙事字段；其他叙事字段使用纯字符串或数组对象。
 
-## 核心文案字段写法
+### `etf`
 
-以下 4 组字段是页面专业度的关键来源，不能只写成泛泛而谈的主题总结，也不能使用口号式、模板式表达。
+- `intro` 用 1 到 2 句概括 ETF 的核心暴露、权重结构和适用场景。
+- `concepts` 只写真实相关概念，不堆砌标签。
+- `scale` 使用亿元，保留两位小数，例如 `386.07 亿元`。
 
-### `report.thesis`
+### `report`
 
-- 用 2 到 4 句完成整个 ETF 研究的核心论证，不是宣传语，也不是简单复述指数名称。
-- 必须说明：
-  - ETF 主要暴露在哪些产业链环节或资产类型。
-  - 权重结构决定了它的收益弹性来自哪里。
-  - 它更适合跟踪什么样的产业趋势、资本开支周期、政策周期或盈利兑现节奏。
-- 语气要像研究摘要，强调“暴露结构、驱动因子、交易前提”，不要写成“这个 ETF 很不错”“适合长期看好”这类空话。
+- `headlineSignal` 适合头部展示，简短中性，不写口号。
+- `coreJudgment` 用一句短判断概括 ETF 的核心暴露和定价方向。
+- `thesis` 要像研究摘要，不是宣传语，也不是复述指数名称。
+- `callout` 不是“一句话看法”，不要使用“总结：”“一句话看法：”“核心结论：”“这只ETF适合……”等固定开头。
+- `hiddenStoryLine` 写市场可能炒作的未来叙事，不写成财务总结或行业百科。
+- `risks` 写真实风险来源，不写空泛的“市场波动风险”。
 
-### `report.callout`
+### `businessRatio`
 
-- 这个字段不是“一句话看法”，也不要用“总结：”“一句话看法：”“核心结论：”“这只ETF适合……”这类固定开头。
-- 它的职责是把整篇 ETF 分析研究压缩成一句高密度结论，直接概括组合性质、驱动条件和交易约束。
-- 推荐写法是完整陈述句，直接进入判断，例如“组合本质上是……，弹性来自……，但定价能否继续抬升取决于……”
-- 长度控制在 20 到 40 个汉字，要求信息密度高、可复用，不要写口语化提醒。
+- `rate` 使用 number。
+- 分组要让用户能快速理解组合暴露。
+- 如果分组没有覆盖全部权重，增加“其他”分组承接剩余暴露。
+- `desc` 要解释这个分组对 ETF 定价的意义，不只是描述行业。
 
-### `shortTermFactors`
-
-- 每条都要是“可跟踪、可验证、能在几周到几个月内改变定价”的变量，不要写成宽泛行业常识。
-- 标题要落在具体变量或验证点上，例如“AI 资本开支验证”“海风送出节奏”“特高压招标兑现”“铜价与加工费剪刀差”，不要只写大而泛的板块名。
-- `description` 必须交代清楚三件事：
-  - 这个变量影响产业链的哪个环节。
-  - 它如何传导到 ETF 权重股的订单、收入、利润率或估值。
-  - 市场为什么会提前交易这个变量。
-- 尽量避免“会带动需求”“会影响业绩”这种空泛句式，改写成更具体的传导逻辑。
-
-### `styleCharacteristics`
-
-- 这里不是简单罗列风格标签，而是解释这个 ETF 在资金行为和定价结构上的“交易属性”。
-- 优先描述：
-  - 权重集中度和龙头依赖度。
-  - 成长 / 周期 / 红利 / 制造 / 出海 / 主题资金等风格暴露。
-  - 对订单、资本开支、商品价格、估值切换、政策预期的敏感度。
-  - 相对宽基或相邻主题 ETF 的波动来源和节奏差异。
-- 每条都应体现“为什么会这样”，不要只写结论标签。例如不要只写“高波动”，而要写“龙头权重高且预期交易占比大，业绩确认前估值波动通常快于基本面兑现”。
-
-## financialRows 结构
-
-`financialRows` 每项参考：
-
-```js
-{
-  code: '300308',
-  name: '中际旭创',
-  weight: 13.66,
-  productTags: ['光模块', '800G', '数据中心互联'],
-  intro: '一句话说明公司在 ETF 组合里的业务暴露和影响。',
-  data: [
-    {
-      year: 2026,
-      quarter: 1,
-      roe: 8.69,
-      mainBusinessGrowthRate: 66.23,
-      netProfitMargin: 18.32,
-      grossProfitMargin: 34.21,
-      revenueGrowthRate: 66.23,
-      nonNetProfitGrowthRate: 76.65,
-    },
-  ],
-}
-```
+### `financialRows`
 
 接口字段映射：
 
@@ -204,52 +274,84 @@ export default etf588200;
 - `quarter_data[].profit_grow` -> `nonNetProfitGrowthRate`
 - `quarter_data[].roe` -> `roe`
 
-## 必须预先计算的展示字段
+写法要求：
 
-页面只负责展示，不负责计算。生成 ETF 数据文件时必须在 skill 流程内算好并写入以下字段：
+- `productTags` 写真实产品、业务线或产业链环节，不写空泛行业词。
+- `intro` 要短，适合页面表格展示。
+- `quarter` 使用 `1`、`2`、`3`、`4`。
+
+### `kLineData`
+
+- 保留最近 90 根日 K 线。
+- 字段只保留 `date`、`open`、`close`、`low`、`high`、`volume`、`amount`、`amplitude`、`changePercent`、`changeAmount`、`turnoverRate`。
+- 所有数值字段保持 number，不转字符串。
+
+### 核心文案
+
+以下 4 组字段直接决定页面专业度，不能写成模板化、口号化或过度泛化的文案。
+
+#### `report.thesis`
+
+- 用 2 到 4 句完成整个 ETF 研究的核心论证。
+- 必须说明：
+  - ETF 主要暴露在哪些产业链环节或资产类型。
+  - 权重结构决定了它的收益弹性来自哪里。
+  - 它更适合跟踪什么样的产业趋势、资本开支周期、政策周期或盈利兑现节奏。
+- 语气要像研究摘要，强调“暴露结构、驱动因子、交易前提”。
+- 不要写“这个 ETF 很不错”“适合长期看好”“景气度高”这类空话。
+
+#### `report.callout`
+
+- 这是整篇 ETF 研究的高密度概括，不是用户提醒语。
+- 直接进入判断，概括组合性质、驱动条件和交易约束。
+- 长度控制在 20 到 40 个汉字。
+- 不要使用固定开头模板，不要写成口语化提醒。
+
+#### `shortTermFactors`
+
+- 建议 4 到 7 条。
+- 只写未来几周到几个月内会影响价格的变量。
+- `title` 要落在具体变量、验证点或传导抓手上，不要只写泛行业名词。
+- `description` 必须说明：
+  - 变量影响产业链的哪个环节。
+  - 如何传导到 ETF 权重股的订单、收入、利润率或估值。
+  - 市场为什么会提前交易这个变量。
+- 避免“会带动需求”“会影响业绩”这类空泛句式。
+
+#### `styleCharacteristics`
+
+- 建议 4 到 7 条。
+- 这里写的是 ETF 的交易属性和定价结构，不是简单贴风格标签。
+- 优先描述：
+  - 权重集中度和龙头依赖度。
+  - 成长 / 周期 / 红利 / 制造 / 出海 / 主题资金等风格暴露。
+  - 对订单、资本开支、商品价格、估值切换、政策预期的敏感度。
+  - 相对宽基或相邻主题 ETF 的波动来源和节奏差异。
+- 每条都要解释“为什么具备这种风格”以及“这种风格如何反映到价格行为”。
+
+### 展示字段计算
+
+下列字段必须在 skill 内算好：
 
 - `metrics`
 - `recentFiveDayAmplitude`
 - `recentTenDayMaxDrawdown`
 - `recentTenDayMaxDrawdownDate`
 
-计算来源：
+计算要求：
 
-- `metrics[0]` 基金规模：使用 `fetch_fund_snapshot` 返回的流通市值换算成亿元后写入 `etf.scale`，`value` 可写成 `291.05 亿`。
-- `metrics[1]` 盈利增速：从 `financialRows[].data[0].nonNetProfitGrowthRate` 按持仓权重计算。
-- `metrics[2]` ROE：从 `financialRows[].data[0].roe` 按持仓权重计算。
-- `metrics[3]` 业务增速：从 `financialRows[].data[0].mainBusinessGrowthRate` 按持仓权重计算。
-- `recentFiveDayAmplitude`：从 `kLineData` 最近 5 条计算平均振幅，并带上最小和最大振幅范围，格式如 `5.67%（5.04% ~ 6.48%）`。
-- `recentTenDayMaxDrawdown`：从 `kLineData` 最近 10 条计算最大区间跌幅，格式如 `-8.42%`。
-- `recentTenDayMaxDrawdownDate`：写入最大跌幅发生日，格式如 `2026.05.21`。
-
-## K 线技术分析与 `chartCaption`
-
-生成或更新 ETF 数据时，必须按 `references/kline-technical-analysis.md` 执行 K 线技术分析，并把结果写入：
-
-- `report.chartCaption`
-- `kLineMarkers.candleMarkers`
-- `kLineMarkers.supportMarkers`
-- `kLineMarkers.resistanceMarkers`
-- `kLineMarkers.keyInfoMarkers`
-- `kLineMarkers.polyLines`
-
-`chartCaption` 必须是完整的 K 线技术分析总结，并带接下来 1 到 3 个交易日的行情推演。它必须写成 JSX 片段，不是普通字符串；如果文件里用了这个字段，文件后缀必须是 `.jsx`。
-
-写作要求：
-
-- 必须分成 3 段。
-- 每段控制在 100 到 180 个汉字之间。
-- 第 1 段写当前走势、量能和结构。
-- 第 2 段写关键支撑、压力、均线或形态变化。
-- 第 3 段写接下来 1 到 3 个交易日的推演和操作节奏。
-- 不要写成短句拼接，也不要只下结论不展开。
-- 推荐使用 JSX 片段并把每段包在单独的 `<p>` 中。
+- `metrics[0]` 基金规模：使用 `fetch_fund_snapshot` 返回的流通市值换算成亿元。
+- `metrics[1]` 盈利增速：来自 `financialRows[].data[0].nonNetProfitGrowthRate` 的加权结果。
+- `metrics[2]` ROE：来自 `financialRows[].data[0].roe` 的加权结果。
+- `metrics[3]` 业务增速：来自 `financialRows[].data[0].mainBusinessGrowthRate` 的加权结果。
+- 最近 5 日振幅写平均值，并附最小值和最大值区间，格式如 `5.67%（5.04% ~ 6.48%）`。
+- 最近 10 日最大回撤写最小跌幅值，格式如 `-8.42%`。
+- 最大回撤日期格式必须是 `YYYY.MM.DD`。
 
 权重指标计算规则：
 
 1. 只使用最新一期财务数据存在的持仓。
-2. 先取待计算指标的原始值数组，计算 p10 和 p90。
+2. 先取原始值数组，计算 p10 和 p90。
 3. 每个值裁剪到 `[p10, p90]` 后按 `weight` 加权。
 4. 用 `sum(clippedValue * weight) / sum(weight)` 得到结果。
 5. 展示值保留两位小数并加 `%`。
@@ -260,76 +362,81 @@ K 线指标计算规则：
 2. 单日振幅优先使用接口返回的 `amplitude`；缺失时用 `(high - low) / low * 100`。
 3. 平均、最小、最大振幅保留两位小数。
 4. `recentTenDays = kLineData.slice(-10)`。
-5. 最近 10 日最大跌幅按昨日收盘价到今日最低价的最大回撤计算，即 `(todayLow - previousClose) / previousClose * 100`，从 `recentTenDays.slice(1)` 逐日计算后取最小值，保留两位小数并加 `%`，并将对应 `today.date` 写入 `recentTenDayMaxDrawdownDate`，日期格式为 `YYYY.MM.DD`。
+5. 最近 10 日最大跌幅按 `(todayLow - previousClose) / previousClose * 100` 逐日计算后取最小值，并写入对应 `today.date`。
+
+## K 线技术分析
+
+生成或更新 ETF 数据时，必须按 `references/kline-technical-analysis.md` 执行技术分析，并写入：
+
+- `report.chartCaption`
+- `kLineMarkers.candleMarkers`
+- `kLineMarkers.supportMarkers`
+- `kLineMarkers.resistanceMarkers`
+- `kLineMarkers.keyInfoMarkers`
+- `kLineMarkers.polyLines`
+
+`report.chartCaption` 要求：
+
+- 必须是 JSX 片段。
+- 必须分成 3 段。
+- 每段控制在 100 到 180 个汉字之间。
+- 第 1 段写当前走势、量能和结构。
+- 第 2 段写关键支撑、压力、均线或形态变化。
+- 第 3 段写接下来 1 到 3 个交易日的推演和操作节奏。
+- 不要写成短句拼接，也不要只下结论不展开。
 
 ## 工作流程
 
-1. 通过本地 server 接口抓取 ETF 基础数据。接口返回 JSON，不直接写文件：
+1. 抓取前输出：
+   - `调用参数：...`
+   - `调用接口：...`
+2. 通过本地 server 接口抓取 ETF 基础数据：
 
 ```bash
 curl "http://localhost:8000/api/skill/etf/base-data?code=<ETF_CODE>&klineLimit=90"
 ```
 
-在发起本地 server 调用之前，必须先在会话里输出本次调用的参数和接口地址，再执行抓取。格式要求：
+3. 接口成功后输出：
+   - `xx 接口调用已完成`
+   - `xx 数据成功获取`
+4. 接口失败后立即停止，并输出：
+   - `调用接口失败，参数是 xx`
+5. 基于返回 JSON 生成最终数据文件。
+6. 生成后只做只读检查，不运行 preview、build、test、lint 或自校验命令。
 
-- `调用参数：...`
-- `调用接口：...`
+## 抓取约束
 
-如果是多个参数，按 JSON 或 key-value 形式原样输出，保证可读且可复现。
+- 多个 ETF 必须按代码逐个串行处理。
+- 禁止并行请求多个 `/api/skill/etf/base-data`。
+- 禁止用 shell 循环或一条命令连续请求多个 ETF。
+- 无法取数时说明原因，不要编造数据。
 
-接口会返回：
+## 生成要求
 
-- ETF 前十大持仓
-- 持仓公司的目标季度核心财务数据
-- 基金最近 90 根日 K 线
+基于接口返回 JSON 生成最终 JSX 数据文件时：
 
-当一次任务涉及多个 ETF 代码时，必须按代码逐个串行抓取和整理。禁止并行请求多个 `/api/skill/etf/base-data`、禁止用 shell 循环或一条命令连续请求多个 ETF，也不要用 `multi_tool_use.parallel` 同时发起多个抓取请求；东方财富接口容易触发风控或封禁。每完成一个 ETF 的抓取、整理和文件写入后，再处理下一个。
+- 输出文件为 `frontend/src/data/etfs/etf<ETF_CODE>.jsx`。
+- 顶层变量名为 `etf<ETF_CODE>`，例如 `etf515880`。
+- 补全 `etf.name`、`etf.index`、`etf.intro`、`etf.concepts`、`etf.scale`。
+- 补全 `report`。
+- 根据真实业务暴露生成 `businessRatio`，并补全 `desc` 和必要的 `subItems`。
+- 将持仓整理成 `financialRows`，为每个持仓补全 `productTags` 和 `intro`。
+- 将基金 K 线直接写入 `kLineData`，保留最近 90 根数据。
+- 计算并写入 `metrics`、`recentFiveDayAmplitude`、`recentTenDayMaxDrawdown`、`recentTenDayMaxDrawdownDate`。
+- 补全 `shortTermFactors` 和 `styleCharacteristics`，不得套固定模板。
+- `viewpoints` 没有可靠事件时写 `[]`。
+- 不保留接口返回中的辅助字段，例如 `source`、`fetched_at`、`target_quarter_end`、`report_type`、`position_report`、`holdings`。
 
-如果因为沙箱、server 未启动或超时导致失败，按当前环境规则处理；无法取数时说明原因，不要编造数据。
+## 总体分析原则
 
-2. 每次本地 server 接口返回成功后，必须在会话里输出：
-
-- `xx 接口调用已完成`
-- `xx 数据成功获取`
-
-其中 `xx` 替换为实际接口名或数据主题，例如 `ETF 基础数据`、`K 线数据`。
-
-3. 如果接口调用失败，必须立即停止后续分析、计算和写文件操作，并在会话里输出：
-
-- `调用接口失败，参数是 xx`
-
-其中 `xx` 写入本次请求的完整参数或关键参数摘要，不要继续执行任何后续步骤。
-
-4. 基于接口返回 JSON 进行分析和补全，生成最终 JSX 数据文件：
-   - 输出文件为 `frontend/src/data/etfs/etf<ETF_CODE>.jsx`。
-   - 顶层变量名为 `etf<ETF_CODE>`，例如 `etf515880`。
-   - 补全 `etf.name`、`etf.index`、`etf.intro`、`etf.concepts`、`etf.scale`。
-   - 补全 `report`，文案风格参考 `frontend/src/data/etfs/etf515880.jsx`。
-   - 根据持仓真实业务暴露生成 `businessRatio`，并补全 `desc` 和必要的 `subItems`。
-   - 将接口返回的持仓整理成 `financialRows`，为每个持仓补全 `productTags` 和 `intro`。
-   - 将接口返回的基金 K 线直接写入 `kLineData`，保留最近 90 根数据。
-   - 根据 `financialRows` 和 `kLineData` 计算并写入 `metrics`、`recentFiveDayAmplitude`、`recentTenDayMaxDrawdown`、`recentTenDayMaxDrawdownDate`。
-   - 补全 `shortTermFactors` 和 `styleCharacteristics`，按本 skill 的字段写法生成，不要套固定模板。
-   - `viewpoints` 没有可靠事件时写 `[]`。
-   - 不要保留接口返回里的辅助字段，例如 `source`、`fetched_at`、`target_quarter_end`、`report_type`、`position_report`、`holdings`。
-
-5. `frontend/src/data/etfs/index.js` 会用 `import.meta.glob` 自动导出目录下的 ETF 数据，`EtfReportPage` 通过 `/etf/:code` 动态读取 `etf<code>`。新增 ETF 数据文件后通常不需要改页面；如果用户要求新增特殊路由或展示逻辑，再按页面现有结构调整。
-
-6. 生成后只做只读检查，例如确认字段名、导出名和文件路径。不要自动运行 preview、build、test、lint 或自校验命令；把可手动执行的命令交给用户。
-
-## 分析规则
-
-- 定量字段优先基于抓取数据：持仓、权重、`financialRows` 和 `kLineData`。
-- 多 ETF 任务必须一个代码一个代码处理，任何联网抓取步骤都不并发。
-- 定性分析要基于持仓公司的真实业务暴露，不要只根据 ETF 名称推断。
-- `businessRatio` 的权重需要和持仓权重保持可解释的一致性。如果分组没有覆盖全部持仓，增加“其他”分组承接剩余暴露。
-- `report.thesis`、`report.callout`、`shortTermFactors`、`styleCharacteristics` 用研究摘要式中文，重点写产业链暴露、驱动变量、传导逻辑和交易约束，不要使用“ 一句话看法： ”或其他固定开头模板。
-- `report.hiddenStoryLine` 是市场可能会炒作的故事线，重点写想象空间和未来场景，不要写成财务总结或行业百科。
-- `report.chartCaption` 必须是完整 K 线技术分析总结，分 3 段，每段 100 到 180 个汉字，并带接下来 1 到 3 个交易日的推演。
-- 除 `report.chartCaption` 外，不要把 JSX 放进 ETF 静态数据；所有其他叙事字段使用纯字符串或数组对象。
-- `report.chartCaption` 是唯一允许使用 JSX 的叙事字段。若需要分段排版，请使用 JSX 片段并把每段包在单独的 `<p>` 中；只要文件包含 JSX，就必须使用 `.jsx` 后缀，同时确保 `frontend/src/data/etfs/index.js` 的聚合规则能加载 `.jsx`。
-- 缺少来源时，不要编造精确规模、指数代码或财务数值；使用保守表达并明确不确定性。
+- 定量字段优先基于抓取数据：持仓、权重、`financialRows`、`kLineData`。
+- 定性分析必须基于持仓公司的真实业务暴露，不要只根据 ETF 名称推断。
+- `businessRatio` 的权重要和持仓权重保持可解释一致性。
+- 文案使用研究摘要式中文，重点写产业链暴露、驱动变量、传导逻辑和交易约束。
+- 缺少来源时，不要编造精确规模、指数代码或财务数值。
 
 ## 参考
 
-需要确认旧字段语义时，可读取 `references/output-schema.md`；需要生成 K 线技术分析、支撑压力、折线和 `chartCaption` 时，读取 `references/kline-technical-analysis.md`。字段最终以 `frontend/src/data/etfs/etf515880.jsx` 和 `frontend/src/pages/EtfReport.jsx` 为准。
+- K 线技术分析、支撑压力、折线和 `chartCaption` 生成规则见 `references/kline-technical-analysis.md`。
+- 字段形状的 TS 参考见 `references/etf-schema-reference.ts`。
+- 页面真实消费字段最终以 [`EtfReport.jsx`](/Users/cenmen/Desktop/work/projects/web/market-insight/frontend/src/pages/EtfReport.jsx) 为准。

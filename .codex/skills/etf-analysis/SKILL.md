@@ -1,6 +1,6 @@
 ---
 name: etf-analysis
-description: Market Insight 项目专用的 ETF 分析工作流。通过本地 server 接口获取 ETF 持仓、持仓公司业绩和基金 K 线数据，结合数据补全分析内容，并输出 frontend/src/data/etfs 使用的 ETF 静态 JavaScript 数据。需要同步生成 K 线技术分析、画线参数和带行情推演的图注。仅当用户显式调用 $etf-analysis 或明确要求使用 ETF 分析 skill 时使用；不要因为上下文自动调用。
+description: Market Insight 项目专用的 ETF 分析工作流。通过本地 server 接口获取 ETF 持仓、持仓公司业绩和基金 K 线数据，结合数据补全分析内容，并输出 frontend/src/data/etfs 使用的 ETF 静态数据。需要同步生成 K 线技术分析、画线参数和带行情推演的图注。仅当用户显式调用 $etf-analysis 或明确要求使用 ETF 分析 skill 时使用；不要因为上下文自动调用。
 ---
 
 # ETF 分析
@@ -18,13 +18,13 @@ frontend/src/data/etfs
 单个 ETF 文件命名：
 
 ```text
-frontend/src/data/etfs/etf<ETF_CODE>.js
+frontend/src/data/etfs/etf<ETF_CODE>.jsx
 ```
 
 例如：
 
 ```text
-frontend/src/data/etfs/etf515880.js
+frontend/src/data/etfs/etf515880.jsx
 ```
 
 页面会直接读取 `kLineMarkers`，所以数据文件里需要同步写入：
@@ -62,13 +62,13 @@ kLineMarkers: {
 
 每次生成或更新 ETF 数据前，必须先检查当前代码结构，不要依赖旧 schema：
 
-1. 读取 `frontend/src/data/etfs/etf515880.js`，以它作为字段顺序、命名、文案风格和导出格式的主要参考。
+1. 读取 `frontend/src/data/etfs/etf515880.jsx`，以它作为字段顺序、命名、文案风格和导出格式的主要参考。
 2. 读取 `frontend/src/pages/EtfReport.jsx`，确认页面实际消费字段。
 3. 检查工作区已有改动，避免覆盖用户或旧任务留下的相关修改。
 
 ## 当前目标类型
 
-生成的单个 ETF 文件应为 JavaScript 文件，不要写 TypeScript 类型导入或 `satisfies`：
+生成的单个 ETF 文件应优先使用 JSX 文件后缀 `.jsx`。只要文件内包含任何 JSX 片段字段，例如 `report.chartCaption`，就必须使用 `.jsx`，不要写成 `.js`。文件内容仍然是普通 JavaScript 对象，不要写 TypeScript 类型导入或 `satisfies`：
 
 ```js
 const etf588200 = {
@@ -87,7 +87,14 @@ const etf588200 = {
     coreJudgment: '一句短判断',
     thesis: '投资逻辑正文。',
     callout: '总结性提示或对用户的直接建议，要求简洁有力，字数控制在 20 字以内。',
-    chartCaption: '近期走势总结 + 对接下来 1 到 3 个交易日的推演。',
+    chartCaption: (
+      <>
+        <p>近期走势总结……</p>
+        <p>关键支撑/压力……</p>
+        <p>接下来 1 到 3 个交易日的推演……</p>
+      </>
+    ),
+    hiddenStoryLine: '市场可能炒作的故事线，必须有想象空间。',
     disclaimer: '仅供参考，不构成任何投资建议；市场有风险，决策需谨慎，风险自负。',
     risks: [],
   },
@@ -118,6 +125,7 @@ export default etf588200;
 - `kLineMarkers` 必须是对象，当前页面读取 `candleMarkers`、`supportMarkers`、`resistanceMarkers`、`keyInfoMarkers`、`polyLines` 五个字段。
 - `viewpoints` 使用数组；没有可靠事件时写 `[]`，不要写 `null`，因为页面直接传给 `EventTimeline`。
 - `story`、`tPrinciples`、`tReferences`、`strategies` 当前页面不消费，没有可靠内容时写 `null`。
+- `report.hiddenStoryLine` 如果有内容，写成一段带想象力的市场叙事，不是基本面总结，也不是财务描述。重点是市场可能会炒作的故事线，例如“国产航天未来可能演进到什么程度”“某个新技术如果规模化落地会引发什么交易机会”。
 
 ## financialRows 结构
 
@@ -158,7 +166,7 @@ export default etf588200;
 
 ## 必须预先计算的展示字段
 
-页面只负责展示，不负责计算。生成 ETF JS 文件时必须在 skill 流程内算好并写入以下字段：
+页面只负责展示，不负责计算。生成 ETF 数据文件时必须在 skill 流程内算好并写入以下字段：
 
 - `metrics`
 - `recentFiveDayAmplitude`
@@ -186,7 +194,7 @@ export default etf588200;
 - `kLineMarkers.keyInfoMarkers`
 - `kLineMarkers.polyLines`
 
-`chartCaption` 必须是完整的 K 线技术分析总结，并带接下来 1 到 3 个交易日的行情推演。
+`chartCaption` 必须是完整的 K 线技术分析总结，并带接下来 1 到 3 个交易日的行情推演。它必须写成 JSX 片段，不是普通字符串；如果文件里用了这个字段，文件后缀必须是 `.jsx`。
 
 写作要求：
 
@@ -196,6 +204,7 @@ export default etf588200;
 - 第 2 段写关键支撑、压力、均线或形态变化。
 - 第 3 段写接下来 1 到 3 个交易日的推演和操作节奏。
 - 不要写成短句拼接，也不要只下结论不展开。
+- 推荐使用 JSX 片段并把每段包在单独的 `<p>` 中。
 
 权重指标计算规则：
 
@@ -251,11 +260,11 @@ curl "http://localhost:8000/api/skill/etf/base-data?code=<ETF_CODE>&klineLimit=9
 
 其中 `xx` 写入本次请求的完整参数或关键参数摘要，不要继续执行任何后续步骤。
 
-4. 基于接口返回 JSON 进行分析和补全，生成最终 JS：
-   - 输出文件为 `frontend/src/data/etfs/etf<ETF_CODE>.js`。
+4. 基于接口返回 JSON 进行分析和补全，生成最终 JSX 数据文件：
+   - 输出文件为 `frontend/src/data/etfs/etf<ETF_CODE>.jsx`。
    - 顶层变量名为 `etf<ETF_CODE>`，例如 `etf515880`。
    - 补全 `etf.name`、`etf.index`、`etf.intro`、`etf.concepts`、`etf.scale`。
-   - 补全 `report`，文案风格参考 `frontend/src/data/etfs/etf515880.js`。
+   - 补全 `report`，文案风格参考 `frontend/src/data/etfs/etf515880.jsx`。
    - 根据持仓真实业务暴露生成 `businessRatio`，并补全 `desc` 和必要的 `subItems`。
    - 将接口返回的持仓整理成 `financialRows`，为每个持仓补全 `productTags` 和 `intro`。
    - 将接口返回的基金 K 线直接写入 `kLineData`，保留最近 90 根数据。
@@ -274,12 +283,13 @@ curl "http://localhost:8000/api/skill/etf/base-data?code=<ETF_CODE>&klineLimit=9
 - 多 ETF 任务必须一个代码一个代码处理，任何联网抓取步骤都不并发。
 - 定性分析要基于持仓公司的真实业务暴露，不要只根据 ETF 名称推断。
 - `businessRatio` 的权重需要和持仓权重保持可解释的一致性。如果分组没有覆盖全部持仓，增加“其他”分组承接剩余暴露。
-- `report.thesis`、`report.callout`、`shortTermFactors`、`styleCharacteristics` 用简洁中文，风格参考现有 `etf515880.js`。
+- `report.thesis`、`report.callout`、`shortTermFactors`、`styleCharacteristics` 用简洁中文，风格参考现有 `etf515880.jsx`。
+- `report.hiddenStoryLine` 是市场可能会炒作的故事线，重点写想象空间和未来场景，不要写成财务总结或行业百科。
 - `report.chartCaption` 必须是完整 K 线技术分析总结，分 3 段，每段 100 到 180 个汉字，并带接下来 1 到 3 个交易日的推演。
 - 除 `report.chartCaption` 外，不要把 JSX 放进 ETF 静态数据；所有其他叙事字段使用纯字符串或数组对象。
-- `report.chartCaption` 是唯一允许使用 JSX 的叙事字段。若需要分段排版，请使用 JSX 片段并把每段包在单独的 `<p>` 中，段落建议使用 `style={{ textIndent: '2em' }}` 做首行缩进；如果某个 ETF 文件包含 JSX，文件后缀必须使用 `.jsx`，同时确保 `frontend/src/data/etfs/index.js` 的聚合规则能加载 `.jsx`。
+- `report.chartCaption` 是唯一允许使用 JSX 的叙事字段。若需要分段排版，请使用 JSX 片段并把每段包在单独的 `<p>` 中；只要文件包含 JSX，就必须使用 `.jsx` 后缀，同时确保 `frontend/src/data/etfs/index.js` 的聚合规则能加载 `.jsx`。
 - 缺少来源时，不要编造精确规模、指数代码或财务数值；使用保守表达并明确不确定性。
 
 ## 参考
 
-需要确认旧字段语义时，可读取 `references/output-schema.md`；需要生成 K 线技术分析、支撑压力、折线和 `chartCaption` 时，读取 `references/kline-technical-analysis.md`。字段最终以 `frontend/src/data/etfs/etf515880.js` 和 `frontend/src/pages/EtfReport.jsx` 为准。
+需要确认旧字段语义时，可读取 `references/output-schema.md`；需要生成 K 线技术分析、支撑压力、折线和 `chartCaption` 时，读取 `references/kline-technical-analysis.md`。字段最终以 `frontend/src/data/etfs/etf515880.jsx` 和 `frontend/src/pages/EtfReport.jsx` 为准。

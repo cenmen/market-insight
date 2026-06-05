@@ -5,6 +5,7 @@ import EtfSharePrompt from '@/components/EtfSharePrompt.jsx';
 import ReportFooter from '@/components/ReportFooter.jsx';
 import Timeline from '@/components/Timeline.jsx';
 import etfs from '@/data/etfs';
+import { identity, mean, minBy, takeRight } from 'es-toolkit';
 import { Navigate, useParams, useSearchParams } from 'react-router-dom';
 
 const formatRate = (rate) => {
@@ -16,7 +17,7 @@ const getLatestFinancial = (row) => {
 };
 
 function getRecentTenDayKLineData(kLineData) {
-  return Array.isArray(kLineData) ? kLineData.slice(-10) : [];
+  return takeRight(Array.isArray(kLineData) ? kLineData : [], 10);
 }
 
 function getAveragePercent(data, key) {
@@ -30,11 +31,27 @@ function getAveragePercent(data, key) {
     return '--';
   }
 
-  const total = values.reduce(function sumValue(sum, value) {
-    return sum + value;
-  }, 0);
+  return `${mean(values).toFixed(2)}%`;
+}
 
-  return `${(total / values.length).toFixed(2)}%`;
+function getMinPercent(data, key) {
+  const values = (Array.isArray(data) ? data : [])
+    .map(function mapValue(item) {
+      return Number(item?.[key]);
+    })
+    .filter(Number.isFinite);
+
+  if (values.length === 0) {
+    return '--';
+  }
+
+  const minValue = minBy(values, identity);
+
+  if (minValue === undefined) {
+    return '--';
+  }
+
+  return `${minValue.toFixed(2)}%`;
 }
 
 const formatQuarter = (financial) => {
@@ -56,7 +73,7 @@ export default function EtfReportPage() {
 
   const recentTenDayKLine = getRecentTenDayKLineData(data.kLineData);
   const recentTenDayAmplitude = getAveragePercent(recentTenDayKLine, 'amplitude');
-  const recentTenDayMaxDrawdown = getAveragePercent(recentTenDayKLine, 'maxDrawdown');
+  const recentTenDayMaxDrawdown = getMinPercent(recentTenDayKLine, 'maxDrawdown');
 
   const pieData = data.businessRatio.map((item) => {
     return {

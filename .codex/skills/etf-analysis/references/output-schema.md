@@ -1,22 +1,16 @@
-# ETF 静态 TS 结构
+# ETF 静态 JSX 结构
 
 目标文件目录：
 
 ```text
-apps/website/src/static-json/etf/<ETF_CODE>.ts
+frontend/src/data/etfs/<ETF_CODE>.jsx
 ```
 
-当前消费类型定义：
-
-```text
-apps/website/src/types/modules/etf-analysis.ts
-```
+当前消费类型来源于页面实际读取结构，而不是 TypeScript 类型定义。
 
 ## 顶层结构
 
-```ts
-import type { EtfAnalysisData } from '@/types';
-
+```jsx
 const etf588200 = {
   etf: {
     code: '588200',
@@ -51,8 +45,8 @@ const etf588200 = {
     polyLines: [],
   },
   financialRows: [],
-  viewpoints: null,
-} satisfies EtfAnalysisData;
+  viewpoints: [],
+};
 
 export default etf588200;
 ```
@@ -60,16 +54,17 @@ export default etf588200;
 写法要求：
 
 - 单个 ETF 文件必须写完整展示数据，包括 `metrics`、`recentFiveDayAmplitude`、`recentTenDayMaxDrawdown`、`recentTenDayMaxDrawdownDate`。
-- 网站只负责展示，不负责计算这些字段；不要把计算逻辑放到 `apps/website/src/static-json/etf/index.ts`。
-- `chartCaption` 必须是完整的 K 线技术分析总结，分 3 段，每段 100 到 180 个汉字，并带接下来 1 到 3 个交易日的行情推演，不要写成纯新闻摘要。
+- 网站只负责展示，不负责计算这些字段；不要把计算逻辑放到页面里。
+- `report.chartCaption` 必须是 JSX 片段，不是字符串，建议分成 3 个 `<p>`，分别写当前走势、关键支撑/压力和接下来 1 到 3 个交易日推演。
+- `report.hiddenStoryLine` 如果有内容，应该是带想象力的市场叙事，而不是基本面总结。
 - `kLineMarkers` 必须按对象写入，当前页面使用 `candleMarkers`、`supportMarkers`、`resistanceMarkers`、`keyInfoMarkers`、`polyLines`。
 - `story`、`tPrinciples`、`tReferences`、`strategies` 没有可靠内容时写 `null`。
 - `kLineData` 使用脚本抓取的基金最近 90 根日 K 线。
-- 保持 TypeScript 对象格式，使用 `satisfies EtfAnalysisData`。
+- 文件只要包含 JSX，就必须使用 `.jsx` 后缀，不要写成 `.js`。
 
 ## `metrics[]`
 
-```ts
+```jsx
 [
   { label: '基金规模', value: '386.07 亿元', note: '资金流动性' },
   { label: '盈利增速', value: '251.90%', note: '持仓公司权重盈利增速估算' },
@@ -89,7 +84,7 @@ export default etf588200;
 
 ## `recentFiveDayAmplitude` 和 `recentTenDayMaxDrawdown`
 
-```ts
+```jsx
 recentFiveDayAmplitude: '5.76%（5.10% ~ 6.61%）',
 recentTenDayMaxDrawdown: '-8.42%',
 recentTenDayMaxDrawdownDate: '2026.05.21',
@@ -105,7 +100,7 @@ recentTenDayMaxDrawdownDate: '2026.05.21',
 
 ## `businessRatio[]`
 
-```ts
+```jsx
 {
   type: 'AI 算力与通用计算芯片',
   rate: 19.22,
@@ -124,7 +119,7 @@ recentTenDayMaxDrawdownDate: '2026.05.21',
 
 ## `financialRows[]`
 
-```ts
+```jsx
 {
   code: '688041',
   name: '海光信息',
@@ -156,7 +151,7 @@ recentTenDayMaxDrawdownDate: '2026.05.21',
 
 ## `kLineData[]`
 
-```ts
+```jsx
 {
   date: '2026-05-28',
   open: 42.66,
@@ -182,7 +177,7 @@ recentTenDayMaxDrawdownDate: '2026.05.21',
 
 `shortTermFactors` 和 `styleCharacteristics` 使用相同结构：
 
-```ts
+```jsx
 {
   title: 'AI 资本开支验证',
   description: '重点看订单、出货和需求变化对 ETF 权重股的影响。',
@@ -197,7 +192,7 @@ recentTenDayMaxDrawdownDate: '2026.05.21',
 
 ## 可选叙事字段
 
-```ts
+```jsx
 story: '题材主轴围绕……',
 tPrinciples: '做 T 以……',
 tReferences: '参考节奏：……',

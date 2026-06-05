@@ -12,6 +12,11 @@ export const pageLinks = [
     description: '三大指数、板块对照与资金行为复盘',
   },
   {
+    path: '/static',
+    title: 'Static',
+    description: '参考版排版页面，不依赖动态数据',
+  },
+  {
     path: '/pre-open',
     title: '盘前分析',
     description: '宏观要点、盘前消息与四大指数情景',

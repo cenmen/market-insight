@@ -80,9 +80,9 @@ const etf588200 = {
   },
   metrics: [
     { label: '基金规模', value: '386.07 亿元', note: '资金流动性' },
-    { label: '盈利增速', value: '251.90%', note: '持仓公司权重盈利增速估算' },
-    { label: 'ROE', value: '6.06%', note: '持仓公司权重加权 ROE 估算' },
-    { label: '业务增速', value: '114.91%', note: '持仓公司权重业务增速估算' },
+    { label: '盈利增速', value: '251.90%', note: '持仓盈利增速估算' },
+    { label: 'ROE', value: '6.06%', note: '持仓加权 ROE 估算' },
+    { label: '业务增速', value: '114.91%', note: '持仓业务增速估算' },
   ],
   recentFiveDayAmplitude: '5.76%',
   businessRatio: [
@@ -245,7 +245,7 @@ export default etf588200;
 - `coreJudgment` 用一句短判断概括 ETF 的核心暴露和定价方向。
 - `thesis` 要像研究摘要，不是宣传语，也不是复述指数名称。
 - `callout` 不是“一句话看法”，不要使用“总结：”“一句话看法：”“核心结论：”“这只ETF适合……”等固定开头。
-- `hiddenStoryLine` 写市场可能炒作的未来叙事，不写成财务总结或行业百科。
+- `hiddenStoryLine` 写市场可能炒作的未来叙事，不写成财务总结或行业百科，长度控制在 100 到 160 个汉字。
 - `risks` 写真实风险来源，不写空泛的“市场波动风险”。
 
 ### `businessRatio`
@@ -298,7 +298,7 @@ export default etf588200;
 
 - 这是整篇 ETF 研究的高密度概括，不是用户提醒语。
 - 直接进入判断，概括组合性质、驱动条件和交易约束。
-- 长度控制在 20 到 40 个汉字。
+- 长度控制在 100 到 160 个汉字。
 - 不要使用固定开头模板，不要写成口语化提醒。
 
 #### `shortTermFactors`
@@ -435,3 +435,4 @@ curl "http://localhost:8000/api/skill/etf/base-data?code=<ETF_CODE>&klineLimit=9
 
 - K 线技术分析、支撑压力、折线和 `chartCaption` 生成规则见 `references/kline-technical-analysis.md`。
 - 字段形状的 TS 参考见 `references/etf-schema-reference.ts`。
+持仓盈利增速估算

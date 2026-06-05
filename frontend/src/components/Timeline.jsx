@@ -40,7 +40,7 @@ export default function Timeline(props) {
             key={`${item.title}-${item.datetime ?? item.date}`}
           >
             <div className='absolute top-[4.5pt] left-[2.5pt] h-[6pt] w-[6pt] rounded-full bg-[#1b365d]' />
-            {item.datetime ? <div className='mb-[5pt] pl-[2pt] text-[10pt] leading-none text-[#6b6a64]'>{item.datetime}</div> : null}
+            {item.datetime || item.date ? <div className='mb-[5pt] pl-[2pt] text-[10pt] leading-none text-[#6b6a64]'>{item.datetime || item.date}</div> : null}
             <div className='rounded-[4pt] border border-[#e8e6dc] bg-[#faf9f5] px-[9pt] py-[7pt]'>
               <div className='flex items-start justify-between gap-[8pt]'>
                 <div className='font-medium text-[#3d3d3a]'>{item.title}</div>

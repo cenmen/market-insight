@@ -86,7 +86,7 @@ const etf588200 = {
     headlineSignal: '规模与流动性观察',
     coreJudgment: '一句短判断',
     thesis: '投资逻辑正文。',
-    callout: '总结性提示或对用户的直接建议，要求简洁有力，字数控制在 20 字以内。',
+    callout: '对整篇 ETF 研究结论的高浓缩概括，要求简洁有力，字数控制在 20 到 40 字。',
     chartCaption: (
       <>
         <p>近期走势总结……</p>
@@ -126,6 +126,46 @@ export default etf588200;
 - `viewpoints` 使用数组；没有可靠事件时写 `[]`，不要写 `null`，因为页面直接传给 `EventTimeline`。
 - `story`、`tPrinciples`、`tReferences`、`strategies` 当前页面不消费，没有可靠内容时写 `null`。
 - `report.hiddenStoryLine` 如果有内容，写成一段带想象力的市场叙事，不是基本面总结，也不是财务描述。重点是市场可能会炒作的故事线，例如“国产航天未来可能演进到什么程度”“某个新技术如果规模化落地会引发什么交易机会”。
+
+## 核心文案字段写法
+
+以下 4 组字段是页面专业度的关键来源，不能只写成泛泛而谈的主题总结，也不能使用口号式、模板式表达。
+
+### `report.thesis`
+
+- 用 2 到 4 句完成整个 ETF 研究的核心论证，不是宣传语，也不是简单复述指数名称。
+- 必须说明：
+  - ETF 主要暴露在哪些产业链环节或资产类型。
+  - 权重结构决定了它的收益弹性来自哪里。
+  - 它更适合跟踪什么样的产业趋势、资本开支周期、政策周期或盈利兑现节奏。
+- 语气要像研究摘要，强调“暴露结构、驱动因子、交易前提”，不要写成“这个 ETF 很不错”“适合长期看好”这类空话。
+
+### `report.callout`
+
+- 这个字段不是“一句话看法”，也不要用“总结：”“一句话看法：”“核心结论：”“这只ETF适合……”这类固定开头。
+- 它的职责是把整篇 ETF 分析研究压缩成一句高密度结论，直接概括组合性质、驱动条件和交易约束。
+- 推荐写法是完整陈述句，直接进入判断，例如“组合本质上是……，弹性来自……，但定价能否继续抬升取决于……”
+- 长度控制在 20 到 40 个汉字，要求信息密度高、可复用，不要写口语化提醒。
+
+### `shortTermFactors`
+
+- 每条都要是“可跟踪、可验证、能在几周到几个月内改变定价”的变量，不要写成宽泛行业常识。
+- 标题要落在具体变量或验证点上，例如“AI 资本开支验证”“海风送出节奏”“特高压招标兑现”“铜价与加工费剪刀差”，不要只写大而泛的板块名。
+- `description` 必须交代清楚三件事：
+  - 这个变量影响产业链的哪个环节。
+  - 它如何传导到 ETF 权重股的订单、收入、利润率或估值。
+  - 市场为什么会提前交易这个变量。
+- 尽量避免“会带动需求”“会影响业绩”这种空泛句式，改写成更具体的传导逻辑。
+
+### `styleCharacteristics`
+
+- 这里不是简单罗列风格标签，而是解释这个 ETF 在资金行为和定价结构上的“交易属性”。
+- 优先描述：
+  - 权重集中度和龙头依赖度。
+  - 成长 / 周期 / 红利 / 制造 / 出海 / 主题资金等风格暴露。
+  - 对订单、资本开支、商品价格、估值切换、政策预期的敏感度。
+  - 相对宽基或相邻主题 ETF 的波动来源和节奏差异。
+- 每条都应体现“为什么会这样”，不要只写结论标签。例如不要只写“高波动”，而要写“龙头权重高且预期交易占比大，业绩确认前估值波动通常快于基本面兑现”。
 
 ## financialRows 结构
 
@@ -269,7 +309,7 @@ curl "http://localhost:8000/api/skill/etf/base-data?code=<ETF_CODE>&klineLimit=9
    - 将接口返回的持仓整理成 `financialRows`，为每个持仓补全 `productTags` 和 `intro`。
    - 将接口返回的基金 K 线直接写入 `kLineData`，保留最近 90 根数据。
    - 根据 `financialRows` 和 `kLineData` 计算并写入 `metrics`、`recentFiveDayAmplitude`、`recentTenDayMaxDrawdown`、`recentTenDayMaxDrawdownDate`。
-   - 补全 `shortTermFactors` 和 `styleCharacteristics`。
+   - 补全 `shortTermFactors` 和 `styleCharacteristics`，按本 skill 的字段写法生成，不要套固定模板。
    - `viewpoints` 没有可靠事件时写 `[]`。
    - 不要保留接口返回里的辅助字段，例如 `source`、`fetched_at`、`target_quarter_end`、`report_type`、`position_report`、`holdings`。
 
@@ -283,7 +323,7 @@ curl "http://localhost:8000/api/skill/etf/base-data?code=<ETF_CODE>&klineLimit=9
 - 多 ETF 任务必须一个代码一个代码处理，任何联网抓取步骤都不并发。
 - 定性分析要基于持仓公司的真实业务暴露，不要只根据 ETF 名称推断。
 - `businessRatio` 的权重需要和持仓权重保持可解释的一致性。如果分组没有覆盖全部持仓，增加“其他”分组承接剩余暴露。
-- `report.thesis`、`report.callout`、`shortTermFactors`、`styleCharacteristics` 用简洁中文，风格参考现有 `etf515880.jsx`。
+- `report.thesis`、`report.callout`、`shortTermFactors`、`styleCharacteristics` 用研究摘要式中文，重点写产业链暴露、驱动变量、传导逻辑和交易约束，不要使用“ 一句话看法： ”或其他固定开头模板。
 - `report.hiddenStoryLine` 是市场可能会炒作的故事线，重点写想象空间和未来场景，不要写成财务总结或行业百科。
 - `report.chartCaption` 必须是完整 K 线技术分析总结，分 3 段，每段 100 到 180 个汉字，并带接下来 1 到 3 个交易日的推演。
 - 除 `report.chartCaption` 外，不要把 JSX 放进 ETF 静态数据；所有其他叙事字段使用纯字符串或数组对象。

@@ -20,8 +20,9 @@ frontend/src/data/etfs/etf<ETF_CODE>.jsx
 每次生成或更新前，必须先做：
 
 1. 检查当前工作区改动，避免覆盖用户已有修改
-2. 读取本 skill 自带的完整参考结构和字段生成要求
-3. 如需快速确认字段形状，再读取 TS 参考文件
+2. 检查本地 server 是否在运行，接口是否可用，如果不可用则停止并提示用户启动 server
+3. 读取本 skill 自带的完整参考结构和字段生成要求
+4. 如需快速确认字段形状，再读取 TS 参考文件
 
 如需用类型视角快速确认字段形状，可读取：
 
@@ -366,7 +367,7 @@ K 线指标计算规则：
 
 `report.chartCaption` 要求：
 
-- 必须是 JSX 片段。
+- 必须是 JSX 片段，每个 p 元素都必须显式加上 style={{ textIndent: '2em' }}。
 - 必须分成 3 段。
 - 每段控制在 100 到 180 个汉字之间。
 - 第 1 段写当前走势、量能和结构。
@@ -422,6 +423,7 @@ curl "http://localhost:8000/api/skill/etf/base-data?code=<ETF_CODE>&klineLimit=9
 - 补全 `shortTermFactors` 和 `styleCharacteristics`，不得套固定模板。
 - `viewpoints` 没有可靠事件时写 `[]`。
 - 不保留接口返回中的辅助字段，例如 `source`、`fetched_at`、`target_quarter_end`、`report_type`、`position_report`、`holdings`。
+- `recentTenDayAmplitudeComment` 和 `recentTenDayMaxDrawdownComment` 必须存在且必须有内容，不能留空、null 或省略。
 
 ## 总体分析原则
 

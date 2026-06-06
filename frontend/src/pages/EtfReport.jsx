@@ -249,7 +249,7 @@ export default function EtfReportPage() {
             <div className='mb-[8pt] rounded-[4pt] bg-[#faf9f5] pt-[10pt]'>
               <div className='px-[10pt] text-[10pt] font-medium text-[#3d3d3a]'>最近 10 日振幅</div>
               <div className='mt-[4pt] px-[10pt] text-[14pt] font-medium text-[#1b365d] tabular-nums'>{recentTenDayAmplitude}</div>
-              <div className='mt-[4pt] px-[10pt] text-[9pt] text-[#504e49]'>{data.recentFiveDayAmplitudeComment ?? data.recentTenDayAmplitudeComment}</div>
+              <div className='mt-[4pt] px-[10pt] text-[9pt] text-[#504e49]'>{data.recentTenDayAmplitudeComment}</div>
               <div className='mt-[4pt]'>
                 <BaseLineChart
                   data={recentTenDayKLine}

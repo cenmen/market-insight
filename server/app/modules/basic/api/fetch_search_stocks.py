@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import asyncio
 import json
 from typing import List
 
 import httpx
+from aiocache import SimpleMemoryCache
 
 from app.modules.basic.schema.request import SearchStockParams
+
+search_stocks_cache = SimpleMemoryCache()
 
 
 def fetch_search_stocks(params: SearchStockParams) -> List[dict]:
@@ -64,4 +68,16 @@ def fetch_search_stocks(params: SearchStockParams) -> List[dict]:
                     "marketText": str(item.get("securityTypeName") or ""),
                 }
             )
+    return records
+
+
+async def fetch_search_stocks_cached(params: SearchStockParams) -> List[dict]:
+    """带内存缓存的股票搜索，避免短时间内重复搜索同一关键词。"""
+    keyword = str(params.keyword or "").strip()
+    key = f"search_stocks:{keyword}"
+    cached = await search_stocks_cache.get(key)
+    if cached is not None:
+        return cached
+    records = await asyncio.to_thread(fetch_search_stocks, params)
+    await search_stocks_cache.set(key, records, ttl=600)
     return records

@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import asyncio
 import json
-from typing import Any, Dict, List, Tuple
 import time
+from typing import Any, Dict, List, Tuple
 
 import httpx
+from aiocache import SimpleMemoryCache
+
+fund_top_holdings_cache = SimpleMemoryCache()
 
 
 def _safe_float(value: Any, default: float = 0.0) -> float:
@@ -76,3 +80,14 @@ def fetch_fund_top_holdings(code: str) -> Tuple[List[Dict[str, Any]], str | None
     holdings.sort(key=lambda item: item["hold_rate"], reverse=True)
     expansion = data.get("Expansion")
     return holdings[:10], str(expansion) if expansion else None
+
+
+async def fetch_fund_top_holdings_cached(code: str) -> Tuple[List[Dict[str, Any]], str | None]:
+    """带内存缓存的基金前十大持仓读取，避免重复请求同一基金持仓。"""
+    key = f"fund_top_holdings:{str(code).zfill(6)}"
+    cached = await fund_top_holdings_cache.get(key)
+    if cached is not None:
+        return cached
+    records = await asyncio.to_thread(fetch_fund_top_holdings, code)
+    await fund_top_holdings_cache.set(key, records, ttl=1800)
+    return records

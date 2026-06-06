@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import asyncio
 from datetime import datetime
 from typing import Any, Dict, List
 
 import httpx
+from aiocache import SimpleMemoryCache
+
+fund_kline_cache = SimpleMemoryCache()
 
 
 def _safe_float(value: Any, default: float = 0.0) -> float:
@@ -133,4 +137,15 @@ def fetch_fund_kline(code: str, limit: int) -> List[Dict[str, Any]]:
         record = _parse_ths_fund_kline_value(item, previous_close)
         records.append(record)
         previous_close = record["close"]
+    return records
+
+
+async def fetch_fund_kline_cached(code: str, limit: int) -> List[Dict[str, Any]]:
+    """带内存缓存的基金 K 线读取，避免重复请求同一代码与条数数据。"""
+    key = f"fund_kline:{str(code).zfill(6)}|{limit}"
+    cached = await fund_kline_cache.get(key)
+    if cached is not None:
+        return cached
+    records = await asyncio.to_thread(fetch_fund_kline, code, limit)
+    await fund_kline_cache.set(key, records, ttl=1800)
     return records

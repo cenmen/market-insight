@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import asyncio
 from typing import Any, Dict
 
 import httpx
+from aiocache import SimpleMemoryCache
+
+fund_snapshot_cache = SimpleMemoryCache()
 
 
 def _safe_float(value: Any, default: float = 0.0) -> float:
@@ -109,3 +113,14 @@ def fetch_fund_snapshot(code: str) -> Dict[str, Any] | None:
         "totalMarketValue": _nullable_float(raw_fields.get("3475914")),
         "circulatingMarketValue": _nullable_float(raw_fields.get("3541450")),
     }
+
+
+async def fetch_fund_snapshot_cached(code: str) -> Dict[str, Any] | None:
+    """带内存缓存的基金快照读取，避免短时间内重复请求同一基金。"""
+    key = f"fund_snapshot:{str(code).zfill(6)}"
+    cached = await fund_snapshot_cache.get(key)
+    if cached is not None:
+        return cached
+    record = await asyncio.to_thread(fetch_fund_snapshot, code)
+    await fund_snapshot_cache.set(key, record, ttl=300)
+    return record

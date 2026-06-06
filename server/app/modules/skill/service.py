@@ -1,9 +1,23 @@
 from __future__ import annotations
 
+import asyncio
 from datetime import datetime
 from typing import Any, Dict
 
-from app.modules.basic.service import fetch_fund_kline, fetch_fund_snapshot, fetch_fund_top_holdings, fetch_stock_main_finance
+from aiocache import SimpleMemoryCache
+
+from app.modules.basic.service import (
+    fetch_fund_kline,
+    fetch_fund_kline_cached,
+    fetch_fund_snapshot,
+    fetch_fund_snapshot_cached,
+    fetch_fund_top_holdings,
+    fetch_fund_top_holdings_cached,
+    fetch_stock_main_finance,
+    fetch_stock_main_finance_cached,
+)
+
+etf_base_data_cache = SimpleMemoryCache()
 
 
 def target_quarter_end(today: datetime) -> str:
@@ -64,3 +78,52 @@ def fetch_etf_base_data(code: str, kline_limit: int = 60) -> Dict[str, Any]:
         "kLineData": k_line_data,
         "holdings": holdings,
     }
+
+
+async def fetch_etf_base_data_cached(code: str, kline_limit: int = 60) -> Dict[str, Any]:
+    """带内存缓存的 ETF 基础数据聚合接口，优先复用缓存子接口结果。"""
+    key = f"etf_base_data:{str(code).zfill(6)}|{kline_limit}"
+    cached = await etf_base_data_cache.get(key)
+    if cached is not None:
+        return cached
+
+    quarter_end = target_quarter_end(datetime.now())
+    current_report_type = report_type(quarter_end)
+
+    snapshot_task = fetch_fund_snapshot_cached(code)
+    holdings_task = fetch_fund_top_holdings_cached(code)
+    kline_task = fetch_fund_kline_cached(code, kline_limit)
+
+    try:
+        snapshot = await snapshot_task
+    except Exception:
+        snapshot = None
+    holdings, position_report = await holdings_task
+    k_line_data = await kline_task
+
+    finance_tasks = [fetch_stock_main_finance_cached(holding["stock_code"], current_report_type) for holding in holdings]
+    finance_results = await asyncio.gather(*finance_tasks, return_exceptions=True)
+
+    for holding, finance_result in zip(holdings, finance_results):
+        if isinstance(finance_result, Exception) or not finance_result:
+            continue
+        if finance_result["date"] == quarter_end:
+            holding["quarter_data"] = [finance_result]
+
+    record = {
+        "code": code,
+        "source": "eastmoney",
+        "fetched_at": datetime.now().isoformat(timespec="seconds"),
+        "target_quarter_end": quarter_end,
+        "report_type": current_report_type,
+        "position_report": position_report,
+        "scale": (
+            f"{(snapshot.get('circulatingMarketValue') or 0) / 100000000:.2f} 亿元"
+            if snapshot and snapshot.get("circulatingMarketValue") is not None
+            else None
+        ),
+        "kLineData": k_line_data,
+        "holdings": holdings,
+    }
+    await etf_base_data_cache.set(key, record, ttl=1800)
+    return record

@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import asyncio
 import re
-from typing import Any, Dict
 import time
+from typing import Any, Dict
 
 import httpx
+from aiocache import SimpleMemoryCache
+
+stock_main_finance_cache = SimpleMemoryCache()
 
 
 def _safe_float(value: Any, default: float = 0.0) -> float:
@@ -98,3 +102,14 @@ def fetch_stock_main_finance(stock_code: str, report_type: str) -> Dict[str, Any
         "rev_grow": _safe_float(row.get("TOTALOPERATEREVETZ")),
         "profit_grow": _safe_float(row.get("KCFJCXSYJLRTZ")),
     }
+
+
+async def fetch_stock_main_finance_cached(stock_code: str, report_type: str) -> Dict[str, Any] | None:
+    """带内存缓存的股票核心财务读取，避免重复请求同一报告期。"""
+    key = f"stock_main_finance:{str(stock_code).zfill(6)}|{report_type}"
+    cached = await stock_main_finance_cache.get(key)
+    if cached is not None:
+        return cached
+    record = await asyncio.to_thread(fetch_stock_main_finance, stock_code, report_type)
+    await stock_main_finance_cache.set(key, record, ttl=86400)
+    return record

@@ -25,12 +25,12 @@ from app.modules.basic.schema.response import (
     SearchStockResponse,
 )
 from app.modules.basic.service import (
-    fetch_fund_kline,
-    fetch_fund_snapshot,
-    fetch_fund_top_holdings,
+    fetch_fund_kline_cached,
+    fetch_fund_snapshot_cached,
+    fetch_fund_top_holdings_cached,
     fetch_kline_by_tx_cached,
-    fetch_search_stocks,
-    fetch_stock_main_finance,
+    fetch_search_stocks_cached,
+    fetch_stock_main_finance_cached,
 )
 
 router = APIRouter()
@@ -56,8 +56,8 @@ async def get_kline(params: KlineParams = Depends(), context: Context = Depends(
     summary="搜索股票",
     description="根据关键词匹配股票代码与名称",
 )
-def search(params: SearchStockParams = Depends(), context: Context = Depends(build_context)):
-    records = fetch_search_stocks(params)
+async def search(params: SearchStockParams = Depends(), context: Context = Depends(build_context)):
+    records = await fetch_search_stocks_cached(params)
     items = [SearchStockItem.model_validate(r) for r in records]
     data = SearchStockResponse(count=len(items), items=items)
     return ResponseModel.success(data=data, request_id=context.request_id)
@@ -69,8 +69,8 @@ def search(params: SearchStockParams = Depends(), context: Context = Depends(bui
     summary="获取ETF前十大持仓",
     description="按基金代码返回前十大持仓及持仓报告期",
 )
-def get_fund_top_holdings(params: FundTopHoldingsParams = Depends(), context: Context = Depends(build_context)):
-    records, position_report = fetch_fund_top_holdings(params.code)
+async def get_fund_top_holdings(params: FundTopHoldingsParams = Depends(), context: Context = Depends(build_context)):
+    records, position_report = await fetch_fund_top_holdings_cached(params.code)
     items = [FundTopHoldingItem.model_validate(r) for r in records]
     data = FundTopHoldingsResponse(
         code=params.code,
@@ -87,8 +87,8 @@ def get_fund_top_holdings(params: FundTopHoldingsParams = Depends(), context: Co
     summary="获取ETF基金K线",
     description="按基金代码返回指定条数的日K线数据",
 )
-def get_fund_kline(params: FundKlineParams = Depends(), context: Context = Depends(build_context)):
-    records = fetch_fund_kline(params.code, params.limit)
+async def get_fund_kline(params: FundKlineParams = Depends(), context: Context = Depends(build_context)):
+    records = await fetch_fund_kline_cached(params.code, params.limit)
     items = [FundKlineItem.model_validate(r) for r in records]
     data = FundKlineResponse(code=params.code, count=len(items), lines=items)
     return ResponseModel.success(data=data, request_id=context.request_id)
@@ -100,8 +100,8 @@ def get_fund_kline(params: FundKlineParams = Depends(), context: Context = Depen
     summary="获取ETF基金最新快照",
     description="按基金代码返回最新行情快照信息",
 )
-def get_fund_snapshot(params: FundSnapshotParams = Depends(), context: Context = Depends(build_context)):
-    record = fetch_fund_snapshot(params.code)
+async def get_fund_snapshot(params: FundSnapshotParams = Depends(), context: Context = Depends(build_context)):
+    record = await fetch_fund_snapshot_cached(params.code)
     data = FundSnapshotItem.model_validate(record) if record else None
     return ResponseModel.success(data=data, request_id=context.request_id)
 
@@ -112,7 +112,7 @@ def get_fund_snapshot(params: FundSnapshotParams = Depends(), context: Context =
     summary="获取股票核心财务指标",
     description="按股票代码与报告类型返回单期核心财务指标",
 )
-def get_stock_main_finance(params: StockMainFinanceParams = Depends(), context: Context = Depends(build_context)):
-    record = fetch_stock_main_finance(params.stockCode, params.reportType)
+async def get_stock_main_finance(params: StockMainFinanceParams = Depends(), context: Context = Depends(build_context)):
+    record = await fetch_stock_main_finance_cached(params.stockCode, params.reportType)
     data = QuarterFinanceItem.model_validate(record) if record else None
     return ResponseModel.success(data=data, request_id=context.request_id)

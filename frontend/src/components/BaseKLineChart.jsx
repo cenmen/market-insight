@@ -5,33 +5,107 @@ function splitKlineData(data) {
   const categoryData = [];
   const values = [];
   const volumes = [];
+  let previousItem = null;
 
   data.forEach(function eachItem(item) {
     categoryData.push(item.date);
-      values.push({
-        value: [item.open, item.close, item.low, item.high],
-        open: item.open,
-        close: item.close,
-        low: item.low,
-        high: item.high,
-        volume: item.volume,
-        amount: item.amount,
-        amplitude: item.amplitude,
-        maxDrawdown: item.maxDrawdown,
-        changePercent: item.changePercent,
-        changeAmount: item.changeAmount,
-        turnoverRate: item.turnoverRate,
-        date: item.date,
-      });
+    values.push({
+      value: [item.open, item.close, item.low, item.high],
+      open: item.open,
+      close: item.close,
+      low: item.low,
+      high: item.high,
+      volume: item.volume,
+      amount: item.amount,
+      amplitude: item.amplitude,
+      maxDrawdown: item.maxDrawdown,
+      changePercent: item.changePercent,
+      changeAmount: item.changeAmount,
+      turnoverRate: item.turnoverRate,
+      date: item.date,
+      gapType: resolveGapType(previousItem, item),
+      gapHigh: resolveGapHigh(previousItem, item),
+      gapLow: resolveGapLow(previousItem, item),
+      gapLabel: resolveGapLabel(previousItem, item),
+    });
     volumes.push({
       value: item.volume ?? 0,
       itemStyle: {
         color: item.open <= item.close ? 'rgba(239, 68, 68, 0.35)' : 'rgba(34, 197, 94, 0.32)',
       },
     });
+    previousItem = item;
   });
 
   return { categoryData, values, volumes };
+}
+
+function resolveGapType(previousItem, currentItem) {
+  if (!previousItem || !currentItem) {
+    return '';
+  }
+
+  const previousHigh = Number(previousItem.high);
+  const previousLow = Number(previousItem.low);
+  const currentHigh = Number(currentItem.high);
+  const currentLow = Number(currentItem.low);
+  const previousClose = Number(previousItem.close);
+
+  if (Number.isFinite(previousHigh) && Number.isFinite(currentLow) && currentLow > previousHigh) {
+    const gapSize = currentLow - previousHigh;
+    const threshold = Number.isFinite(previousClose) && previousClose > 0 ? Math.max(previousClose * 0.004, 0.02) : 0.02;
+    return gapSize >= threshold ? 'up' : '';
+  }
+
+  if (Number.isFinite(previousLow) && Number.isFinite(currentHigh) && currentHigh < previousLow) {
+    const gapSize = previousLow - currentHigh;
+    const threshold = Number.isFinite(previousClose) && previousClose > 0 ? Math.max(previousClose * 0.004, 0.02) : 0.02;
+    return gapSize >= threshold ? 'down' : '';
+  }
+
+  return '';
+}
+
+function resolveGapHigh(previousItem, currentItem) {
+  const gapType = resolveGapType(previousItem, currentItem);
+
+  if (gapType === 'up') {
+    return Number(currentItem.low);
+  }
+
+  if (gapType === 'down') {
+    return Number(previousItem.low);
+  }
+
+  return NaN;
+}
+
+function resolveGapLow(previousItem, currentItem) {
+  const gapType = resolveGapType(previousItem, currentItem);
+
+  if (gapType === 'up') {
+    return Number(previousItem.high);
+  }
+
+  if (gapType === 'down') {
+    return Number(currentItem.high);
+  }
+
+  return NaN;
+}
+
+function resolveGapLabel(previousItem, currentItem) {
+  const gapType = resolveGapType(previousItem, currentItem);
+
+  if (gapType === 'up') {
+    return '向上跳空缺口';
+  }
+
+  if (gapType === 'down') {
+    return '向下跳空缺口';
+  }
+
+  return '';
 }
 
 function formatNumber(value, digits = 2) {
@@ -59,6 +133,135 @@ function formatDateWithoutYear(value) {
     return `${parts[1]}-${parts[2]}`;
   }
   return value;
+}
+
+function buildMovingAverageData(data, period) {
+  const values = [];
+  const closes = [];
+  let sum = 0;
+
+  data.forEach(function eachItem(item) {
+    const close = Number(item.close);
+    closes.push(close);
+
+    if (Number.isFinite(close)) {
+      sum += close;
+    }
+
+    if (closes.length > period) {
+      const removed = closes.shift();
+
+      if (Number.isFinite(removed)) {
+        sum -= removed;
+      }
+    }
+
+    if (closes.length < period || closes.some(function hasInvalidValue(value) {
+      return !Number.isFinite(value);
+    })) {
+      values.push(null);
+      return;
+    }
+
+    values.push(Number((sum / period).toFixed(2)));
+  });
+
+  return values;
+}
+
+function getLatestFiniteValue(values) {
+  if (!Array.isArray(values)) {
+    return null;
+  }
+
+  for (let index = values.length - 1; index >= 0; index -= 1) {
+    const value = Number(values[index]);
+    if (Number.isFinite(value)) {
+      return value;
+    }
+  }
+
+  return null;
+}
+
+function buildGapAreas(data) {
+  const gaps = [];
+
+  data.forEach(function eachItem(item, index) {
+    if (index === 0) {
+      return;
+    }
+
+    const previousItem = data[index - 1];
+    const gapType = resolveGapType(previousItem, item);
+
+    if (!gapType) {
+      return;
+    }
+
+    const gapArea = {
+      startDate: previousItem.date,
+      endDate: item.date,
+      top: gapType === 'up' ? Number(item.low) : Number(previousItem.low),
+      bottom: gapType === 'up' ? Number(previousItem.high) : Number(item.high),
+      label: gapType === 'up' ? '向上跳空缺口' : '向下跳空缺口',
+      kind: gapType,
+    };
+
+    if (!Number.isFinite(gapArea.top) || !Number.isFinite(gapArea.bottom) || gapArea.top <= gapArea.bottom) {
+      return;
+    }
+
+    gaps.push(gapArea);
+  });
+
+  return gaps.slice(-4);
+}
+
+function buildMaHeaderGraphic(latestMa5, latestMa10) {
+  const children = [];
+  let cursorX = 0;
+
+  if (Number.isFinite(latestMa5)) {
+    children.push({
+      type: 'text',
+      style: {
+        x: cursorX,
+        y: 0,
+        text: `MA5: ${formatNumber(latestMa5)}`,
+        fill: '#f59e0b',
+        font: '500 11px JetBrains Mono, monospace',
+      },
+    });
+    cursorX += 96;
+  }
+
+  if (Number.isFinite(latestMa10)) {
+    children.push({
+      type: 'text',
+      style: {
+        x: cursorX,
+        y: 0,
+        text: `MA10: ${formatNumber(latestMa10)}`,
+        fill: '#3b82f6',
+        font: '500 11px JetBrains Mono, monospace',
+      },
+    });
+    cursorX += 108;
+  }
+
+  if (children.length === 0) {
+    return null;
+  }
+
+  return {
+    type: 'group',
+    left: 56,
+    top: 10,
+    z: 30,
+    silent: true,
+    children,
+  };
 }
 
 function resolveCandleMarkerIndex(marker, categoryData) {
@@ -275,7 +478,7 @@ function buildPolylineData(data, categoryData, polyLines) {
   }
 
   return polyLines
-    .map(function mapPolyLine(line) {
+    .map(function mapPolyLine(line, index) {
       const rawPoints = Array.isArray(line.points) ? line.points : [];
       const points = rawPoints
         .map(function mapPoint(point) {
@@ -309,6 +512,44 @@ function buildPolylineData(data, categoryData, polyLines) {
       };
     })
     .filter(Boolean);
+}
+
+function makeGapMarkAreas(gapAreas) {
+  if (!Array.isArray(gapAreas) || gapAreas.length === 0) {
+    return [];
+  }
+
+  return gapAreas.map(function mapGapArea(gapArea) {
+    const isUpGap = gapArea.kind === 'up';
+    const fillColor = isUpGap ? 'rgba(245, 158, 11, 0.10)' : 'rgba(59, 130, 246, 0.10)';
+    const borderColor = isUpGap ? '#d39a55' : '#7f9cc1';
+    const textColor = isUpGap ? '#8a5d25' : '#506b8b';
+
+    return [
+      {
+        name: gapArea.label,
+        xAxis: gapArea.startDate,
+        yAxis: gapArea.bottom,
+        itemStyle: {
+          color: fillColor,
+          borderColor,
+          borderWidth: 1,
+        },
+        label: {
+          show: true,
+          position: 'insideTop',
+          color: textColor,
+          fontFamily: 'TsangerJinKai02, serif',
+          fontSize: 9,
+          formatter: gapArea.label,
+        },
+      },
+      {
+        xAxis: gapArea.endDate,
+        yAxis: gapArea.top,
+      },
+    ];
+  });
 }
 
 function makeCandleMarkerSeries(markerData) {
@@ -463,6 +704,12 @@ export default function BaseKLineChart({ data = [], height = 360, className, mar
     function makeOption() {
       const dataset = splitKlineData(data);
       const normalizedMarkers = normalizeMarkerGroups(markers);
+      const gapAreas = buildGapAreas(data);
+      const ma5Data = buildMovingAverageData(data, 5);
+      const ma10Data = buildMovingAverageData(data, 10);
+      const latestMa5 = getLatestFiniteValue(ma5Data);
+      const latestMa10 = getLatestFiniteValue(ma10Data);
+      const maHeaderGraphic = buildMaHeaderGraphic(latestMa5, latestMa10);
       const markerData = buildMarkerData(data, dataset.categoryData, [
         { kind: 'candle', markers: normalizedMarkers.candleMarkers },
         { kind: 'support', markers: normalizedMarkers.supportMarkers },
@@ -470,17 +717,62 @@ export default function BaseKLineChart({ data = [], height = 360, className, mar
         { kind: 'keyInfo', markers: normalizedMarkers.keyInfoMarkers },
       ]);
       const polyLineData = buildPolylineData(data, dataset.categoryData, normalizedMarkers.polyLines);
+      const gapMarkAreaData = makeGapMarkAreas(gapAreas);
       const hasPointMarkers = markerData.length > 0;
       const series = [
         {
           name: '价格',
           type: 'candlestick',
           data: dataset.values,
+          z: 3,
           itemStyle: {
             color: '#ef4444',
             color0: '#22c55e',
             borderColor: '#ef4444',
             borderColor0: '#22c55e',
+          },
+          markArea: gapMarkAreaData.length > 0 ? { silent: true, data: gapMarkAreaData } : undefined,
+        },
+        {
+          name: 'MA5',
+          type: 'line',
+          data: ma5Data,
+          xAxisIndex: 0,
+          yAxisIndex: 0,
+          showSymbol: false,
+          symbol: 'none',
+          smooth: false,
+          silent: true,
+          clip: true,
+          z: 4,
+          lineStyle: {
+            color: '#f59e0b',
+            width: 1.25,
+            opacity: 0.95,
+          },
+          emphasis: {
+            disabled: true,
+          },
+        },
+        {
+          name: 'MA10',
+          type: 'line',
+          data: ma10Data,
+          xAxisIndex: 0,
+          yAxisIndex: 0,
+          showSymbol: false,
+          symbol: 'none',
+          smooth: false,
+          silent: true,
+          clip: true,
+          z: 4,
+          lineStyle: {
+            color: '#3b82f6',
+            width: 1.25,
+            opacity: 0.95,
+          },
+          emphasis: {
+            disabled: true,
           },
         },
         {
@@ -504,6 +796,7 @@ export default function BaseKLineChart({ data = [], height = 360, className, mar
       return {
         animation: false,
         backgroundColor: 'transparent',
+        graphic: maHeaderGraphic || undefined,
         tooltip: {
           trigger: 'axis',
           axisPointer: { type: 'cross' },
@@ -521,7 +814,15 @@ export default function BaseKLineChart({ data = [], height = 360, className, mar
               return '';
             }
             const raw = klineItem.data || {};
-            return [
+            const ma5Item = seriesItems.find(function findMa5(item) {
+              return item.seriesName === 'MA5';
+            });
+            const ma10Item = seriesItems.find(function findMa10(item) {
+              return item.seriesName === 'MA10';
+            });
+            const ma5Value = Number.isFinite(Number(ma5Item?.data)) ? Number(ma5Item.data) : Number(ma5Item?.value);
+            const ma10Value = Number.isFinite(Number(ma10Item?.data)) ? Number(ma10Item.data) : Number(ma10Item?.value);
+            const tooltipLines = [
               `日期：${raw.date ?? klineItem.axisValue ?? '--'}`,
               `开盘：${formatNumber(raw.open)}`,
               `收盘：${formatNumber(raw.close)}`,
@@ -534,7 +835,23 @@ export default function BaseKLineChart({ data = [], height = 360, className, mar
               `涨跌幅：${formatNumber(raw.changePercent)}%`,
               `涨跌额：${formatNumber(raw.changeAmount)}`,
               `换手率：${formatNumber(raw.turnoverRate)}%`,
-            ].join('<br/>');
+            ];
+
+            if (Number.isFinite(ma5Value)) {
+              tooltipLines.push(`MA5：${formatNumber(ma5Value)}`);
+            }
+
+            if (Number.isFinite(ma10Value)) {
+              tooltipLines.push(`MA10：${formatNumber(ma10Value)}`);
+            }
+
+            if (raw.gapLabel && Number.isFinite(Number(raw.gapLow)) && Number.isFinite(Number(raw.gapHigh))) {
+              tooltipLines.push(`跳空：${raw.gapLabel}（${formatNumber(raw.gapLow)} - ${formatNumber(raw.gapHigh)}）`);
+            } else if (raw.gapLabel) {
+              tooltipLines.push(`跳空：${raw.gapLabel}`);
+            }
+
+            return tooltipLines.join('<br/>');
           },
         },
         axisPointer: {

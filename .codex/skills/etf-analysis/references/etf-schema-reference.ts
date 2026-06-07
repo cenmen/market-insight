@@ -144,8 +144,8 @@ export interface EtfStaticDataReference {
   report: EtfReport;
   metrics: [MetricItem, MetricItem, MetricItem, MetricItem];
   recentFiveDayAmplitude: string;
-  recentTenDayAmplitudeComment?: string;
-  recentTenDayMaxDrawdownComment?: string;
+  recentTenDayAmplitudeComment: string;
+  recentTenDayMaxDrawdownComment: string;
   businessRatio: BusinessRatioItem[];
   shortTermFactors: FactorItem[];
   styleCharacteristics: FactorItem[];

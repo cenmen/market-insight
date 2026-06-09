@@ -2,6 +2,7 @@ import BaseKLineChart from '@/components/BaseKLineChart';
 import BaseLineChart from '@/components/BaseLineChart';
 import BasePieChart from '@/components/BasePieChart';
 import EtfSharePrompt from '@/components/EtfSharePrompt.jsx';
+import Rate from '@/components/Rate.jsx';
 import ReportFooter from '@/components/ReportFooter.jsx';
 import Timeline from '@/components/Timeline.jsx';
 import etfs from '@/data/etfs';
@@ -11,6 +12,26 @@ import { Navigate, useParams, useSearchParams } from 'react-router-dom';
 const formatRate = (rate) => {
   return `${Number(rate).toFixed(2)}%`;
 };
+
+function clampValue(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function roundToHalf(value) {
+  return Math.round(value * 2) / 2;
+}
+
+function getHeatScore(recentTenDayAmplitude, recentTenDayMaxDrawdown) {
+  const amplitude = Number.parseFloat(String(recentTenDayAmplitude));
+  const maxDrawdown = Math.abs(Number.parseFloat(String(recentTenDayMaxDrawdown)));
+
+  if (!Number.isFinite(amplitude) || !Number.isFinite(maxDrawdown)) {
+    return 3;
+  }
+
+  const rawScore = 2.5 + amplitude / 4 - maxDrawdown / 12;
+  return roundToHalf(clampValue(rawScore, 0.5, 5));
+}
 
 const getLatestFinancial = (row) => {
   return row.data?.[0] ?? {};
@@ -74,6 +95,7 @@ export default function EtfReportPage() {
   const recentTenDayKLine = getRecentTenDayKLineData(data.kLineData);
   const recentTenDayAmplitude = getAveragePercent(recentTenDayKLine, 'amplitude');
   const recentTenDayMaxDrawdown = getMinPercent(recentTenDayKLine, 'maxDrawdown');
+  const heatScore = getHeatScore(recentTenDayAmplitude, recentTenDayMaxDrawdown);
 
   const pieData = data.businessRatio.map((item) => {
     return {
@@ -85,14 +107,27 @@ export default function EtfReportPage() {
   return (
     <main className='min-h-screen bg-[#f5f4ed] font-["TsangerJinKai02","Source_Han_Serif_SC","Noto_Serif_CJK_SC","Songti_SC","STSong",Georgia,serif] text-[10pt] leading-[1.5] tracking-[0.3pt] text-[#141413]'>
       <article className='mx-auto w-full max-w-[210mm] px-[18mm] pt-[16mm] pb-[18mm] max-[820px]:px-[18px] max-[820px]:py-[24px]'>
-        <header className='mb-[14pt] flex items-start justify-between gap-[18pt] rounded-[1.5pt] border-l-[2.5pt] border-[#1b365d] pl-[8pt] max-[820px]:block'>
-          <div className={`${useMask ? 'isolate' : ''} relative min-w-0 flex-1`}>
+        <header className='mb-[14pt] rounded-[1.5pt] border-l-[2.5pt] border-[#1b365d] pl-[8pt]'>
+          <div className={`${useMask ? 'isolate' : ''} relative min-w-0`}>
             <div className='mb-[4pt] text-[9pt] tracking-[1pt] text-[#1b365d] uppercase'>ETF ANALYSIS</div>
-            <h1 className='mb-[4pt] text-[24pt] leading-[1.15] font-medium text-[#141413]'>
-              {data.etf.name} <span className='text-[14pt] text-[#6b6a64]'>{data.etf.code}</span>
-            </h1>
-            <div className='text-[10pt] leading-[1.4] text-[#504e49]'>
-              {data.etf.index} · {data.report.coreJudgment}
+            <div className='flex items-end justify-between gap-[10pt]'>
+              <h1 className='text-[24pt] leading-[1.15] font-medium text-[#141413]'>
+                {data.etf.name} <span className='text-[14pt] text-[#6b6a64]'>{data.etf.code}</span>
+              </h1>
+              <div className='text-[26pt] leading-none font-medium text-[#141413] tabular-nums'>{data.etf.scale}</div>
+            </div>
+            <div className='mt-[4pt] flex items-center justify-between gap-[10pt]'>
+              <div className='text-[10pt] leading-[1.4] text-[#504e49]'>
+                {data.etf.index} · {data.report.coreJudgment}
+              </div>
+              <div className='text-right text-[10pt] leading-[1.4] text-[#504e49]'>{data.report.headlineSignal}</div>
+            </div>
+            <div className='mt-[4pt] flex items-center justify-between gap-[10pt]'>
+              <div className='flex items-center gap-[6pt]'>
+                <span className='text-[8.5pt] tracking-[1pt] text-[#7d6d3f] uppercase'>评分</span>
+                <Rate value={heatScore} showValue />
+              </div>
+              <div className='text-[9pt] text-[#6b6a64]'>{data.report.date}</div>
             </div>
             {useMask ? (
               <div
@@ -100,11 +135,6 @@ export default function EtfReportPage() {
                 aria-hidden='true'
               />
             ) : null}
-          </div>
-          <div className='min-w-[46mm] pt-[4pt] text-right max-[820px]:mt-[14pt] max-[820px]:text-left'>
-            <div className='text-[26pt] leading-none font-medium text-[#141413] tabular-nums'>{data.etf.scale}</div>
-            <div className='mt-[2pt] text-[10pt] font-medium text-[#1b365d]'>{data.report.headlineSignal}</div>
-            <div className='mt-[2pt] text-[9pt] text-[#6b6a64]'>{data.report.date}</div>
           </div>
         </header>
 

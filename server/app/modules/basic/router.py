@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+
 from fastapi import APIRouter, Depends
 
 from app.core.context import Context, build_context
@@ -8,6 +10,7 @@ from app.modules.basic.schema.request import (
     FundKlineParams,
     FundSnapshotParams,
     FundTopHoldingsParams,
+    MarketTurnoverParams,
     KlineParams,
     SearchStockParams,
     StockMainFinanceParams,
@@ -18,12 +21,15 @@ from app.modules.basic.schema.response import (
     FundSnapshotItem,
     FundTopHoldingItem,
     FundTopHoldingsResponse,
+    MarketTurnoverItem,
+    MarketTurnoverResponse,
     KlineBar,
     KlineResponse,
     QuarterFinanceItem,
     SearchStockItem,
     SearchStockResponse,
 )
+from app.modules.basic.api.fetch_market_turnover import sync_market_turnover_csv
 from app.modules.basic.service import (
     fetch_fund_kline_cached,
     fetch_fund_snapshot_cached,
@@ -115,4 +121,18 @@ async def get_fund_snapshot(params: FundSnapshotParams = Depends(), context: Con
 async def get_stock_main_finance(params: StockMainFinanceParams = Depends(), context: Context = Depends(build_context)):
     record = await fetch_stock_main_finance_cached(params.stockCode, params.reportType)
     data = QuarterFinanceItem.model_validate(record) if record else None
+    return ResponseModel.success(data=data, request_id=context.request_id)
+
+
+@router.get(
+    "/market/turnover",
+    response_model=ResponseModel,
+    summary="获取最近90个交易日沪深两市成交额",
+    description="使用 AKShare + 本地 CSV 缓存同步最近交易日成交额数据，缺失日期才补抓。",
+)
+async def get_market_turnover(params: MarketTurnoverParams = Depends(), context: Context = Depends(build_context)):
+    """返回最近 N 个交易日沪深两市成交额。"""
+    records = await asyncio.to_thread(sync_market_turnover_csv, params.days)
+    items = [MarketTurnoverItem.model_validate(record) for record in records]
+    data = MarketTurnoverResponse(count=len(items), items=items)
     return ResponseModel.success(data=data, request_id=context.request_id)

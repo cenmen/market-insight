@@ -97,3 +97,22 @@ class FundSnapshotItem(BaseModel):
     turnoverRate: Optional[float] = Field(default=None)
     totalMarketValue: Optional[float] = Field(default=None)
     circulatingMarketValue: Optional[float] = Field(default=None)
+
+
+class MarketTurnoverItem(BaseModel):
+    """单日沪深两市成交额数据。"""
+
+    date: str = Field(description="交易日，YYYYMMDD")
+    sse_amount: float = Field(description="上交所成交额，单位亿元")
+    szse_amount: float = Field(description="深交所成交额，单位亿元")
+    total_amount: float = Field(description="沪深两市成交额合计，单位亿元")
+    unit: str = Field(default="亿元", description="金额单位")
+    source: str = Field(default="AKShare", description="数据来源")
+
+
+class MarketTurnoverResponse(BaseModel):
+    """市场成交额接口返回体。"""
+
+    count: int = Field(description="返回条数")
+    items: list[MarketTurnoverItem] = Field(default_factory=list)
+    message: Optional[str] = Field(default=None, description="说明信息")

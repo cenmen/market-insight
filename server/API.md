@@ -8,6 +8,7 @@
 - 统一前缀：`/api`
 - 分组：
   - `基础数据`（前缀 `/basic`）
+  - `市场数据`（前缀 `/basic/market`）
   - `Skill 数据`（前缀 `/skill`）
   - `系统设置`（前缀 `/setting`）
 
@@ -120,6 +121,34 @@
 ### 4) 获取股票核心财务指标
 - 方法与路径：`GET /api/basic/stock/main-finance`
 - 概述：按股票代码与报告类型返回单期核心财务指标
+
+---
+
+## A股 · 市场数据
+前缀：`/api/basic/market`
+
+### 1) 获取最近 90 个交易日沪深两市成交额
+- 方法与路径：`GET /api/basic/market/turnover`
+- 概述：使用 AKShare + 本地 CSV 缓存同步最近交易日成交额数据，缺失日期才补抓
+- 请求参数（Query）：
+  - `days` `number?`，默认 `90`，最近交易日数量，范围 `1-240`
+- 成功响应（`data` 字段）：
+
+```jsonc
+{
+  "count": 2,
+  "items": [
+    {
+      "date": "20260603",
+      "sse_amount": 5234.12,
+      "szse_amount": 6812.34,
+      "total_amount": 12046.46,
+      "unit": "亿元",
+      "source": "AKShare"
+    }
+  ]
+}
+```
 - 请求参数（Query）：
   - `stockCode` `string`，股票代码（例如：`600519`）
   - `reportType` `string`，报告类型（`一季报`/`中报`/`三季报`/`年报`）

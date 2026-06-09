@@ -46,3 +46,9 @@ class FundSnapshotParams(BaseModel):
 class StockMainFinanceParams(BaseModel):
     stockCode: str = Field(..., description="股票代码", min_length=1, json_schema_extra={"example": "600519"})
     reportType: str = Field(..., description="报告类型，如 一季报/中报/三季报/年报", min_length=1, json_schema_extra={"example": "一季报"})
+
+
+class MarketTurnoverParams(BaseModel):
+    """市场成交额接口的查询参数。"""
+
+    days: int = Field(default=90, ge=1, le=240, description="需要返回的最近交易日数量", json_schema_extra={"example": 90})

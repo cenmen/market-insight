@@ -14,6 +14,7 @@ from app.modules.basic.schema.request import (
     KlineParams,
     SearchStockParams,
     StockMainFinanceParams,
+    IndexKlineByTxParams,
 )
 from app.modules.basic.schema.response import (
     FundKlineItem,
@@ -28,6 +29,7 @@ from app.modules.basic.schema.response import (
     QuarterFinanceItem,
     SearchStockItem,
     SearchStockResponse,
+    IndexKlineByTxResponse,
 )
 from app.modules.basic.api.fetch_market_turnover import sync_market_turnover_csv
 from app.modules.basic.service import (
@@ -36,6 +38,7 @@ from app.modules.basic.service import (
     fetch_fund_top_holdings_cached,
     fetch_kline_by_tx_cached,
     fetch_search_stocks_cached,
+    fetch_index_kline_by_tx_cached,
     fetch_stock_main_finance_cached,
 )
 
@@ -135,4 +138,16 @@ async def get_market_turnover(params: MarketTurnoverParams = Depends(), context:
     records = await asyncio.to_thread(sync_market_turnover_csv, params.days)
     items = [MarketTurnoverItem.model_validate(record) for record in records]
     data = MarketTurnoverResponse(count=len(items), items=items)
+    return ResponseModel.success(data=data, request_id=context.request_id)
+
+
+@router.get(
+    "/index/kline/tx",
+    response_model=ResponseModel,
+    summary="在腾讯获取指数历史K线数据",
+    description="按腾讯指数代码返回历史 K 线数组，仅保留 klines 数据",
+)
+async def get_index_kline_by_tx(params: IndexKlineByTxParams = Depends(), context: Context = Depends(build_context)):
+    klines = await fetch_index_kline_by_tx_cached(params)
+    data = IndexKlineByTxResponse(code=params.code, count=len(klines), klines=klines)
     return ResponseModel.success(data=data, request_id=context.request_id)

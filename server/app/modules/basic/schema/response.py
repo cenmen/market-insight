@@ -116,3 +116,9 @@ class MarketTurnoverResponse(BaseModel):
     count: int = Field(description="返回条数")
     items: list[MarketTurnoverItem] = Field(default_factory=list)
     message: Optional[str] = Field(default=None, description="说明信息")
+
+
+class IndexKlineByTxResponse(BaseModel):
+    code: str = Field(description="指数代码")
+    count: int = Field(description="历史日K线条数")
+    klines: list[list[Any]] = Field(default_factory=list, description="腾讯原始日K线数组")

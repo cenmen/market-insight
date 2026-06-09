@@ -14,4 +14,5 @@ from app.modules.basic.api.fetch_market_turnover import (
     write_market_turnover_csv,
 )
 from app.modules.basic.api.fetch_search_stocks import fetch_search_stocks, fetch_search_stocks_cached
+from app.modules.basic.api.fetch_index_kline_by_tx import fetch_index_kline_by_tx, fetch_index_kline_by_tx_cached
 from app.modules.basic.api.fetch_stock_main_finance import fetch_stock_main_finance, fetch_stock_main_finance_cached

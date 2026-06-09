@@ -52,3 +52,14 @@ class MarketTurnoverParams(BaseModel):
     """市场成交额接口的查询参数。"""
 
     days: int = Field(default=90, ge=1, le=240, description="需要返回的最近交易日数量", json_schema_extra={"example": 90})
+
+
+class IndexKlineByTxParams(BaseModel):
+    code: str = Field(
+        ...,
+        description="指数代码，不带市场前缀，例如 000685",
+        min_length=6,
+        max_length=6,
+        json_schema_extra={"example": "000685"},
+    )
+    limit: int = Field(default=320, description="返回日K线条数", ge=1, le=1000)

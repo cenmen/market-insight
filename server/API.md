@@ -113,8 +113,8 @@
   - `GET /api/basic/search?keyword=伊利`
 
 ### 3) 在腾讯获取指数历史K线数据
-- 方法与路径：`GET /api/basic/index/kline/tx`
-- 概述：按腾讯指数代码返回原始 `klines` 数组，仅保留上游响应中的 `day` 数据
+- 方法与路径：`GET /api/basic/index/kline`
+- 概述：按腾讯指数代码返回原始 `klines` 对象数组，仅保留上游响应中的 `day` 数据
 - 请求参数（Query）：
   - `code` `string`，指数代码，不带市场前缀，例如 `000685`
   - `limit` `number?`，返回条数，默认 `320`，范围 `1-1000`
@@ -125,13 +125,37 @@
   "code": "000685",
   "count": 2,
   "klines": [
-    ["2026-06-08", "3649.06", "3694.19", "3788.74", "3647.59", "9886604.00", {}, "3.44", "14119178.43", "0.00", "0.00"],
-    ["2026-06-09", "3787.24", "3893.72", "3899.74", "3740.33", "10258486.00", {}, "3.57", "13877714.22", "0.00", "0.00"]
+    {
+      "date": "2026-06-08",
+      "open": 3649.06,
+      "close": 3694.19,
+      "high": 3788.74,
+      "low": 3647.59,
+      "volume": 9886604,
+      "meta": {},
+      "changePercent": 3.44,
+      "amount": 14119178.43,
+      "changeAmount": 0,
+      "turnoverRate": 0
+    },
+    {
+      "date": "2026-06-09",
+      "open": 3787.24,
+      "close": 3893.72,
+      "high": 3899.74,
+      "low": 3740.33,
+      "volume": 10258486,
+      "meta": {},
+      "changePercent": 3.57,
+      "amount": 13877714.22,
+      "changeAmount": 0,
+      "turnoverRate": 0
+    }
   ]
 }
 ```
 - 示例（仅示意）：
-  - `GET /api/basic/index/kline/tx?code=000685&limit=320`
+  - `GET /api/basic/index/kline?code=000685&limit=320`
 
 ### 4) 获取ETF前十大持仓
 - 方法与路径：`GET /api/basic/fund/top-holdings`

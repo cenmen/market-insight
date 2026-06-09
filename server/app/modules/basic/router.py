@@ -142,10 +142,10 @@ async def get_market_turnover(params: MarketTurnoverParams = Depends(), context:
 
 
 @router.get(
-    "/index/kline/tx",
+    "/index/kline",
     response_model=ResponseModel,
     summary="在腾讯获取指数历史K线数据",
-    description="按腾讯指数代码返回历史 K 线数组，仅保留 klines 数据",
+    description="按腾讯指数代码返回历史 K 线对象数组，仅保留 klines 数据",
 )
 async def get_index_kline_by_tx(params: IndexKlineByTxParams = Depends(), context: Context = Depends(build_context)):
     klines = await fetch_index_kline_by_tx_cached(params)

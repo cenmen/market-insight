@@ -121,4 +121,4 @@ class MarketTurnoverResponse(BaseModel):
 class IndexKlineByTxResponse(BaseModel):
     code: str = Field(description="指数代码")
     count: int = Field(description="历史日K线条数")
-    klines: list[list[Any]] = Field(default_factory=list, description="腾讯原始日K线数组")
+    klines: list[dict[str, Any]] = Field(default_factory=list, description="腾讯原始日K线数组")

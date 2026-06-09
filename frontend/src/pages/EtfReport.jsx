@@ -13,26 +13,6 @@ const formatRate = (rate) => {
   return `${Number(rate).toFixed(2)}%`;
 };
 
-function clampValue(value, min, max) {
-  return Math.min(max, Math.max(min, value));
-}
-
-function roundToHalf(value) {
-  return Math.round(value * 2) / 2;
-}
-
-function getHeatScore(recentTenDayAmplitude, recentTenDayMaxDrawdown) {
-  const amplitude = Number.parseFloat(String(recentTenDayAmplitude));
-  const maxDrawdown = Math.abs(Number.parseFloat(String(recentTenDayMaxDrawdown)));
-
-  if (!Number.isFinite(amplitude) || !Number.isFinite(maxDrawdown)) {
-    return 3;
-  }
-
-  const rawScore = 2.5 + amplitude / 4 - maxDrawdown / 12;
-  return roundToHalf(clampValue(rawScore, 0.5, 5));
-}
-
 const getLatestFinancial = (row) => {
   return row.data?.[0] ?? {};
 };
@@ -95,7 +75,7 @@ export default function EtfReportPage() {
   const recentTenDayKLine = getRecentTenDayKLineData(data.kLineData);
   const recentTenDayAmplitude = getAveragePercent(recentTenDayKLine, 'amplitude');
   const recentTenDayMaxDrawdown = getMinPercent(recentTenDayKLine, 'maxDrawdown');
-  const heatScore = getHeatScore(recentTenDayAmplitude, recentTenDayMaxDrawdown);
+  const heatScore = Number(data.report.heatScore ?? 3);
 
   const pieData = data.businessRatio.map((item) => {
     return {

@@ -129,6 +129,7 @@ export interface EtfReport {
   date: string;
   author: string;
   headlineSignal: string;
+  heatScore: number;
   coreJudgment: string;
   thesis: string;
   callout: string;

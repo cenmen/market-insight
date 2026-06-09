@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import random
 import time
+import warnings
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -148,7 +149,9 @@ def fetch_trade_dates(days: int = 90) -> list[str]:
         raise ValueError("days 必须大于 0")
 
     ak = _import_akshare()
-    calendar = ak.tool_trade_date_hist_sina()
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=pd.errors.SettingWithCopyWarning)
+        calendar = ak.tool_trade_date_hist_sina()
     if not isinstance(calendar, pd.DataFrame) or calendar.empty:
         return []
 
@@ -233,8 +236,10 @@ def write_market_turnover_csv(df: pd.DataFrame, csv_path: str) -> None:
 def fetch_sse_turnover(date: str) -> float:
     """获取指定日期上交所股票成交额，单位为亿元。"""
     ak = _import_akshare()
-    frame = ak.stock_sse_deal_daily(date=date)
-    amount = _sum_row_amount(frame, ["成交金额"])
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=pd.errors.SettingWithCopyWarning)
+        frame = ak.stock_sse_deal_daily(date=date)
+    amount = _extract_amount(frame, ["成交金额"], ["股票"])
     if amount is None:
         raise RuntimeError(f"上交所成交额缺失，日期: {date}")
     return amount
@@ -243,8 +248,10 @@ def fetch_sse_turnover(date: str) -> float:
 def fetch_szse_turnover(date: str) -> float:
     """获取指定日期深交所股票成交额，单位为亿元。"""
     ak = _import_akshare()
-    frame = ak.stock_szse_summary(date=date)
-    amount = _extract_amount(frame, ["股票", "合计"], ["成交金额"])
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=pd.errors.SettingWithCopyWarning)
+        frame = ak.stock_szse_summary(date=date)
+    amount = _extract_amount(frame, ["股票"], ["成交金额"])
     if amount is None:
         raise RuntimeError(f"深交所成交额缺失，日期: {date}")
     return amount

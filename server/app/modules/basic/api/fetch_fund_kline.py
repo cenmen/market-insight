@@ -50,7 +50,9 @@ def _parse_ths_fund_kline_value(item: List[Any], previous_close: float | None = 
     change_amount = close - previous_close if previous_close else 0.0
     change_percent = (change_amount / previous_close * 100) if previous_close else 0.0
     amplitude = ((high - low) / open_price * 100) if open_price else 0.0
-    max_drawdown = ((low - open_price) / open_price * 100) if open_price else 0.0
+    max_drawdown = 0.0
+    if previous_close:
+        max_drawdown = min(0.0, (low - previous_close) / previous_close * 100)
 
     return {
         "date": _format_ths_timestamp(item[0] if item else None),

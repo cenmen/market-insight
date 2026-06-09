@@ -67,6 +67,7 @@ export default function EtfReportPage() {
   const [searchParams] = useSearchParams();
   const data = etfs[`etf${code}`];
   const useMask = searchParams.get('mask') === '1';
+  const hideSharePrompt = searchParams.get('hideSharePrompt') === '1';
 
   if (!data) {
     return <Navigate to='/' replace />;
@@ -334,7 +335,7 @@ export default function EtfReportPage() {
           </div>
         </section>
 
-        <EtfSharePrompt />
+        {hideSharePrompt ? null : <EtfSharePrompt />}
 
         <ReportFooter date={data.report.date} />
       </article>

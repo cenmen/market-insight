@@ -13,6 +13,7 @@
     "clsx": "^2.1.1",
     "echarts": "^6.1.0",
     "es-toolkit": "^1.47.0",
+    "klinecharts": "10.0.0-beta3",
     "lucide-react": "^1.17.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",

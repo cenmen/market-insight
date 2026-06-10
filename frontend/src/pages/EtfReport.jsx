@@ -1,4 +1,5 @@
 import BaseKLineChart from '@/components/BaseKLineChart';
+import BaseKLineChart2 from '@/components/BaseKLineChart2';
 import BaseLineChart from '@/components/BaseLineChart';
 import BasePieChart from '@/components/BasePieChart';
 import EtfSharePrompt from '@/components/EtfSharePrompt.jsx';
@@ -305,6 +306,10 @@ export default function EtfReportPage() {
           <figure className='my-[12pt] break-inside-avoid'>
             <BaseKLineChart data={data.kLineData} markers={data.kLineMarkers} height={364} />
             <figcaption className='mt-[4pt] text-[9pt] leading-[1.5] text-[#6b6a64]'>{data.report.chartCaption}</figcaption>
+          </figure>
+          <figure className='my-[12pt] break-inside-avoid'>
+            <BaseKLineChart2 data={data.kLineData} markers={data.kLineMarkers} height={364} />
+            <figcaption className='mt-[4pt] text-[9pt] leading-[1.5] text-[#6b6a64]'>KLineCharts 版本，当前仅接入 supportMarkers。</figcaption>
           </figure>
         </section>
 

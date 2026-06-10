@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { isFunction, isPlainObject, isString } from 'es-toolkit';
 import { dispose, init, registerOverlay } from 'klinecharts';
 
 const SUPPORT_MARKER_OVERLAY_NAME = 'base-kline-chart-2-support-marker';
@@ -29,10 +30,10 @@ function ensureSupportMarkerOverlayRegistered() {
       const isAbove = marker.position === 'above';
       const lineLength = Number.isFinite(Number(marker.lineLength)) && Number(marker.lineLength) > 0 ? Number(marker.lineLength) : 1;
       const lineWidth = Number.isFinite(Number(marker.lineWidth)) && Number(marker.lineWidth) > 0 ? Number(marker.lineWidth) : 1;
-      const fontSize = Number.isFinite(Number(marker.fontSize)) && Number(marker.fontSize) > 0 ? Number(marker.fontSize) : 10;
+      const fontSize = Number.isFinite(Number(marker.fontSize)) && Number(marker.fontSize) > 0 ? Number(marker.fontSize) : 8;
       const label = marker.label || '支撑位';
-      const pointX = Math.round(point.x) + 0.5;
-      const pointY = Math.round(point.y) + 0.5;
+      const pointX = Math.round(point.x);
+      const pointY = Math.round(point.y);
       const verticalOffset = Math.round(18 * lineLength);
       const labelY = isAbove ? pointY - verticalOffset : pointY + verticalOffset;
 
@@ -55,7 +56,7 @@ function ensureSupportMarkerOverlayRegistered() {
         {
           type: 'circle',
           attrs: {
-            x: pointX,
+            x: pointX + 0.5,
             y: pointY,
             r: 2,
           },
@@ -103,7 +104,7 @@ function ensureSupportMarkerOverlayRegistered() {
 }
 
 function parseDateToTimestamp(value) {
-  if (typeof value !== 'string') {
+  if (!isString(value)) {
     return 0;
   }
 
@@ -164,13 +165,7 @@ function resolvePricePrecision(data, markers) {
   let precision = 2;
 
   (Array.isArray(data) ? data : []).forEach(function eachItem(item) {
-    precision = Math.max(
-      precision,
-      getDecimalLength(item?.open),
-      getDecimalLength(item?.high),
-      getDecimalLength(item?.low),
-      getDecimalLength(item?.close),
-    );
+    precision = Math.max(precision, getDecimalLength(item?.open), getDecimalLength(item?.high), getDecimalLength(item?.low), getDecimalLength(item?.close));
   });
 
   (Array.isArray(markers) ? markers : []).forEach(function eachMarker(marker) {
@@ -185,7 +180,7 @@ function resolveSupportMarkers(markers, supportMarkers) {
     return supportMarkers;
   }
 
-  if (markers && typeof markers === 'object' && Array.isArray(markers.supportMarkers)) {
+  if (isPlainObject(markers) && Array.isArray(markers.supportMarkers)) {
     return markers.supportMarkers;
   }
 
@@ -199,7 +194,7 @@ function buildSupportMarkerOverlays(data, markers) {
 
   const timestampMap = new Map();
   data.forEach(function eachItem(item) {
-    if (typeof item?.date === 'string') {
+    if (isString(item?.date)) {
       timestampMap.set(item.date, parseDateToTimestamp(item.date));
     }
   });
@@ -231,7 +226,7 @@ function buildSupportMarkerOverlays(data, markers) {
 }
 
 function applyChartStyles(chart) {
-  if (!chart || typeof chart.setStyles !== 'function') {
+  if (!chart || !isFunction(chart.setStyles)) {
     return;
   }
 
@@ -297,6 +292,16 @@ function applyChartStyles(chart) {
         },
       },
     },
+    indicator: {
+      tooltip: {
+        showRule: 'none',
+        title: {
+          show: false,
+          showName: false,
+          showParams: false,
+        },
+      },
+    },
   });
 }
 
@@ -318,13 +323,13 @@ export default function BaseKLineChart2({ data = [], height = 360, className, ma
 
     applyChartStyles(chart);
 
-    if (chart && typeof chart.overrideYAxis === 'function') {
+    if (chart && isFunction(chart.overrideYAxis)) {
       chart.overrideYAxis({
         position: 'left',
       });
     }
 
-    if (chart && typeof chart.setDataLoader === 'function') {
+    if (chart && isFunction(chart.setDataLoader)) {
       chart.setDataLoader({
         getBars(params) {
           params.callback(dataRef.current, false);
@@ -332,11 +337,15 @@ export default function BaseKLineChart2({ data = [], height = 360, className, ma
       });
     }
 
-    if (chart && typeof chart.setPeriod === 'function') {
+    if (chart && isFunction(chart.setPeriod)) {
       chart.setPeriod({ type: 'day', span: 1 });
     }
 
-    if (chart && typeof chart.createIndicator === 'function') {
+    if (chart && isFunction(chart.setBarSpace)) {
+      chart.setBarSpace(7);
+    }
+
+    if (chart && isFunction(chart.createIndicator)) {
       chart.createIndicator(
         {
           name: 'VOL',
@@ -345,15 +354,20 @@ export default function BaseKLineChart2({ data = [], height = 360, className, ma
           styles: {
             tooltip: {
               showRule: 'none',
+              title: {
+                show: false,
+                showName: false,
+                showParams: false,
+              },
             },
           },
         },
         {
-        pane: {
-          id: 'base-kline-chart-2-volume-pane',
-          height: 96,
-          minHeight: 72,
-        },
+          pane: {
+            id: 'base-kline-chart-2-volume-pane',
+            height: 96,
+            minHeight: 72,
+          },
           yAxis: {
             position: 'left',
           },
@@ -378,30 +392,38 @@ export default function BaseKLineChart2({ data = [], height = 360, className, ma
       }
 
       const normalizedData = normalizeKLineData(data);
-      if (typeof chart.removeOverlay === 'function') {
+      if (isFunction(chart.removeOverlay)) {
         chart.removeOverlay({ groupId: SUPPORT_MARKER_GROUP_ID });
       }
 
       const markerList = resolveSupportMarkers(markers, supportMarkers);
       dataRef.current = normalizedData;
 
-      if (typeof chart.setSymbol === 'function') {
+      if (isFunction(chart.setSymbol)) {
         chart.setSymbol({
           ticker: 'BASE_KLINE_CHART_2',
           pricePrecision: resolvePricePrecision(data, markerList),
           volumePrecision: 0,
         });
-      } else if (typeof chart.resetData === 'function') {
+      } else if (isFunction(chart.resetData)) {
         chart.resetData();
       }
 
       const overlays = buildSupportMarkerOverlays(data, markerList);
-      if (overlays.length > 0 && typeof chart.createOverlay === 'function') {
+      if (overlays.length > 0 && isFunction(chart.createOverlay)) {
         chart.createOverlay(overlays);
       }
 
-      if (normalizedData.length > 0 && typeof chart.scrollToRealTime === 'function') {
-        chart.scrollToRealTime();
+      if (isFunction(chart.setMaxOffsetLeftDistance)) {
+        chart.setMaxOffsetLeftDistance(0);
+      }
+
+      if (isFunction(chart.setMaxOffsetRightDistance)) {
+        chart.setMaxOffsetRightDistance(30);
+      }
+
+      if (normalizedData.length > 0 && isFunction(chart.scrollToDataIndex)) {
+        chart.scrollToDataIndex(normalizedData.length - 1);
       }
     },
     [data, markers, supportMarkers],
@@ -413,7 +435,7 @@ export default function BaseKLineChart2({ data = [], height = 360, className, ma
     }
 
     const resizeObserver = new ResizeObserver(function onResize() {
-      if (chartRef.current && typeof chartRef.current.resize === 'function') {
+      if (chartRef.current && isFunction(chartRef.current.resize)) {
         chartRef.current.resize();
       }
     });

@@ -1,5 +1,20 @@
-import { Link } from 'react-router-dom'
-import { etfPageLinks } from '@/utils/pages'
+import { Link } from 'react-router-dom';
+
+import etfs from '@/data/etfs';
+
+function mapEtfPage(data) {
+  return {
+    path: `/etf/${data.etf.code}`,
+    title: `${data.etf.name}（${data.etf.code}）分析`,
+    description: data.report?.coreJudgment || data.etf.intro,
+  };
+}
+
+function sortByCode(a, b) {
+  return a.path.localeCompare(b.path);
+}
+
+const etfPageLinks = Object.values(etfs).map(mapEtfPage).sort(sortByCode);
 
 export default function HomePage() {
   return (
@@ -35,5 +50,5 @@ export default function HomePage() {
         </nav>
       </section>
     </main>
-  )
+  );
 }

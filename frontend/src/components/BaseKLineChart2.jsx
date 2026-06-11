@@ -510,16 +510,17 @@ export default function BaseKLineChart2({ data = [], height = 360, className, ma
     containerRef.current.innerHTML = '';
     ensurePointMarkerOverlayRegistered();
 
-    const chart = init(containerRef.current);
+    const chart = init(containerRef.current, {
+      layout: {
+        basicParams: {
+          yAxisPosition: 'left',
+          yAxisInside: false,
+        },
+      },
+    });
     chartRef.current = chart;
 
     applyChartStyles(chart);
-
-    if (chart && isFunction(chart.overrideYAxis)) {
-      chart.overrideYAxis({
-        position: 'left',
-      });
-    }
 
     if (chart && isFunction(chart.setDataLoader)) {
       chart.setDataLoader({

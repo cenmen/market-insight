@@ -131,6 +131,30 @@ function safeNumber(value, defaultValue = 0) {
   return num;
 }
 
+function formatTooltipNumber(value, digits = 3) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) {
+    return '--';
+  }
+  return num.toFixed(digits);
+}
+
+function formatTooltipAmountToYi(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) {
+    return '--';
+  }
+  return `${(num / 100000000).toFixed(2)} 亿`;
+}
+
+function resolveTrendColor(value, fallback = '#6b6a64') {
+  const num = Number(value);
+  if (!Number.isFinite(num) || num === 0) {
+    return fallback;
+  }
+  return num > 0 ? '#ef4444' : '#22c55e';
+}
+
 function normalizeKLineData(data) {
   if (!Array.isArray(data)) {
     return [];
@@ -138,14 +162,22 @@ function normalizeKLineData(data) {
 
   return data
     .map(function mapItem(item) {
+      const open = safeNumber(item?.open);
+      const high = safeNumber(item?.high);
+      const low = safeNumber(item?.low);
+      const amplitude = Number.isFinite(Number(item?.amplitude)) ? safeNumber(item?.amplitude) : open !== 0 ? ((high - low) / open) * 100 : NaN;
+
       return {
         timestamp: parseDateToTimestamp(item?.date),
-        open: safeNumber(item?.open),
-        high: safeNumber(item?.high),
-        low: safeNumber(item?.low),
+        date: item?.date,
+        open,
+        high,
+        low,
         close: safeNumber(item?.close),
         volume: safeNumber(item?.volume),
         turnover: safeNumber(item?.amount),
+        amplitude,
+        maxDrawdown: safeNumber(item?.maxDrawdown, NaN),
       };
     })
     .filter(function filterItem(item) {
@@ -258,6 +290,47 @@ function applyChartStyles(chart) {
       },
       tooltip: {
         showRule: 'follow_cross',
+        showType: 'rect',
+        title: {
+          template: '{time}',
+        },
+        legend: {
+          template(data) {
+            const current = data.current || {};
+            const prev = data.prev || null;
+            const prevClose = Number(prev?.close);
+            const currentClose = Number(current.close);
+            const changePercent =
+              Number.isFinite(prevClose) && prevClose !== 0 && Number.isFinite(currentClose) ? ((currentClose - prevClose) / prevClose) * 100 : NaN;
+            const amplitude = Number(current.amplitude);
+            const maxDrawdown = Number(current.maxDrawdown);
+
+            return [
+              { title: '日期：', value: current.date || '--' },
+              { title: '开盘：', value: formatTooltipNumber(current.open) },
+              { title: '收盘：', value: formatTooltipNumber(current.close) },
+              { title: '最高：', value: formatTooltipNumber(current.high) },
+              { title: '最低：', value: formatTooltipNumber(current.low) },
+              { title: '振幅：', value: Number.isFinite(amplitude) ? `${amplitude.toFixed(2)}%` : '--' },
+              {
+                title: '最大跌幅：',
+                value: {
+                  text: Number.isFinite(maxDrawdown) ? `${maxDrawdown.toFixed(2)}%` : '--',
+                  color: resolveTrendColor(maxDrawdown),
+                },
+              },
+              {
+                title: '涨跌幅：',
+                value: {
+                  text: Number.isFinite(changePercent) ? `${changePercent.toFixed(2)}%` : '--',
+                  color: resolveTrendColor(changePercent),
+                },
+              },
+              { title: '成交量：', value: formatTooltipAmountToYi(current.volume) },
+              { title: '成交额：', value: formatTooltipAmountToYi(current.turnover) },
+            ];
+          },
+        },
       },
     },
     xAxis: {

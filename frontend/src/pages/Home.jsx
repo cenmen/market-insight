@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { etfPageLinks, pageLinks } from '@/utils/pages'
+import { etfPageLinks } from '@/utils/pages'
 
 export default function HomePage() {
   return (
@@ -8,17 +8,14 @@ export default function HomePage() {
         <nav className='border border-[#ded9cc] bg-[#fbfaf3] p-5 shadow-[0_12px_30px_rgba(49,44,35,0.08)] md:p-8' aria-label='页面导航'>
           <p className='mb-3 text-[14px] tracking-[0.2em] text-[#7d7768] uppercase'>Pages</p>
           <h1 className='text-[40px] leading-[1.08] font-medium text-[#201f1b] md:text-[52px]'>页面导航</h1>
-          <p className='mt-4 mb-6 text-[16px] leading-[1.6] text-[#4a463f] md:text-[20px]'>点击进入对应页面。</p>
-          <ul className='m-0 grid list-none gap-3 p-0'>
-            {pageLinks.map((page) => (
-              <li key={page.path}>
-                <Link to={page.path} className='block border border-[#d9d3c3] bg-[#f6f2e6] p-4 text-inherit no-underline transition-transform duration-150 ease-in hover:-translate-y-[2px] hover:shadow-[0_8px_18px_rgba(45,39,29,0.1)]'>
-                  <span className='block text-[24px] leading-[1.2] font-medium'>{page.title}</span>
-                  <small className='mt-2 block text-[14px] text-[#5a554a] md:text-[16px]'>{page.description}</small>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <p className='mt-4 mb-6 text-[16px] leading-[1.6] text-[#4a463f] md:text-[20px]'>点击进入事件时间线或 ETF 专题页。</p>
+          <Link
+            to='/article/event-timeline'
+            className='block border border-[#d9d3c3] bg-[#f6f2e6] p-4 text-inherit no-underline transition-transform duration-150 ease-in hover:-translate-y-[2px] hover:shadow-[0_8px_18px_rgba(45,39,29,0.1)]'
+          >
+            <span className='block text-[24px] leading-[1.2] font-medium'>最近两周事件时间线</span>
+            <small className='mt-2 block text-[14px] text-[#5a554a] md:text-[16px]'>盘面事件与资金切换节奏</small>
+          </Link>
         </nav>
 
         <nav className='border border-[#ded9cc] bg-[#fbfaf3] p-5 shadow-[0_12px_30px_rgba(49,44,35,0.08)] md:p-8' aria-label='ETF 页面导航'>

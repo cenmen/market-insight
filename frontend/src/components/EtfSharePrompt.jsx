@@ -25,7 +25,7 @@ export default function EtfSharePrompt() {
         </div>
       </div>
 
-      <div className='grid grid-cols-[1.2fr_0.8fr] gap-[10pt] max-[820px]:grid-cols-1'>
+      <div className='grid grid-cols-[1.2fr_0.8fr] gap-[10pt] max-[820px]:grid-cols-1 print:!grid-cols-[1.2fr_0.8fr] print:!gap-[10pt]'>
         <div className='rounded-[4pt] border border-[#e1d6ba] bg-[#fbf7ee] px-[10pt] py-[9pt]'>
           <div className='mb-[6pt] flex items-center gap-[6pt] text-[9pt] font-medium text-[#7d6d3f]'>
             <QrCode className='h-[13px] w-[13px]' />

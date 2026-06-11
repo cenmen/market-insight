@@ -129,7 +129,7 @@ export default function EtfReportPage() {
             );
           })}
         </div>
-        <section className='mb-[16pt] grid grid-cols-4 gap-[10pt] max-[820px]:grid-cols-2 max-[820px]:gap-[6pt]'>
+        <section className='mb-[16pt] grid grid-cols-4 gap-[10pt] max-[820px]:grid-cols-2 max-[820px]:gap-[6pt] print:!grid-cols-2 print:!gap-[10pt]'>
           {data.metrics.map((metric) => {
             return (
               <div className='rounded-[4pt] bg-[#faf9f5] p-[10pt]' key={metric.label}>
@@ -186,7 +186,7 @@ export default function EtfReportPage() {
 
         <section>
           <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>业务分布</h2>
-          <div className='my-[8pt] grid grid-cols-2 gap-[10pt] max-[820px]:block'>
+          <div className='my-[8pt] grid grid-cols-2 gap-[10pt] max-[820px]:block print:!grid print:!grid-cols-2 print:!gap-[10pt]'>
             {data.businessRatio.map((item) => {
               return (
                 <div className='break-inside-avoid rounded-[4pt] bg-[#faf9f5] px-[10pt] py-[8pt]' key={item.type}>
@@ -206,19 +206,21 @@ export default function EtfReportPage() {
 
         <section>
           <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>持仓明细</h2>
-          <div className='mt-[8pt] grid grid-cols-2 gap-[10pt] max-[820px]:grid-cols-1 max-[820px]:gap-[8pt]'>
+          <div className='mt-[8pt] grid grid-cols-2 gap-[10pt] max-[820px]:grid-cols-1 max-[820px]:gap-[8pt] print:!grid print:!grid-cols-2 print:!gap-[10pt]'>
             {data.financialRows.map((row) => {
               const financial = getLatestFinancial(row);
               return (
                 <article className='break-inside-avoid rounded-[4pt] bg-[#faf9f5] p-[10pt]' key={row.code}>
-                  <header className='flex items-start justify-between gap-[8pt] max-[820px]:block'>
+                  <header className='flex items-start justify-between gap-[8pt] max-[820px]:block print:!flex print:!items-start print:!justify-between'>
                     <div className='flex items-baseline gap-[6pt] text-[#141413]'>
                       <strong>{row.name}</strong>
                       <span className='font-["JetBrains_Mono",monospace] text-[8.5pt] text-[#6b6a64]'>{row.code}</span>
                       <span className='text-[8.5pt] whitespace-nowrap text-[#6b6a64]'>{formatQuarter(financial)}</span>
                     </div>
-                    <div className='text-right max-[820px]:mt-[2pt] max-[820px]:text-left'>
-                      <div className='text-[9pt] font-medium whitespace-nowrap text-[#1b365d] max-[820px]:mt-[2pt]'>持仓占比 {formatRate(row.weight)}</div>
+                    <div className='text-right max-[820px]:mt-[2pt] max-[820px]:text-left print:!mt-0 print:!text-right'>
+                      <div className='text-[9pt] font-medium whitespace-nowrap text-[#1b365d] max-[820px]:mt-[2pt] print:!mt-0'>
+                        持仓占比 {formatRate(row.weight)}
+                      </div>
                     </div>
                   </header>
                   <div className='mt-[4pt] flex flex-wrap gap-[3pt]'>
@@ -257,7 +259,7 @@ export default function EtfReportPage() {
 
         <section>
           <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>技术观察</h2>
-          <div className='my-[8pt] grid grid-cols-2 gap-[10pt] max-[820px]:grid-cols-1'>
+          <div className='my-[8pt] grid grid-cols-2 gap-[10pt] max-[820px]:grid-cols-1 print:!grid print:!grid-cols-2 print:!gap-[10pt]'>
             <div className='mb-[8pt] rounded-[4pt] bg-[#faf9f5] pt-[10pt]'>
               <div className='px-[10pt] text-[10pt] font-medium text-[#3d3d3a]'>最近 10 日振幅</div>
               <div className='mt-[4pt] px-[10pt] text-[14pt] font-medium text-[#1b365d] tabular-nums'>{recentTenDayAmplitude}</div>
@@ -307,10 +309,10 @@ export default function EtfReportPage() {
             <BaseKLineChart data={data.kLineData} markers={data.kLineMarkers} height={364} />
             <figcaption className='mt-[4pt] text-[9pt] leading-[1.5] text-[#6b6a64]'>{data.report.chartCaption}</figcaption>
           </figure>
-          <figure className='my-[12pt] break-inside-avoid'>
+          {/* <figure className='my-[12pt] break-inside-avoid'>
             <BaseKLineChart2 data={data.kLineData} markers={data.kLineMarkers} height={364} />
             <figcaption className='mt-[4pt] text-[9pt] leading-[1.5] text-[#6b6a64]'>KLineCharts 版本，当前仅接入 supportMarkers。</figcaption>
-          </figure>
+          </figure> */}
         </section>
 
         {data.report.timelineEvents?.length > 0 ? (
@@ -328,7 +330,7 @@ export default function EtfReportPage() {
 
         <section>
           <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>风险提示</h2>
-          <div className='my-[8pt] grid grid-cols-2 gap-[10pt] max-[820px]:block'>
+          <div className='my-[8pt] grid grid-cols-2 gap-[10pt] max-[820px]:block print:!grid print:!grid-cols-2 print:!gap-[10pt]'>
             {data.report.risks.map((risk) => {
               return (
                 <div className='break-inside-avoid rounded-[3pt] bg-[#faf9f5] px-[10pt] py-[6pt]' key={risk.title}>

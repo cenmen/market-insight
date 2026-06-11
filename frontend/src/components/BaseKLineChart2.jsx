@@ -2,18 +2,24 @@ import { useEffect, useRef } from 'react';
 import { isFunction, isPlainObject, isString } from 'es-toolkit';
 import { dispose, init, registerOverlay } from 'klinecharts';
 
-const SUPPORT_MARKER_OVERLAY_NAME = 'base-kline-chart-2-support-marker';
-const SUPPORT_MARKER_GROUP_ID = 'base-kline-chart-2-support-marker-group';
+const POINT_MARKER_OVERLAY_NAME = 'base-kline-chart-2-point-marker';
+const POINT_MARKER_GROUP_ID = 'base-kline-chart-2-point-marker-group';
+const K_LINE_MARKER_TYPE_PRIORITY = {
+  support: 1,
+  resistance: 2,
+  keyInfo: 3,
+  candle: 4,
+};
 
-let hasRegisteredSupportMarkerOverlay = false;
+let hasRegisteredPointMarkerOverlay = false;
 
-function ensureSupportMarkerOverlayRegistered() {
-  if (hasRegisteredSupportMarkerOverlay) {
+function ensurePointMarkerOverlayRegistered() {
+  if (hasRegisteredPointMarkerOverlay) {
     return;
   }
 
   registerOverlay({
-    name: SUPPORT_MARKER_OVERLAY_NAME,
+    name: POINT_MARKER_OVERLAY_NAME,
     totalStep: 1,
     lock: true,
     visible: true,
@@ -28,10 +34,11 @@ function ensureSupportMarkerOverlayRegistered() {
 
       const marker = params.overlay?.extendData || {};
       const isAbove = marker.position === 'above';
+      const markerStyle = resolveMarkerStyle(marker.type);
       const lineLength = Number.isFinite(Number(marker.lineLength)) && Number(marker.lineLength) > 0 ? Number(marker.lineLength) : 1;
       const lineWidth = Number.isFinite(Number(marker.lineWidth)) && Number(marker.lineWidth) > 0 ? Number(marker.lineWidth) : 1;
       const fontSize = Number.isFinite(Number(marker.fontSize)) && Number(marker.fontSize) > 0 ? Number(marker.fontSize) : 8;
-      const label = marker.label || '支撑位';
+      const label = marker.label || resolveDefaultMarkerLabel(marker.type);
       const pointX = Math.round(point.x);
       const pointY = Math.round(point.y);
       const verticalOffset = Math.round(18 * lineLength);
@@ -48,7 +55,7 @@ function ensureSupportMarkerOverlayRegistered() {
           },
           styles: {
             style: 'solid',
-            color: '#d39a55',
+            color: markerStyle.line,
             size: lineWidth,
             dashedValue: [2, 2],
           },
@@ -62,8 +69,8 @@ function ensureSupportMarkerOverlayRegistered() {
           },
           styles: {
             style: 'stroke_fill',
-            color: '#fff6ea',
-            borderColor: '#d39a55',
+            color: markerStyle.fill,
+            borderColor: markerStyle.line,
             borderSize: lineWidth,
             borderStyle: 'solid',
             borderDashedValue: [2, 2],
@@ -80,7 +87,7 @@ function ensureSupportMarkerOverlayRegistered() {
           },
           styles: {
             style: 'fill',
-            color: '#8a5d25',
+            color: markerStyle.text,
             size: fontSize,
             family: 'TsangerJinKai02, serif',
             weight: 500,
@@ -100,7 +107,7 @@ function ensureSupportMarkerOverlayRegistered() {
     },
   });
 
-  hasRegisteredSupportMarkerOverlay = true;
+  hasRegisteredPointMarkerOverlay = true;
 }
 
 function parseDateToTimestamp(value) {
@@ -207,46 +214,158 @@ function resolvePricePrecision(data, markers) {
   return precision;
 }
 
-function resolveSupportMarkers(markers, supportMarkers) {
-  if (Array.isArray(supportMarkers)) {
-    return supportMarkers;
+function normalizeMarkerGroups(markers, supportMarkers) {
+  if (Array.isArray(markers)) {
+    return {
+      candleMarkers: markers,
+      supportMarkers: Array.isArray(supportMarkers) ? supportMarkers : [],
+      resistanceMarkers: [],
+      keyInfoMarkers: [],
+    };
   }
 
-  if (isPlainObject(markers) && Array.isArray(markers.supportMarkers)) {
-    return markers.supportMarkers;
+  if (!isPlainObject(markers)) {
+    return {
+      candleMarkers: [],
+      supportMarkers: Array.isArray(supportMarkers) ? supportMarkers : [],
+      resistanceMarkers: [],
+      keyInfoMarkers: [],
+    };
   }
 
-  return [];
+  return {
+    candleMarkers: Array.isArray(markers.candleMarkers) ? markers.candleMarkers : [],
+    supportMarkers: Array.isArray(supportMarkers) ? supportMarkers : Array.isArray(markers.supportMarkers) ? markers.supportMarkers : [],
+    resistanceMarkers: Array.isArray(markers.resistanceMarkers) ? markers.resistanceMarkers : [],
+    keyInfoMarkers: Array.isArray(markers.keyInfoMarkers) ? markers.keyInfoMarkers : [],
+  };
 }
 
-function buildSupportMarkerOverlays(data, markers) {
-  if (!Array.isArray(markers) || markers.length === 0) {
-    return [];
+function resolveDefaultMarkerLabel(type) {
+  if (type === 'support') {
+    return '支撑位';
   }
 
-  const timestampMap = new Map();
+  if (type === 'resistance') {
+    return '压力位';
+  }
+
+  if (type === 'keyInfo') {
+    return '关键信息位';
+  }
+
+  return 'K线标记';
+}
+
+function resolveMarkerStyle(type) {
+  if (type === 'support') {
+    return {
+      line: '#d39a55',
+      fill: '#fff6ea',
+      text: '#8a5d25',
+    };
+  }
+
+  if (type === 'resistance') {
+    return {
+      line: '#7f9cc1',
+      fill: '#eff4fb',
+      text: '#506b8b',
+    };
+  }
+
+  if (type === 'keyInfo') {
+    return {
+      line: '#8a7f74',
+      fill: '#f7f4ef',
+      text: '#66605a',
+    };
+  }
+
+  return {
+    line: '#8c897f',
+    fill: '#faf8f3',
+    text: '#6a6056',
+  };
+}
+
+function buildPointMarkerOverlays(data, markerGroups) {
+  const markerEntries = [];
+  const dateMap = new Map();
+
   data.forEach(function eachItem(item) {
     if (isString(item?.date)) {
-      timestampMap.set(item.date, parseDateToTimestamp(item.date));
+      dateMap.set(item.date, item);
     }
   });
 
-  return markers
-    .map(function mapMarker(marker, index) {
-      const timestamp = timestampMap.get(marker?.date);
-      const value = safeNumber(marker?.price, NaN);
-      if (!Number.isFinite(timestamp) || timestamp <= 0 || !Number.isFinite(value)) {
-        return null;
+  markerGroups.forEach(function eachGroup(group) {
+    const markers = Array.isArray(group.markers) ? group.markers : [];
+
+    markers.forEach(function eachMarker(marker, index) {
+      const candle = dateMap.get(marker?.date);
+      if (!candle) {
+        return;
       }
 
+      const position = marker.position === 'below' ? 'below' : 'above';
+      const price = Number.isFinite(Number(marker?.price)) ? Number(marker.price) : position === 'below' ? Number(candle.low) : Number(candle.high);
+
+      if (!Number.isFinite(price)) {
+        return;
+      }
+
+      markerEntries.push({
+        date: candle.date,
+        timestamp: candle.timestamp,
+        value: price,
+        type: group.type,
+        position,
+        label: marker.label,
+        lineLength: marker.lineLength,
+        lineWidth: marker.lineWidth,
+        fontSize: marker.fontSize,
+        priority: group.priority,
+        order: index,
+      });
+    });
+  });
+
+  markerEntries.sort(function sortMarker(left, right) {
+    const leftTimestamp = Number(left.timestamp) || 0;
+    const rightTimestamp = Number(right.timestamp) || 0;
+    if (leftTimestamp !== rightTimestamp) {
+      return leftTimestamp - rightTimestamp;
+    }
+
+    if (left.priority !== right.priority) {
+      return left.priority - right.priority;
+    }
+
+    return left.order - right.order;
+  });
+
+  const seenDate = new Set();
+
+  return markerEntries
+    .filter(function filterMarker(marker) {
+      if (seenDate.has(marker.date)) {
+        return false;
+      }
+
+      seenDate.add(marker.date);
+      return true;
+    })
+    .map(function mapMarker(marker, index) {
       return {
-        name: SUPPORT_MARKER_OVERLAY_NAME,
-        groupId: SUPPORT_MARKER_GROUP_ID,
-        id: `${SUPPORT_MARKER_GROUP_ID}-${index}-${marker.date}`,
+        name: POINT_MARKER_OVERLAY_NAME,
+        groupId: POINT_MARKER_GROUP_ID,
+        id: `${POINT_MARKER_GROUP_ID}-${index}-${marker.date}`,
         lock: true,
-        points: [{ timestamp, value }],
+        points: [{ timestamp: marker.timestamp, value: marker.value }],
         extendData: {
           label: marker.label,
+          type: marker.type,
           position: marker.position,
           lineLength: marker.lineLength,
           lineWidth: marker.lineWidth,
@@ -389,7 +508,7 @@ export default function BaseKLineChart2({ data = [], height = 360, className, ma
     }
 
     containerRef.current.innerHTML = '';
-    ensureSupportMarkerOverlayRegistered();
+    ensurePointMarkerOverlayRegistered();
 
     const chart = init(containerRef.current);
     chartRef.current = chart;
@@ -419,6 +538,46 @@ export default function BaseKLineChart2({ data = [], height = 360, className, ma
     }
 
     if (chart && isFunction(chart.createIndicator)) {
+      chart.createIndicator(
+        {
+          name: 'MA',
+          shortName: '',
+          calcParams: [5, 10],
+          styles: {
+            lines: [
+              {
+                color: '#6366f1',
+                size: 0.75,
+                style: 'solid',
+                dashedValue: [],
+                smooth: false,
+              },
+              {
+                color: '#facc15',
+                size: 0.75,
+                style: 'solid',
+                dashedValue: [],
+                smooth: false,
+              },
+            ],
+            tooltip: {
+              showRule: 'none',
+              title: {
+                show: false,
+                showName: false,
+                showParams: false,
+              },
+            },
+          },
+        },
+        {
+          pane: {
+            id: 'candle_pane',
+          },
+          isStack: true,
+        },
+      );
+
       chart.createIndicator(
         {
           name: 'VOL',
@@ -465,11 +624,18 @@ export default function BaseKLineChart2({ data = [], height = 360, className, ma
       }
 
       const normalizedData = normalizeKLineData(data);
+      const normalizedMarkers = normalizeMarkerGroups(markers, supportMarkers);
+      const markerList = [
+        ...normalizedMarkers.candleMarkers,
+        ...normalizedMarkers.supportMarkers,
+        ...normalizedMarkers.resistanceMarkers,
+        ...normalizedMarkers.keyInfoMarkers,
+      ];
+
       if (isFunction(chart.removeOverlay)) {
-        chart.removeOverlay({ groupId: SUPPORT_MARKER_GROUP_ID });
+        chart.removeOverlay({ groupId: POINT_MARKER_GROUP_ID });
       }
 
-      const markerList = resolveSupportMarkers(markers, supportMarkers);
       dataRef.current = normalizedData;
 
       if (isFunction(chart.setSymbol)) {
@@ -482,7 +648,12 @@ export default function BaseKLineChart2({ data = [], height = 360, className, ma
         chart.resetData();
       }
 
-      const overlays = buildSupportMarkerOverlays(data, markerList);
+      const overlays = buildPointMarkerOverlays(normalizedData, [
+        { type: 'support', priority: K_LINE_MARKER_TYPE_PRIORITY.support, markers: normalizedMarkers.supportMarkers },
+        { type: 'resistance', priority: K_LINE_MARKER_TYPE_PRIORITY.resistance, markers: normalizedMarkers.resistanceMarkers },
+        { type: 'keyInfo', priority: K_LINE_MARKER_TYPE_PRIORITY.keyInfo, markers: normalizedMarkers.keyInfoMarkers },
+        { type: 'candle', priority: K_LINE_MARKER_TYPE_PRIORITY.candle, markers: normalizedMarkers.candleMarkers },
+      ]);
       if (overlays.length > 0 && isFunction(chart.createOverlay)) {
         chart.createOverlay(overlays);
       }

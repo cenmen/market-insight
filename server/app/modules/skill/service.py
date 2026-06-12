@@ -79,6 +79,29 @@ def _normalize_amount_to_yi_yuan(value: Any) -> float | None:
     return round(amount, 2)
 
 
+def _normalize_date_key(value: Any) -> str:
+    """把日期统一转换成 YYYYMMDD。"""
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    return text.replace("-", "").replace("/", "")
+
+
+def safe_float(value: Any) -> float | None:
+    """把任意值安全转换为 float，失败时返回 None。"""
+    if value is None:
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    text = str(value).strip().replace(",", "")
+    if not text or text in {"--", "None", "nan", "NaN"}:
+        return None
+    try:
+        return float(text)
+    except (TypeError, ValueError):
+        return None
+
+
 def _resolve_theme_configs(theme_keys: Iterable[str]) -> tuple[list[dict[str, Any]], list[str], list[str]]:
     """把主题 key 映射成可查询的配置，并返回未命中和缺少指数代码的 key 列表。"""
     keys = _normalize_keys(theme_keys)
@@ -107,7 +130,7 @@ def _build_amount_map(records: list[dict[str, Any]]) -> dict[str, float]:
     """把单个 K 线序列转成按日期索引的成交额映射。"""
     amount_map: dict[str, float] = {}
     for record in records:
-        date = str(record.get("date") or "").strip()
+        date = _normalize_date_key(record.get("date"))
         if not date:
             continue
         amount = _normalize_amount_to_yi_yuan(record.get("amount"))
@@ -115,6 +138,37 @@ def _build_amount_map(records: list[dict[str, Any]]) -> dict[str, float]:
             continue
         amount_map[date] = amount
     return amount_map
+
+
+def _build_sector_congestion_rows(
+    market_records: list[dict[str, Any]],
+    resolved_configs: list[dict[str, Any]],
+    theme_amount_maps: dict[str, dict[str, float]],
+) -> list[dict[str, Any]]:
+    """把市场与主题成交额数据合并为拥挤度返回行。"""
+    rows: list[dict[str, Any]] = []
+    for market_record in market_records:
+        date = _normalize_date_key(market_record.get("date"))
+        total_amount = market_record.get("total_amount")
+        total_amount_float = safe_float(total_amount)
+
+        row: dict[str, Any] = {
+            "date": date,
+            "sse_amount": market_record.get("sse_amount"),
+            "szse_amount": market_record.get("szse_amount"),
+            "total_amount": total_amount,
+            "unit": market_record.get("unit") or "亿元",
+        }
+        for config in resolved_configs:
+            key = config["key"]
+            amount = theme_amount_maps.get(key, {}).get(date)
+            ratio = round(amount / total_amount_float * 100, 2) if amount is not None and total_amount_float else None
+            row[key] = {
+                "amount": amount,
+                "ratio": ratio,
+            }
+        rows.append(row)
+    return rows
 
 
 def fetch_etf_base_data(code: str, kline_limit: int = 60) -> Dict[str, Any]:
@@ -216,61 +270,19 @@ async def fetch_sector_congestion(theme_keys: Iterable[str], days: int = 90) -> 
     #     return cached
 
     if not resolved_configs:
-        market_records = await asyncio.to_thread(sync_market_turnover_csv, days)
-        rows = [
-            {
-                "date": str(record.get("date") or "").strip(),
-                "sse_amount": record.get("sse_amount"),
-                "szse_amount": record.get("szse_amount"),
-                "total_amount": record.get("total_amount"),
-                "unit": record.get("unit") or "亿元",
-            }
-            for record in market_records
-        ]
+        market_records = sync_market_turnover_csv(days)
+        rows = _build_sector_congestion_rows(market_records, resolved_configs, {})
         await sector_congestion_cache.set(cache_key, rows, ttl=1800)
         return rows
 
-    market_task = asyncio.to_thread(sync_market_turnover_csv, days)
-    kline_tasks = [fetch_ths_kline_cached(item["liquidityCode"], days) for item in resolved_configs]
-
-    market_records = await market_task
-    kline_results = await asyncio.gather(*kline_tasks, return_exceptions=True)
+    market_records = sync_market_turnover_csv(days)
 
     theme_amount_maps: dict[str, dict[str, float]] = {}
-    for config, result in zip(resolved_configs, kline_results):
-        if isinstance(result, Exception):
-            theme_amount_maps[config["key"]] = {}
-            continue
-        theme_amount_maps[config["key"]] = _build_amount_map(result)
+    for config in resolved_configs:
+        kline_result = await fetch_ths_kline_cached(config["liquidityCode"], days)
+        theme_amount_maps[config["key"]] = _build_amount_map(kline_result)
 
-    rows: list[dict[str, Any]] = []
-    for market_record in market_records:
-        date = str(market_record.get("date") or "").strip()
-        total_amount = market_record.get("total_amount")
-        row: dict[str, Any] = {
-            "date": date,
-            "sse_amount": market_record.get("sse_amount"),
-            "szse_amount": market_record.get("szse_amount"),
-            "total_amount": total_amount,
-            "unit": market_record.get("unit") or "亿元",
-        }
-        total_amount_float = None
-        if isinstance(total_amount, (int, float)):
-            total_amount_float = float(total_amount)
-        else:
-            try:
-                total_amount_float = float(str(total_amount))
-            except (TypeError, ValueError):
-                total_amount_float = None
-        for config in resolved_configs:
-            key = config["key"]
-            amount = theme_amount_maps.get(key, {}).get(date)
-            ratio = round(amount / total_amount_float * 100, 2) if amount is not None and total_amount_float else None
-            row[key] = {
-                "amount": amount,
-                "ratio": ratio,
-            }
-        rows.append(row)
+    rows = _build_sector_congestion_rows(market_records, resolved_configs, theme_amount_maps)
 
     await sector_congestion_cache.set(cache_key, rows, ttl=1800)
     return rows

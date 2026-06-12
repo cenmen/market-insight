@@ -1,6 +1,7 @@
 import BaseKLineChart from '@/components/BaseKLineChart';
 import BaseLineChart from '@/components/BaseLineChart';
 import BasePieChart from '@/components/BasePieChart';
+import EtfSharePrompt from '@/components/EtfSharePrompt.jsx';
 import EtfPublicAccountPrompt from '@/components/EtfPublicAccountPrompt.jsx';
 import Rate from '@/components/Rate.jsx';
 import ReportFooter from '@/components/ReportFooter.jsx';
@@ -337,7 +338,7 @@ export default function EtfReportPage() {
           </div>
         </section>
 
-        {hideSharePrompt ? null : <EtfPublicAccountPrompt />}
+        {hideSharePrompt ? <EtfSharePrompt /> : <EtfPublicAccountPrompt />}
 
         <ReportFooter date={data.report.date} />
       </article>

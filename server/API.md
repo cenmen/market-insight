@@ -210,6 +210,15 @@
   - `code` `string`，ETF 基金代码（例如：`588200`）
   - `klineLimit` `number?`，K线条数，默认 `60`
 
+### 2) 获取板块拥挤度
+- 方法与路径：`GET /api/skill/sector/congestion`
+- 概述：按主题 key 返回沪深两市成交额、板块/指数成交额与成交额占比
+- 请求参数（Query）：
+  - `themeKeys` `array[string]?`，主题 key 列表，参考 `frontend/src/data/etfBaseList.js` 的 `key`
+  - `days` `number?`，默认 `90`，最近交易日数量
+- 返回说明：
+  - `data` 为数组，每个元素包含 `date`、`sse_amount`、`szse_amount`、`total_amount`、`unit` 以及各主题 key 的 `{ amount, ratio }`
+
 ## 系统设置
 前缀：`/api/setting`
 

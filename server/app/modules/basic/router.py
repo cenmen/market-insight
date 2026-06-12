@@ -48,8 +48,8 @@ router = APIRouter()
 @router.get(
     "/kline",
     response_model=ResponseModel,
-    summary="获取K线数据",
-    description="按股票代码与周期返回K线列表",
+    summary="获取K线数据（腾讯证券）",
+    description="按股票代码与周期返回 K 线列表，数据来自腾讯证券行情源（通过 AkShare 适配）",
 )
 async def get_kline(params: KlineParams = Depends(), context: Context = Depends(build_context)):
     df = await fetch_kline_by_tx_cached(params)
@@ -62,8 +62,8 @@ async def get_kline(params: KlineParams = Depends(), context: Context = Depends(
 @router.get(
     "/search",
     response_model=ResponseModel,
-    summary="搜索股票",
-    description="根据关键词匹配股票代码与名称",
+    summary="搜索股票（东方财富）",
+    description="根据关键词匹配股票代码与名称，数据来自东方财富搜索接口",
 )
 async def search(params: SearchStockParams = Depends(), context: Context = Depends(build_context)):
     records = await fetch_search_stocks_cached(params)
@@ -75,8 +75,8 @@ async def search(params: SearchStockParams = Depends(), context: Context = Depen
 @router.get(
     "/fund/top-holdings",
     response_model=ResponseModel,
-    summary="获取ETF前十大持仓",
-    description="按基金代码返回前十大持仓及持仓报告期",
+    summary="获取ETF前十大持仓（东方财富）",
+    description="按基金代码返回前十大持仓及持仓报告期，数据来自东方财富基金持仓接口",
 )
 async def get_fund_top_holdings(params: FundTopHoldingsParams = Depends(), context: Context = Depends(build_context)):
     records, position_report = await fetch_fund_top_holdings_cached(params.code)
@@ -93,8 +93,8 @@ async def get_fund_top_holdings(params: FundTopHoldingsParams = Depends(), conte
 @router.get(
     "/fund/kline",
     response_model=ResponseModel,
-    summary="获取ETF基金K线",
-    description="按基金代码返回指定条数的日K线数据",
+    summary="获取ETF基金K线（同花顺）",
+    description="按基金代码返回指定条数的日 K 线数据，数据来自同花顺基金行情接口",
 )
 async def get_fund_kline(params: FundKlineParams = Depends(), context: Context = Depends(build_context)):
     records = await fetch_fund_kline_cached(params.code, params.limit)
@@ -106,8 +106,8 @@ async def get_fund_kline(params: FundKlineParams = Depends(), context: Context =
 @router.get(
     "/fund/snapshot",
     response_model=ResponseModel,
-    summary="获取ETF基金最新快照",
-    description="按基金代码返回最新行情快照信息",
+    summary="获取ETF基金最新快照（同花顺）",
+    description="按基金代码返回最新行情快照信息，数据来自同花顺基金快照接口",
 )
 async def get_fund_snapshot(params: FundSnapshotParams = Depends(), context: Context = Depends(build_context)):
     record = await fetch_fund_snapshot_cached(params.code)
@@ -118,8 +118,8 @@ async def get_fund_snapshot(params: FundSnapshotParams = Depends(), context: Con
 @router.get(
     "/stock/main-finance",
     response_model=ResponseModel,
-    summary="获取股票核心财务指标",
-    description="按股票代码与报告类型返回单期核心财务指标",
+    summary="获取股票核心财务指标（东方财富）",
+    description="按股票代码与报告类型返回单期核心财务指标，数据来自东方财富财务接口",
 )
 async def get_stock_main_finance(params: StockMainFinanceParams = Depends(), context: Context = Depends(build_context)):
     record = await fetch_stock_main_finance_cached(params.stockCode, params.reportType)
@@ -130,7 +130,7 @@ async def get_stock_main_finance(params: StockMainFinanceParams = Depends(), con
 @router.get(
     "/market/turnover",
     response_model=ResponseModel,
-    summary="获取最近90个交易日沪深两市成交额",
+    summary="获取最近90个交易日沪深两市成交额（AKShare）",
     description="使用 AKShare + 本地 CSV 缓存同步最近交易日成交额数据，缺失日期才补抓。",
 )
 async def get_market_turnover(params: MarketTurnoverParams = Depends(), context: Context = Depends(build_context)):
@@ -144,7 +144,7 @@ async def get_market_turnover(params: MarketTurnoverParams = Depends(), context:
 @router.get(
     "/index/kline",
     response_model=ResponseModel,
-    summary="在腾讯获取指数历史K线数据",
+    summary="获取指数历史K线数据（腾讯证券）",
     description="按腾讯指数代码返回历史 K 线对象数组，仅保留 klines 数据",
 )
 async def get_index_kline_by_tx(params: IndexKlineByTxParams = Depends(), context: Context = Depends(build_context)):

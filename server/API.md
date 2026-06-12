@@ -40,7 +40,7 @@
 ## A股 · 基础数据
 前缀：`/api/basic`
 
-### 1) 获取K线数据
+### 1) 获取K线数据（腾讯证券）
 - 方法与路径：`GET /api/basic/kline`
 - 概述：获取指定股票在给定周期与日期范围内的 K 线数据
 - 请求参数（Query）：
@@ -85,7 +85,7 @@
 - 示例（仅示意）：
   - `GET /api/basic/kline?code=600519&period=daily&startDate=20250101&endDate=20250131`
 
-### 2) 搜索股票
+### 2) 搜索股票（东方财富）
 - 方法与路径：`GET /api/basic/search`
 - 概述：根据关键词匹配股票代码或名称
 - 请求参数（Query）：
@@ -112,7 +112,7 @@
 - 示例（仅示意）：
   - `GET /api/basic/search?keyword=伊利`
 
-### 3) 在腾讯获取指数历史K线数据
+### 3) 获取指数历史K线数据（腾讯证券）
 - 方法与路径：`GET /api/basic/index/kline`
 - 概述：按腾讯指数代码返回原始 `klines` 对象数组，仅保留上游响应中的 `day` 数据
 - 请求参数（Query）：
@@ -157,13 +157,13 @@
 - 示例（仅示意）：
   - `GET /api/basic/index/kline?code=000685&limit=320`
 
-### 4) 获取ETF前十大持仓
+### 4) 获取ETF前十大持仓（东方财富）
 - 方法与路径：`GET /api/basic/fund/top-holdings`
 - 概述：按 ETF 基金代码返回前十大持仓及持仓报告期
 - 请求参数（Query）：
   - `code` `string`，ETF 基金代码（例如：`588200`）
 
-### 5) 获取股票核心财务指标
+### 5) 获取股票核心财务指标（东方财富）
 - 方法与路径：`GET /api/basic/stock/main-finance`
 - 概述：按股票代码与报告类型返回单期核心财务指标
 
@@ -172,7 +172,7 @@
 ## A股 · 市场数据
 前缀：`/api/basic/market`
 
-### 1) 获取最近 90 个交易日沪深两市成交额
+### 1) 获取最近 90 个交易日沪深两市成交额（AKShare）
 - 方法与路径：`GET /api/basic/market/turnover`
 - 概述：使用 AKShare + 本地 CSV 缓存同步最近交易日成交额数据，缺失日期才补抓
 - 请求参数（Query）：

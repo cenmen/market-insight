@@ -17,7 +17,7 @@ from app.modules.basic.service import (
     fetch_ths_kline_cached,
     sync_market_turnover_csv,
 )
-from app.constants.theme_config import THEME_CONFIGS, THEME_CONFIG_MAP
+from app.constants.theme_config import THEME_CONFIG_MAP
 
 etf_base_data_cache = SimpleMemoryCache()
 sector_congestion_cache = SimpleMemoryCache()
@@ -79,26 +79,28 @@ def _normalize_amount_to_yi_yuan(value: Any) -> float | None:
     return round(amount, 2)
 
 
-def _resolve_theme_configs(theme_keys: Iterable[str]) -> tuple[list[dict[str, Any]], list[str]]:
-    """把主题 key 映射成可查询的配置，并返回未命中的 key 列表。"""
+def _resolve_theme_configs(theme_keys: Iterable[str]) -> tuple[list[dict[str, Any]], list[str], list[str]]:
+    """把主题 key 映射成可查询的配置，并返回未命中和缺少指数代码的 key 列表。"""
     keys = _normalize_keys(theme_keys)
     if not keys:
-        configs = [dict(item) for item in THEME_CONFIGS]
-        for item in configs:
-            item["liquidityCode"] = item.get("indexCode") or item.get("code")
-        return configs, []
+        return [], [], []
 
     configs: list[dict[str, Any]] = []
     missing_keys: list[str] = []
+    missing_index_codes: list[str] = []
     for key in keys:
         config = THEME_CONFIG_MAP.get(key)
         if config is None:
             missing_keys.append(key)
             continue
+        index_code = config.get("indexCode")
+        if not index_code:
+            missing_index_codes.append(key)
+            continue
         item = dict(config)
-        item["liquidityCode"] = item.get("indexCode") or item.get("code")
+        item["liquidityCode"] = str(index_code)
         configs.append(item)
-    return configs, missing_keys
+    return configs, missing_keys, missing_index_codes
 
 
 def _build_amount_map(records: list[dict[str, Any]]) -> dict[str, float]:
@@ -202,16 +204,31 @@ async def fetch_etf_base_data_cached(code: str, kline_limit: int = 60) -> Dict[s
 
 async def fetch_sector_congestion(theme_keys: Iterable[str], days: int = 90) -> list[dict[str, Any]]:
     """按主题 key 聚合市场成交额与板块成交额，返回板块拥挤度序列。"""
-    resolved_configs, missing_keys = _resolve_theme_configs(theme_keys)
+    resolved_configs, missing_keys, missing_index_codes = _resolve_theme_configs(theme_keys)
     if missing_keys:
         raise ValueError(f"未知主题 key: {', '.join(missing_keys)}")
-    if not resolved_configs:
-        return []
+    if missing_index_codes:
+        raise ValueError(f"主题缺少 indexCode，无法计算板块拥挤度: {', '.join(missing_index_codes)}")
 
     cache_key = f"sector_congestion:{','.join(item['key'] for item in resolved_configs)}|{days}"
     cached = await sector_congestion_cache.get(cache_key)
     if cached is not None:
         return cached
+
+    if not resolved_configs:
+        market_records = await asyncio.to_thread(sync_market_turnover_csv, days)
+        rows = [
+            {
+                "date": str(record.get("date") or "").strip(),
+                "sse_amount": record.get("sse_amount"),
+                "szse_amount": record.get("szse_amount"),
+                "total_amount": record.get("total_amount"),
+                "unit": record.get("unit") or "亿元",
+            }
+            for record in market_records
+        ]
+        await sector_congestion_cache.set(cache_key, rows, ttl=1800)
+        return rows
 
     market_task = asyncio.to_thread(sync_market_turnover_csv, days)
     kline_tasks = [fetch_ths_kline_cached(item["liquidityCode"], days) for item in resolved_configs]

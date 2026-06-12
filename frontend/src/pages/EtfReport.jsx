@@ -129,7 +129,7 @@ export default function EtfReportPage() {
             );
           })}
         </div>
-        <section className='mb-[16pt] grid grid-cols-4 gap-[10pt] max-[820px]:grid-cols-2 max-[820px]:gap-[6pt] print:!grid-cols-2 print:!gap-[10pt]'>
+        <section className='mb-[16pt] grid grid-cols-4 gap-[10pt] max-[820px]:grid-cols-2 max-[820px]:gap-[6pt] print:!grid-cols-4 print:!gap-[10pt]'>
           {data.metrics.map((metric) => {
             return (
               <div className='rounded-[4pt] bg-[#faf9f5] p-[10pt]' key={metric.label}>

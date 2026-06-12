@@ -2,7 +2,7 @@ import BaseKLineChart from '@/components/BaseKLineChart';
 import BaseKLineChart2 from '@/components/BaseKLineChart2';
 import BaseLineChart from '@/components/BaseLineChart';
 import BasePieChart from '@/components/BasePieChart';
-import EtfSharePrompt from '@/components/EtfSharePrompt.jsx';
+import EtfPublicAccountPrompt from '@/components/EtfPublicAccountPrompt.jsx';
 import Rate from '@/components/Rate.jsx';
 import ReportFooter from '@/components/ReportFooter.jsx';
 import Timeline from '@/components/Timeline.jsx';
@@ -68,7 +68,7 @@ export default function EtfReportPage() {
   const [searchParams] = useSearchParams();
   const data = etfs[`etf${code}`];
   const useMask = searchParams.get('mask') === '1';
-  const hideSharePrompt = searchParams.get('hideSharePrompt') === '1';
+  const hideSharePrompt = searchParams.has('hideSharePrompt');
 
   if (!data) {
     return <Navigate to='/' replace />;
@@ -342,7 +342,7 @@ export default function EtfReportPage() {
           </div>
         </section>
 
-        {hideSharePrompt ? null : <EtfSharePrompt />}
+        {hideSharePrompt ? null : <EtfPublicAccountPrompt />}
 
         <ReportFooter date={data.report.date} />
       </article>

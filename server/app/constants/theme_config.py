@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 THEME_CONFIGS: list[dict[str, Any]] = [
-    {"code": "588200", "name": "科创芯片ETF嘉实", "indexCode": "1B0685", "indexName": "芯片", "key": "chip"},
+    {"code": "588200", "name": "科创芯片ETF嘉实", "indexCode": None, "indexName": "芯片", "key": "chip"},
     {"code": "515880", "name": "通信ETF国泰", "indexCode": "931160", "indexName": "通信", "key": "communication"},
     {"code": "159516", "name": "半导体设备ETF国泰", "indexCode": "931743", "indexName": "半导体设备", "key": "semiconductorEquipment"},
     {"code": "159819", "name": "人工智能ETF易方达", "indexCode": None, "indexName": "人工智能", "key": "ai"},

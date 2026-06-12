@@ -211,9 +211,9 @@ async def fetch_sector_congestion(theme_keys: Iterable[str], days: int = 90) -> 
         raise ValueError(f"主题缺少 indexCode，无法计算板块拥挤度: {', '.join(missing_index_codes)}")
 
     cache_key = f"sector_congestion:{','.join(item['key'] for item in resolved_configs)}|{days}"
-    cached = await sector_congestion_cache.get(cache_key)
-    if cached is not None:
-        return cached
+    # cached = await sector_congestion_cache.get(cache_key)
+    # if cached is not None:
+    #     return cached
 
     if not resolved_configs:
         market_records = await asyncio.to_thread(sync_market_turnover_csv, days)

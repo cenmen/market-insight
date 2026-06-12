@@ -1,135 +1,144 @@
-import { useMemo } from 'react';
-import BaseChart from './BaseChart';
+import { useEffect, useRef } from 'react';
+import { isFunction, isPlainObject, isString } from 'es-toolkit';
+import { dispose, init, registerOverlay } from 'klinecharts';
 
-const KLineMarkerTypeEnum = Object.freeze({
-  SUPPORT: 'support',
-  RESISTANCE: 'resistance',
-  KEY_INFO: 'keyInfo',
-  CANDLE: 'candle',
-});
+const POINT_MARKER_OVERLAY_NAME = 'base-kline-chart-2-point-marker';
+const POINT_MARKER_GROUP_ID = 'base-kline-chart-2-point-marker-group';
+const K_LINE_MARKER_TYPE_PRIORITY = {
+  support: 1,
+  resistance: 2,
+  keyInfo: 3,
+  candle: 4,
+};
 
-const KLineMarkerDirectionEnum = Object.freeze({
-  UP: '上',
-  DOWN: '下',
-  UP_LEFT: '上中左',
-  DOWN_LEFT: '下中左',
-});
+let hasRegisteredPointMarkerOverlay = false;
 
-const KLineMarkerPriorityEnum = Object.freeze({
-  SUPPORT: 1,
-  RESISTANCE: 2,
-  KEY_INFO: 3,
-  CANDLE: 4,
-});
+function ensurePointMarkerOverlayRegistered() {
+  if (hasRegisteredPointMarkerOverlay) {
+    return;
+  }
 
-function splitKlineData(data) {
-  const categoryData = [];
-  const values = [];
-  const volumes = [];
-  let previousItem = null;
+  registerOverlay({
+    name: POINT_MARKER_OVERLAY_NAME,
+    totalStep: 1,
+    lock: true,
+    visible: true,
+    needDefaultPointFigure: false,
+    needDefaultXAxisFigure: false,
+    needDefaultYAxisFigure: false,
+    createPointFigures(params) {
+      const point = Array.isArray(params.coordinates) ? params.coordinates[0] : null;
+      if (!point || !Number.isFinite(point.x) || !Number.isFinite(point.y)) {
+        return [];
+      }
 
-  data.forEach(function eachItem(item) {
-    categoryData.push(item.date);
-    values.push({
-      value: [item.open, item.close, item.low, item.high],
-      open: item.open,
-      close: item.close,
-      low: item.low,
-      high: item.high,
-      volume: item.volume,
-      amount: item.amount,
-      amplitude: item.amplitude,
-      maxDrawdown: item.maxDrawdown,
-      changePercent: item.changePercent,
-      changeAmount: item.changeAmount,
-      turnoverRate: item.turnoverRate,
-      date: item.date,
-      gapType: resolveGapType(previousItem, item),
-      gapHigh: resolveGapHigh(previousItem, item),
-      gapLow: resolveGapLow(previousItem, item),
-      gapLabel: resolveGapLabel(previousItem, item),
-    });
-    volumes.push({
-      value: item.volume ?? 0,
-      itemStyle: {
-        color: item.open <= item.close ? 'rgba(239, 68, 68, 0.35)' : 'rgba(34, 197, 94, 0.32)',
-      },
-    });
-    previousItem = item;
+      const marker = params.overlay?.extendData || {};
+      const isAbove = marker.position === 'above';
+      const markerStyle = resolveMarkerStyle(marker.type);
+      const lineLength = Number.isFinite(Number(marker.lineLength)) && Number(marker.lineLength) > 0 ? Number(marker.lineLength) : 1;
+      const lineWidth = Number.isFinite(Number(marker.lineWidth)) && Number(marker.lineWidth) > 0 ? Number(marker.lineWidth) : 1;
+      const fontSize = Number.isFinite(Number(marker.fontSize)) && Number(marker.fontSize) > 0 ? Number(marker.fontSize) : 8;
+      const label = marker.label || resolveDefaultMarkerLabel(marker.type);
+      const pointX = Math.round(point.x);
+      const pointY = Math.round(point.y);
+      const verticalOffset = Math.round(18 * lineLength);
+      const labelY = isAbove ? pointY - verticalOffset : pointY + verticalOffset;
+
+      return [
+        {
+          type: 'line',
+          attrs: {
+            coordinates: [
+              { x: pointX, y: pointY },
+              { x: pointX, y: labelY },
+            ],
+          },
+          styles: {
+            style: 'solid',
+            color: markerStyle.line,
+            size: lineWidth,
+            dashedValue: [2, 2],
+          },
+        },
+        {
+          type: 'circle',
+          attrs: {
+            x: pointX + 0.5,
+            y: pointY,
+            r: 2,
+          },
+          styles: {
+            style: 'stroke_fill',
+            color: markerStyle.fill,
+            borderColor: markerStyle.line,
+            borderSize: lineWidth,
+            borderStyle: 'solid',
+            borderDashedValue: [2, 2],
+          },
+        },
+        {
+          type: 'text',
+          attrs: {
+            x: pointX,
+            y: labelY,
+            text: label,
+            align: 'center',
+            baseline: isAbove ? 'bottom' : 'top',
+          },
+          styles: {
+            style: 'fill',
+            color: markerStyle.text,
+            size: fontSize,
+            family: 'TsangerJinKai02, serif',
+            weight: 500,
+            paddingLeft: 0,
+            paddingTop: 0,
+            paddingRight: 0,
+            paddingBottom: 0,
+            backgroundColor: 'transparent',
+            borderStyle: 'solid',
+            borderDashedValue: [2, 2],
+            borderSize: 0,
+            borderColor: 'transparent',
+            borderRadius: 0,
+          },
+        },
+      ];
+    },
   });
 
-  return { categoryData, values, volumes };
+  hasRegisteredPointMarkerOverlay = true;
 }
 
-function resolveGapType(previousItem, currentItem) {
-  if (!previousItem || !currentItem) {
-    return '';
+function parseDateToTimestamp(value) {
+  if (!isString(value)) {
+    return 0;
   }
 
-  const previousHigh = Number(previousItem.high);
-  const previousLow = Number(previousItem.low);
-  const currentHigh = Number(currentItem.high);
-  const currentLow = Number(currentItem.low);
-  const previousClose = Number(previousItem.close);
-
-  if (Number.isFinite(previousHigh) && Number.isFinite(currentLow) && currentLow > previousHigh) {
-    const gapSize = currentLow - previousHigh;
-    const threshold = Number.isFinite(previousClose) && previousClose > 0 ? Math.max(previousClose * 0.004, 0.02) : 0.02;
-    return gapSize >= threshold ? 'up' : '';
+  const parts = value.split('-');
+  if (parts.length !== 3) {
+    return 0;
   }
 
-  if (Number.isFinite(previousLow) && Number.isFinite(currentHigh) && currentHigh < previousLow) {
-    const gapSize = previousLow - currentHigh;
-    const threshold = Number.isFinite(previousClose) && previousClose > 0 ? Math.max(previousClose * 0.004, 0.02) : 0.02;
-    return gapSize >= threshold ? 'down' : '';
+  const year = Number(parts[0]);
+  const month = Number(parts[1]);
+  const day = Number(parts[2]);
+  if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) {
+    return 0;
   }
 
-  return '';
+  return new Date(year, month - 1, day).getTime();
 }
 
-function resolveGapHigh(previousItem, currentItem) {
-  const gapType = resolveGapType(previousItem, currentItem);
-
-  if (gapType === 'up') {
-    return Number(currentItem.low);
+function safeNumber(value, defaultValue = 0) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) {
+    return defaultValue;
   }
-
-  if (gapType === 'down') {
-    return Number(previousItem.low);
-  }
-
-  return NaN;
+  return num;
 }
 
-function resolveGapLow(previousItem, currentItem) {
-  const gapType = resolveGapType(previousItem, currentItem);
-
-  if (gapType === 'up') {
-    return Number(previousItem.high);
-  }
-
-  if (gapType === 'down') {
-    return Number(currentItem.high);
-  }
-
-  return NaN;
-}
-
-function resolveGapLabel(previousItem, currentItem) {
-  const gapType = resolveGapType(previousItem, currentItem);
-
-  if (gapType === 'up') {
-    return '向上跳空缺口';
-  }
-
-  if (gapType === 'down') {
-    return '向下跳空缺口';
-  }
-
-  return '';
-}
-
-function formatNumber(value, digits = 2) {
+function formatTooltipNumber(value, digits = 3) {
   const num = Number(value);
   if (!Number.isFinite(num)) {
     return '--';
@@ -137,7 +146,7 @@ function formatNumber(value, digits = 2) {
   return num.toFixed(digits);
 }
 
-function formatAmountToYi(value) {
+function formatTooltipAmountToYi(value) {
   const num = Number(value);
   if (!Number.isFinite(num)) {
     return '--';
@@ -145,252 +154,188 @@ function formatAmountToYi(value) {
   return `${(num / 100000000).toFixed(2)} 亿`;
 }
 
-function formatDateWithoutYear(value) {
-  if (typeof value !== 'string') {
-    return value;
+function resolveTrendColor(value, fallback = '#6b6a64') {
+  const num = Number(value);
+  if (!Number.isFinite(num) || num === 0) {
+    return fallback;
   }
-  const parts = value.split('-');
-  if (parts.length === 3) {
-    return `${parts[1]}-${parts[2]}`;
-  }
-  return value;
+  return num > 0 ? '#ef4444' : '#22c55e';
 }
 
-function buildMovingAverageData(data, period) {
-  const values = [];
-  const closes = [];
-  let sum = 0;
+function normalizeKLineData(data) {
+  if (!Array.isArray(data)) {
+    return [];
+  }
 
-  data.forEach(function eachItem(item) {
-    const close = Number(item.close);
-    closes.push(close);
+  return data
+    .map(function mapItem(item) {
+      const open = safeNumber(item?.open);
+      const high = safeNumber(item?.high);
+      const low = safeNumber(item?.low);
+      const amplitude = Number.isFinite(Number(item?.amplitude)) ? safeNumber(item?.amplitude) : open !== 0 ? ((high - low) / open) * 100 : NaN;
 
-    if (Number.isFinite(close)) {
-      sum += close;
-    }
+      return {
+        timestamp: parseDateToTimestamp(item?.date),
+        date: item?.date,
+        open,
+        high,
+        low,
+        close: safeNumber(item?.close),
+        volume: safeNumber(item?.volume),
+        turnover: safeNumber(item?.amount),
+        amplitude,
+        maxDrawdown: safeNumber(item?.maxDrawdown, NaN),
+      };
+    })
+    .filter(function filterItem(item) {
+      return item.timestamp > 0;
+    });
+}
 
-    if (closes.length > period) {
-      const removed = closes.shift();
+function getDecimalLength(value) {
+  const text = String(value ?? '').trim();
+  if (!text.includes('.')) {
+    return 0;
+  }
+  return text.split('.')[1]?.length ?? 0;
+}
 
-      if (Number.isFinite(removed)) {
-        sum -= removed;
-      }
-    }
+function resolvePricePrecision(data, markers) {
+  let precision = 2;
 
-    if (
-      closes.length < period ||
-      closes.some(function hasInvalidValue(value) {
-        return !Number.isFinite(value);
-      })
-    ) {
-      values.push(null);
-      return;
-    }
-
-    values.push(Number((sum / period).toFixed(2)));
+  (Array.isArray(data) ? data : []).forEach(function eachItem(item) {
+    precision = Math.max(precision, getDecimalLength(item?.open), getDecimalLength(item?.high), getDecimalLength(item?.low), getDecimalLength(item?.close));
   });
 
-  return values;
+  (Array.isArray(markers) ? markers : []).forEach(function eachMarker(marker) {
+    precision = Math.max(precision, getDecimalLength(marker?.price));
+  });
+
+  return precision;
 }
 
-function getLatestFiniteValue(values) {
-  if (!Array.isArray(values)) {
-    return null;
-  }
-
-  for (let index = values.length - 1; index >= 0; index -= 1) {
-    const value = Number(values[index]);
-    if (Number.isFinite(value)) {
-      return value;
-    }
-  }
-
-  return null;
-}
-
-function resolveCandleMarkerIndex(marker, categoryData) {
-  if (Number.isInteger(marker.index)) {
-    return marker.index;
-  }
-
-  if (Number.isInteger(marker.dataIndex)) {
-    return marker.dataIndex;
-  }
-
-  if (typeof marker.date === 'string') {
-    return categoryData.indexOf(marker.date);
-  }
-
-  return -1;
-}
-
-function resolveMarkerPrice(point, candle) {
-  if (!point || typeof point !== 'object') {
-    return Number.isFinite(Number(candle?.close)) ? Number(candle.close) : NaN;
-  }
-
-  if (Number.isFinite(Number(point.price))) {
-    return Number(point.price);
-  }
-
-  if (Number.isFinite(Number(point.value))) {
-    return Number(point.value);
-  }
-
-  if (Number.isFinite(Number(candle?.close))) {
-    return Number(candle.close);
-  }
-
-  if (Number.isFinite(Number(candle?.open))) {
-    return Number(candle.open);
-  }
-
-  return NaN;
-}
-
-function resolveMarkerIndex(point, categoryData) {
-  if (!point || typeof point !== 'object') {
-    return -1;
-  }
-
-  if (Number.isInteger(point.index)) {
-    return point.index;
-  }
-
-  if (Number.isInteger(point.dataIndex)) {
-    return point.dataIndex;
-  }
-
-  if (typeof point.date === 'string') {
-    return categoryData.indexOf(point.date);
-  }
-
-  return -1;
-}
-
-function normalizeMarkerGroups(markers) {
+function normalizeMarkerGroups(markers, supportMarkers) {
   if (Array.isArray(markers)) {
     return {
       candleMarkers: markers,
-      supportMarkers: [],
+      supportMarkers: Array.isArray(supportMarkers) ? supportMarkers : [],
       resistanceMarkers: [],
       keyInfoMarkers: [],
-      polyLines: [],
     };
   }
 
-  if (!markers || typeof markers !== 'object') {
+  if (!isPlainObject(markers)) {
     return {
       candleMarkers: [],
-      supportMarkers: [],
+      supportMarkers: Array.isArray(supportMarkers) ? supportMarkers : [],
       resistanceMarkers: [],
       keyInfoMarkers: [],
-      polyLines: [],
     };
   }
 
   return {
     candleMarkers: Array.isArray(markers.candleMarkers) ? markers.candleMarkers : [],
-    supportMarkers: Array.isArray(markers.supportMarkers) ? markers.supportMarkers : [],
+    supportMarkers: Array.isArray(supportMarkers) ? supportMarkers : Array.isArray(markers.supportMarkers) ? markers.supportMarkers : [],
     resistanceMarkers: Array.isArray(markers.resistanceMarkers) ? markers.resistanceMarkers : [],
     keyInfoMarkers: Array.isArray(markers.keyInfoMarkers) ? markers.keyInfoMarkers : [],
-    polyLines: Array.isArray(markers.polyLines) ? markers.polyLines : [],
   };
 }
 
 function resolveDefaultMarkerLabel(type) {
-  if (type === KLineMarkerTypeEnum.SUPPORT) {
+  if (type === 'support') {
     return '支撑位';
   }
 
-  if (type === KLineMarkerTypeEnum.RESISTANCE) {
+  if (type === 'resistance') {
     return '压力位';
   }
 
-  if (type === KLineMarkerTypeEnum.KEY_INFO) {
+  if (type === 'keyInfo') {
     return '关键信息位';
   }
 
-  return '锤子线';
+  return 'K线标记';
 }
 
-function resolveMarkerDirection(type, position) {
-  if (type === KLineMarkerTypeEnum.SUPPORT) {
-    return KLineMarkerDirectionEnum.UP;
+function resolveMarkerStyle(type) {
+  if (type === 'support') {
+    return {
+      line: '#d39a55',
+      fill: '#fff6ea',
+      text: '#8a5d25',
+    };
   }
 
-  if (type === KLineMarkerTypeEnum.RESISTANCE) {
-    return KLineMarkerDirectionEnum.DOWN;
+  if (type === 'resistance') {
+    return {
+      line: '#7f9cc1',
+      fill: '#eff4fb',
+      text: '#506b8b',
+    };
   }
 
-  if (position === 'below') {
-    return KLineMarkerDirectionEnum.UP_LEFT;
+  if (type === 'keyInfo') {
+    return {
+      line: '#8a7f74',
+      fill: '#f7f4ef',
+      text: '#66605a',
+    };
   }
 
-  return KLineMarkerDirectionEnum.DOWN_LEFT;
+  return {
+    line: '#8c897f',
+    fill: '#faf8f3',
+    text: '#6a6056',
+  };
 }
 
-function buildMarkerData(data, categoryData, markerGroups) {
-  const lows = data.map(function mapLow(item) {
-    return Number(item.low);
-  });
-  const highs = data.map(function mapHigh(item) {
-    return Number(item.high);
-  });
-  const minLow = Math.min(...lows.filter(Number.isFinite));
-  const maxHigh = Math.max(...highs.filter(Number.isFinite));
-  const priceRange = Number.isFinite(maxHigh - minLow) && maxHigh > minLow ? maxHigh - minLow : 1;
-  const markerGap = priceRange * 0.1;
-
+function buildPointMarkerOverlays(data, markerGroups) {
   const markerEntries = [];
+  const dateMap = new Map();
+
+  data.forEach(function eachItem(item) {
+    if (isString(item?.date)) {
+      dateMap.set(item.date, item);
+    }
+  });
 
   markerGroups.forEach(function eachGroup(group) {
     const markers = Array.isArray(group.markers) ? group.markers : [];
 
-    markers.forEach(function eachMarker(marker, markerIndex) {
-      const dataIndex = resolveCandleMarkerIndex(marker, categoryData);
-      const candle = data[dataIndex];
-
+    markers.forEach(function eachMarker(marker, index) {
+      const candle = dateMap.get(marker?.date);
       if (!candle) {
         return;
       }
 
       const position = marker.position === 'below' ? 'below' : 'above';
-      const candleEdge = position === 'below' ? Number(candle.low) : Number(candle.high);
-      const targetPrice = Number.isFinite(Number(marker.price)) ? Number(marker.price) : candleEdge;
+      const price = Number.isFinite(Number(marker?.price)) ? Number(marker.price) : position === 'below' ? Number(candle.low) : Number(candle.high);
 
-      if (!Number.isFinite(targetPrice)) {
+      if (!Number.isFinite(price)) {
         return;
       }
 
-      const type = group.type;
-      const priority = Number.isFinite(Number(group.priority)) ? Number(group.priority) : KLineMarkerPriorityEnum.CANDLE;
-      const lineLength = Number.isFinite(Number(marker.lineLength)) && Number(marker.lineLength) > 0 ? Number(marker.lineLength) : 1;
-      const labelPrice = position === 'below' ? targetPrice - markerGap * lineLength : targetPrice + markerGap * lineLength;
-      const label = marker.label || resolveDefaultMarkerLabel(type);
-      const lineWidth = Number.isFinite(Number(marker.lineWidth)) && Number(marker.lineWidth) > 0 ? Number(marker.lineWidth) : undefined;
-      const fontSize = Number.isFinite(Number(marker.fontSize)) && Number(marker.fontSize) > 0 ? Number(marker.fontSize) : undefined;
-
       markerEntries.push({
-        dataIndex,
         date: candle.date,
-        targetPrice,
-        labelPrice,
-        label,
+        timestamp: candle.timestamp,
+        value: price,
+        type: group.type,
         position,
-        type,
-        priority,
-        direction: resolveMarkerDirection(type, position),
-        lineWidth,
-        fontSize,
-        order: markerIndex,
+        label: marker.label,
+        lineLength: marker.lineLength,
+        lineWidth: marker.lineWidth,
+        fontSize: marker.fontSize,
+        priority: group.priority,
+        order: index,
       });
     });
   });
 
   markerEntries.sort(function sortMarker(left, right) {
-    if (left.dataIndex !== right.dataIndex) {
-      return left.dataIndex - right.dataIndex;
+    const leftTimestamp = Number(left.timestamp) || 0;
+    const rightTimestamp = Number(right.timestamp) || 0;
+    if (leftTimestamp !== rightTimestamp) {
+      return leftTimestamp - rightTimestamp;
     }
 
     if (left.priority !== right.priority) {
@@ -401,430 +346,367 @@ function buildMarkerData(data, categoryData, markerGroups) {
   });
 
   const seenDate = new Set();
-  const filteredMarkers = [];
 
-  markerEntries.forEach(function eachMarker(marker) {
-    if (seenDate.has(marker.date)) {
-      return;
-    }
-
-    seenDate.add(marker.date);
-    filteredMarkers.push(marker);
-  });
-
-  return filteredMarkers.map(function mapMarker(marker) {
-    return [
-      marker.dataIndex,
-      marker.targetPrice,
-      marker.labelPrice,
-      marker.label,
-      marker.position,
-      marker.type,
-      marker.lineWidth,
-      marker.fontSize,
-      marker.direction,
-    ];
-  });
-}
-
-function buildPolylineData(data, categoryData, polyLines) {
-  if (!Array.isArray(polyLines) || polyLines.length === 0) {
-    return [];
-  }
-
-  return polyLines
-    .map(function mapPolyLine(line, index) {
-      const rawPoints = Array.isArray(line.points) ? line.points : [];
-      const points = rawPoints
-        .map(function mapPoint(point) {
-          const pointIndex = resolveMarkerIndex(point, categoryData);
-          const pointCandle = data[pointIndex];
-          const pointPrice = resolveMarkerPrice(point, pointCandle);
-
-          if (!Number.isFinite(pointIndex) || pointIndex < 0 || !Number.isFinite(pointPrice)) {
-            return null;
-          }
-
-          return [pointIndex, pointPrice];
-        })
-        .filter(Boolean);
-
-      if (points.length < 2) {
-        return null;
+  return markerEntries
+    .filter(function filterMarker(marker) {
+      if (seenDate.has(marker.date)) {
+        return false;
       }
 
-      const lineWidth = Number.isFinite(Number(line.lineWidth)) && Number(line.lineWidth) > 0 ? Number(line.lineWidth) : 1;
-      const color = line.color || '#8a5d25';
-      const lineType = line.lineType || 'dashed';
-
+      seenDate.add(marker.date);
+      return true;
+    })
+    .map(function mapMarker(marker, index) {
       return {
-        points: points.map(function mapPoint(point) {
-          return [categoryData[point[0]], point[1]];
-        }),
-        color,
-        lineWidth,
-        lineType,
+        name: POINT_MARKER_OVERLAY_NAME,
+        groupId: POINT_MARKER_GROUP_ID,
+        id: `${POINT_MARKER_GROUP_ID}-${index}-${marker.date}`,
+        lock: true,
+        points: [{ timestamp: marker.timestamp, value: marker.value }],
+        extendData: {
+          label: marker.label,
+          type: marker.type,
+          position: marker.position,
+          lineLength: marker.lineLength,
+          lineWidth: marker.lineWidth,
+          fontSize: marker.fontSize,
+        },
       };
     })
     .filter(Boolean);
 }
 
-function makeCandleMarkerSeries(markerData) {
-  function resolveMarkerStyle(type) {
-    if (type === KLineMarkerTypeEnum.SUPPORT) {
-      return {
-        line: '#d39a55',
-        fill: '#fff6ea',
-        text: '#8a5d25',
-        lineWidth: 0.75,
-        fontSize: 8,
-      };
-    }
-
-    if (type === KLineMarkerTypeEnum.RESISTANCE) {
-      return {
-        line: '#7f9cc1',
-        fill: '#eff4fb',
-        text: '#506b8b',
-        lineWidth: 0.75,
-        fontSize: 8,
-      };
-    }
-
-    if (type === KLineMarkerTypeEnum.KEY_INFO) {
-      return {
-        line: '#8a7f74',
-        fill: '#f7f4ef',
-        text: '#66605a',
-        lineWidth: 0.65,
-        fontSize: 7,
-      };
-    }
-
-    return {
-      line: '#8c897f',
-      fill: '#faf8f3',
-      text: '#6a6056',
-      lineWidth: 0.75,
-      fontSize: 8,
-    };
+function applyChartStyles(chart) {
+  if (!chart || !isFunction(chart.setStyles)) {
+    return;
   }
 
-  return {
-    name: 'K线标记',
-    type: 'custom',
-    coordinateSystem: 'cartesian2d',
-    data: markerData,
-    encode: { x: 0, y: [1, 2] },
-    silent: true,
-    clip: false,
-    z: 12,
-    renderItem(params, api) {
-      const targetPoint = api.coord([api.value(0), api.value(1)]);
-      const baseLabelPoint = api.coord([api.value(0), api.value(2)]);
-      const label = api.value(3);
-      const type = api.value(5);
-      const markerLineWidth = api.value(6);
-      const markerFontSize = api.value(7);
-      const direction = api.value(8);
-      const isUpDirection = direction === KLineMarkerDirectionEnum.UP || direction === KLineMarkerDirectionEnum.UP_LEFT;
-      const isLeftDirection = direction === KLineMarkerDirectionEnum.UP_LEFT || direction === KLineMarkerDirectionEnum.DOWN_LEFT;
-      const horizontalOffset = isLeftDirection ? -18 : 0;
-      const verticalOffset = isUpDirection ? 16 : -16;
-      const textOffset = isUpDirection ? 3 : -3;
-      const markerStyle = resolveMarkerStyle(type);
-      const lineWidth = Number.isFinite(Number(markerLineWidth)) ? Number(markerLineWidth) : markerStyle.lineWidth;
-      const fontSize = Number.isFinite(Number(markerFontSize)) ? Number(markerFontSize) : markerStyle.fontSize;
-      const labelPoint = [baseLabelPoint[0] + horizontalOffset, baseLabelPoint[1] + verticalOffset];
-
-      return {
-        type: 'group',
-        children: [
-          {
-            type: 'line',
-            shape: {
-              x1: labelPoint[0],
-              y1: labelPoint[1],
-              x2: targetPoint[0],
-              y2: targetPoint[1],
-            },
-            style: {
-              stroke: markerStyle.line,
-              lineWidth,
-              opacity: 0.92,
-            },
-          },
-          {
-            type: 'circle',
-            shape: {
-              cx: targetPoint[0],
-              cy: targetPoint[1],
-              r: 1,
-            },
-            style: {
-              fill: markerStyle.fill,
-              stroke: markerStyle.line,
-              lineWidth,
-              opacity: 0.96,
-            },
-          },
-          {
-            type: 'text',
-            style: {
-              x: labelPoint[0],
-              y: labelPoint[1] + textOffset,
-              text: label,
-              fill: markerStyle.text,
-              font: `500 ${fontSize}px TsangerJinKai02, serif`,
-              textAlign: isLeftDirection ? 'right' : 'center',
-              textVerticalAlign: isUpDirection ? 'top' : 'bottom',
-            },
-          },
-        ],
-      };
+  chart.setStyles({
+    grid: {
+      horizontal: {
+        color: '#e8e6dc',
+      },
+      vertical: {
+        color: '#f0ede2',
+      },
     },
-  };
+    candle: {
+      bar: {
+        upColor: '#ef4444',
+        downColor: '#22c55e',
+        noChangeColor: '#a8a29e',
+        upBorderColor: '#ef4444',
+        downBorderColor: '#22c55e',
+        noChangeBorderColor: '#a8a29e',
+        upWickColor: '#ef4444',
+        downWickColor: '#22c55e',
+        noChangeWickColor: '#a8a29e',
+      },
+      priceMark: {
+        last: {
+          show: false,
+        },
+      },
+      tooltip: {
+        showRule: 'follow_cross',
+        showType: 'rect',
+        title: {
+          template: '{time}',
+        },
+        legend: {
+          template(data) {
+            const current = data.current || {};
+            const prev = data.prev || null;
+            const prevClose = Number(prev?.close);
+            const currentClose = Number(current.close);
+            const changePercent =
+              Number.isFinite(prevClose) && prevClose !== 0 && Number.isFinite(currentClose) ? ((currentClose - prevClose) / prevClose) * 100 : NaN;
+            const amplitude = Number(current.amplitude);
+            const maxDrawdown = Number(current.maxDrawdown);
+
+            return [
+              { title: '日期：', value: current.date || '--' },
+              { title: '开盘：', value: formatTooltipNumber(current.open) },
+              { title: '收盘：', value: formatTooltipNumber(current.close) },
+              { title: '最高：', value: formatTooltipNumber(current.high) },
+              { title: '最低：', value: formatTooltipNumber(current.low) },
+              { title: '振幅：', value: Number.isFinite(amplitude) ? `${amplitude.toFixed(2)}%` : '--' },
+              {
+                title: '最大跌幅：',
+                value: {
+                  text: Number.isFinite(maxDrawdown) ? `${maxDrawdown.toFixed(2)}%` : '--',
+                  color: resolveTrendColor(maxDrawdown),
+                },
+              },
+              {
+                title: '涨跌幅：',
+                value: {
+                  text: Number.isFinite(changePercent) ? `${changePercent.toFixed(2)}%` : '--',
+                  color: resolveTrendColor(changePercent),
+                },
+              },
+              { title: '成交量：', value: formatTooltipAmountToYi(current.volume) },
+              { title: '成交额：', value: formatTooltipAmountToYi(current.turnover) },
+            ];
+          },
+        },
+      },
+    },
+    xAxis: {
+      axisLine: {
+        color: '#e8e6dc',
+      },
+      tickText: {
+        color: '#6b6a64',
+        family: 'JetBrains Mono, monospace',
+        size: 10,
+      },
+    },
+    yAxis: {
+      axisLine: {
+        color: '#e8e6dc',
+      },
+      tickText: {
+        color: '#6b6a64',
+        family: 'JetBrains Mono, monospace',
+        size: 10,
+      },
+    },
+    crosshair: {
+      horizontal: {
+        line: {
+          color: '#1b365d',
+        },
+      },
+      vertical: {
+        line: {
+          color: '#1b365d',
+        },
+      },
+    },
+    indicator: {
+      tooltip: {
+        showRule: 'none',
+        title: {
+          show: false,
+          showName: false,
+          showParams: false,
+        },
+      },
+    },
+  });
 }
 
-function makePolylineSeries(polyLineData) {
-  return polyLineData
-    .map(function mapPolyline(line, index) {
-      return {
-        name: `折线${index + 1}`,
-        type: 'line',
-        data: line.points,
-        xAxisIndex: 0,
-        yAxisIndex: 0,
-        showSymbol: false,
-        symbol: 'none',
-        smooth: false,
-        silent: true,
-        clip: true,
-        z: 20,
-        lineStyle: {
-          color: line.color || '#1b365d',
-          width: line.lineWidth || 1,
-          type: line.lineType || 'solid',
-          opacity: 0.9,
-        },
-        emphasis: {
-          disabled: true,
-        },
-      };
-    })
-    .filter(Boolean);
-}
+export default function BaseKLineChart({ data = [], height = 360, className, markers = {}, supportMarkers, style }) {
+  const containerRef = useRef(null);
+  const chartRef = useRef(null);
+  const dataRef = useRef([]);
 
-export default function BaseKLineChart({ data = [], height = 360, className, markers = {} }) {
-  const option = useMemo(
-    function makeOption() {
-      const dataset = splitKlineData(data);
-      const normalizedMarkers = normalizeMarkerGroups(markers);
-      const ma5Data = buildMovingAverageData(data, 5);
-      const ma10Data = buildMovingAverageData(data, 10);
-      const latestMa5 = getLatestFiniteValue(ma5Data);
-      const latestMa10 = getLatestFiniteValue(ma10Data);
-      const markerData = buildMarkerData(data, dataset.categoryData, [
-        { type: KLineMarkerTypeEnum.SUPPORT, priority: KLineMarkerPriorityEnum.SUPPORT, markers: normalizedMarkers.supportMarkers },
-        { type: KLineMarkerTypeEnum.RESISTANCE, priority: KLineMarkerPriorityEnum.RESISTANCE, markers: normalizedMarkers.resistanceMarkers },
-        { type: KLineMarkerTypeEnum.KEY_INFO, priority: KLineMarkerPriorityEnum.KEY_INFO, markers: normalizedMarkers.keyInfoMarkers },
-        { type: KLineMarkerTypeEnum.CANDLE, priority: KLineMarkerPriorityEnum.CANDLE, markers: normalizedMarkers.candleMarkers },
-      ]);
-      const polyLineData = buildPolylineData(data, dataset.categoryData, normalizedMarkers.polyLines);
-      const hasPointMarkers = markerData.length > 0;
-      const series = [
+  useEffect(function initChart() {
+    if (!containerRef.current) {
+      return null;
+    }
+
+    containerRef.current.innerHTML = '';
+    ensurePointMarkerOverlayRegistered();
+
+    const chart = init(containerRef.current, {
+      layout: {
+        basicParams: {
+          yAxisPosition: 'left',
+          yAxisInside: false,
+        },
+      },
+    });
+    chartRef.current = chart;
+
+    applyChartStyles(chart);
+
+    if (chart && isFunction(chart.setDataLoader)) {
+      chart.setDataLoader({
+        getBars(params) {
+          params.callback(dataRef.current, false);
+        },
+      });
+    }
+
+    if (chart && isFunction(chart.setPeriod)) {
+      chart.setPeriod({ type: 'day', span: 1 });
+    }
+
+    if (chart && isFunction(chart.setBarSpace)) {
+      chart.setBarSpace(7);
+    }
+
+    if (chart && isFunction(chart.createIndicator)) {
+      chart.createIndicator(
         {
-          name: '价格',
-          type: 'candlestick',
-          data: dataset.values,
-          z: 3,
-          itemStyle: {
-            color: '#ef4444',
-            color0: '#22c55e',
-            borderColor: '#ef4444',
-            borderColor0: '#22c55e',
+          name: 'MA',
+          shortName: '',
+          calcParams: [5, 10],
+          styles: {
+            lines: [
+              {
+                color: '#6366f1',
+                size: 0.75,
+                style: 'solid',
+                dashedValue: [],
+                smooth: false,
+              },
+              {
+                color: '#facc15',
+                size: 0.75,
+                style: 'solid',
+                dashedValue: [],
+                smooth: false,
+              },
+            ],
+            tooltip: {
+              showRule: 'none',
+              title: {
+                show: false,
+                showName: false,
+                showParams: false,
+              },
+            },
           },
         },
         {
-          name: 'MA5',
-          type: 'line',
-          data: ma5Data,
-          xAxisIndex: 0,
-          yAxisIndex: 0,
-          showSymbol: false,
-          symbol: 'none',
-          smooth: false,
-          silent: true,
-          clip: true,
-          z: 4,
-          lineStyle: {
-            color: '#f59e0b',
-            width: 1.25,
-            opacity: 0.95,
+          pane: {
+            id: 'candle_pane',
           },
-          emphasis: {
-            disabled: true,
+          isStack: true,
+        },
+      );
+
+      chart.createIndicator(
+        {
+          name: 'VOL',
+          shortName: '',
+          calcParams: [5, 10],
+          styles: {
+            tooltip: {
+              showRule: 'none',
+              title: {
+                show: false,
+                showName: false,
+                showParams: false,
+              },
+            },
           },
         },
         {
-          name: 'MA10',
-          type: 'line',
-          data: ma10Data,
-          xAxisIndex: 0,
-          yAxisIndex: 0,
-          showSymbol: false,
-          symbol: 'none',
-          smooth: false,
-          silent: true,
-          clip: true,
-          z: 4,
-          lineStyle: {
-            color: '#3b82f6',
-            width: 1.25,
-            opacity: 0.95,
+          pane: {
+            id: 'base-kline-chart-2-volume-pane',
+            height: 96,
+            minHeight: 72,
           },
-          emphasis: {
-            disabled: true,
+          yAxis: {
+            position: 'left',
           },
         },
-        {
-          name: '成交量',
-          type: 'bar',
-          xAxisIndex: 1,
-          yAxisIndex: 1,
-          data: dataset.volumes,
-          barWidth: '60%',
-        },
+      );
+    }
+
+    return function disposeChart() {
+      if (containerRef.current) {
+        dispose(containerRef.current);
+        containerRef.current.innerHTML = '';
+      }
+      chartRef.current = null;
+    };
+  }, []);
+
+  useEffect(
+    function syncDataAndMarkers() {
+      const chart = chartRef.current;
+      if (!chart) {
+        return;
+      }
+
+      const normalizedData = normalizeKLineData(data);
+      const normalizedMarkers = normalizeMarkerGroups(markers, supportMarkers);
+      const markerList = [
+        ...normalizedMarkers.candleMarkers,
+        ...normalizedMarkers.supportMarkers,
+        ...normalizedMarkers.resistanceMarkers,
+        ...normalizedMarkers.keyInfoMarkers,
       ];
 
-      if (polyLineData.length > 0) {
-        series.push(...makePolylineSeries(polyLineData));
+      if (isFunction(chart.removeOverlay)) {
+        chart.removeOverlay({ groupId: POINT_MARKER_GROUP_ID });
       }
 
-      if (hasPointMarkers) {
-        series.push(makeCandleMarkerSeries(markerData));
+      dataRef.current = normalizedData;
+
+      if (isFunction(chart.setSymbol)) {
+        chart.setSymbol({
+          ticker: 'BASE_KLINE_CHART_2',
+          pricePrecision: resolvePricePrecision(data, markerList),
+          volumePrecision: 0,
+        });
+      } else if (isFunction(chart.resetData)) {
+        chart.resetData();
       }
 
-      return {
-        animation: false,
-        backgroundColor: 'transparent',
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: { type: 'cross' },
-          confine: true,
-          borderWidth: 1,
-          borderColor: '#e8e6dc',
-          backgroundColor: '#faf9f5',
-          textStyle: { color: '#141413', fontFamily: 'TsangerJinKai02, serif' },
-          formatter(params) {
-            const seriesItems = Array.isArray(params) ? params : [params];
-            const klineItem = seriesItems.find(function findKLine(item) {
-              return item.seriesType === 'candlestick';
-            });
-            if (!klineItem) {
-              return '';
-            }
-            const raw = klineItem.data || {};
-            const tooltipLines = [
-              `日期：${raw.date ?? klineItem.axisValue ?? '--'}`,
-              `开盘：${formatNumber(raw.open)}`,
-              `收盘：${formatNumber(raw.close)}`,
-              `最高：${formatNumber(raw.high)}`,
-              `最低：${formatNumber(raw.low)}`,
-              `成交量：${formatAmountToYi(raw.volume)}`,
-              `成交额：${formatAmountToYi(raw.amount)}`,
-              `振幅：${formatNumber(raw.amplitude)}%`,
-              `最大跌幅：${formatNumber(raw.maxDrawdown)}%`,
-              `涨跌幅：${formatNumber(raw.changePercent)}%`,
-              `涨跌额：${formatNumber(raw.changeAmount)}`,
-              `换手率：${formatNumber(raw.turnoverRate)}%`,
-            ];
+      const overlays = buildPointMarkerOverlays(normalizedData, [
+        { type: 'support', priority: K_LINE_MARKER_TYPE_PRIORITY.support, markers: normalizedMarkers.supportMarkers },
+        { type: 'resistance', priority: K_LINE_MARKER_TYPE_PRIORITY.resistance, markers: normalizedMarkers.resistanceMarkers },
+        { type: 'keyInfo', priority: K_LINE_MARKER_TYPE_PRIORITY.keyInfo, markers: normalizedMarkers.keyInfoMarkers },
+        { type: 'candle', priority: K_LINE_MARKER_TYPE_PRIORITY.candle, markers: normalizedMarkers.candleMarkers },
+      ]);
+      if (overlays.length > 0 && isFunction(chart.createOverlay)) {
+        chart.createOverlay(overlays);
+      }
 
-            if (raw.gapLabel && Number.isFinite(Number(raw.gapLow)) && Number.isFinite(Number(raw.gapHigh))) {
-              tooltipLines.push(`跳空：${raw.gapLabel}（${formatNumber(raw.gapLow)} - ${formatNumber(raw.gapHigh)}）`);
-            } else if (raw.gapLabel) {
-              tooltipLines.push(`跳空：${raw.gapLabel}`);
-            }
+      if (isFunction(chart.setMaxOffsetLeftDistance)) {
+        chart.setMaxOffsetLeftDistance(0);
+      }
 
-            return tooltipLines.join('<br/>');
-          },
-        },
-        axisPointer: {
-          link: [{ xAxisIndex: 'all' }],
-          label: {
-            backgroundColor: '#1B365D',
-          },
-        },
-        grid: [
-          { left: 38, right: 16, top: hasPointMarkers ? 34 : 18, height: hasPointMarkers ? 204 : 220 },
-          { left: 38, right: 16, top: 252, height: 86 },
-        ],
-        xAxis: [
-          {
-            type: 'category',
-            data: dataset.categoryData,
-            boundaryGap: true,
-            axisLine: { lineStyle: { color: '#e8e6dc' } },
-            axisTick: { show: false },
-            axisLabel: {
-              show: false,
-              // color: '#6b6a64',
-              // fontFamily: 'JetBrains Mono, monospace',
-              // formatter(value) {
-              //   return formatDateWithoutYear(value)
-              // },
-            },
-            splitLine: { show: false },
-            min: 'dataMin',
-            max: 'dataMax',
-          },
-          {
-            type: 'category',
-            gridIndex: 1,
-            data: dataset.categoryData,
-            boundaryGap: true,
-            axisLine: { lineStyle: { color: '#e8e6dc' } },
-            axisTick: { show: false },
-            axisLabel: { show: false },
-            splitLine: { show: false },
-            min: 'dataMin',
-            max: 'dataMax',
-          },
-        ],
-        yAxis: [
-          {
-            scale: true,
-            splitNumber: 4,
-            axisLine: { show: false },
-            axisTick: { show: false },
-            axisLabel: { color: '#6b6a64', fontFamily: 'JetBrains Mono, monospace' },
-            splitLine: { lineStyle: { color: '#e8e6dc' } },
-          },
-          {
-            scale: true,
-            gridIndex: 1,
-            splitNumber: 2,
-            axisLine: { show: false },
-            axisTick: { show: false },
-            axisLabel: { show: false },
-            splitLine: { show: false },
-          },
-        ],
-        dataZoom: [
-          {
-            type: 'inside',
-            xAxisIndex: [0, 1],
-            zoomOnMouseWheel: false,
-            moveOnMouseWheel: false,
-            moveOnMouseMove: false,
-            preventDefaultMouseMove: true,
-          },
-        ],
-        series,
-      };
+      // if (isFunction(chart.setMaxOffsetRightDistance)) {
+      //   chart.setMaxOffsetRightDistance(0);
+      // }
+
+      if (isFunction(chart.setOffsetRightDistance)) {
+        chart.setOffsetRightDistance(20);
+      }
+
+      // if (normalizedData.length > 0 && isFunction(chart.scrollToDataIndex)) {
+      //   chart.scrollToDataIndex(normalizedData.length - 1);
+      // }
     },
-    [data, markers],
+    [data, markers, supportMarkers],
   );
 
-  return <BaseChart option={option} height={height} className={className} />;
+  useEffect(function attachResize() {
+    if (!containerRef.current) {
+      return null;
+    }
+
+    const resizeObserver = new ResizeObserver(function onResize() {
+      if (chartRef.current && isFunction(chartRef.current.resize)) {
+        chartRef.current.resize();
+      }
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return function detachResize() {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      className={className}
+      style={{
+        width: '100%',
+        height,
+        position: 'relative',
+        overflow: 'hidden',
+        ...style,
+      }}
+    />
+  );
 }

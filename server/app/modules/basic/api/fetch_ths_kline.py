@@ -7,7 +7,7 @@ from typing import Any, Dict, List
 import httpx
 from aiocache import SimpleMemoryCache
 
-fund_kline_cache = SimpleMemoryCache()
+ths_kline_cache = SimpleMemoryCache()
 
 
 def _safe_float(value: Any, default: float = 0.0) -> float:
@@ -26,9 +26,11 @@ def _safe_float(value: Any, default: float = 0.0) -> float:
 
 
 def _ths_market(code_value: str) -> str:
-    """转换同花顺基金接口要求的市场代码。"""
+    """转换同花顺基金/指数接口要求的市场代码。"""
     code = str(code_value).zfill(6)
-    return "20" if code.startswith(("5", "6", "9")) else "36"
+    if code.startswith("9"):
+        return "120"
+    return "20" if code.startswith(("5", "6")) else "36"
 
 
 def _format_ths_timestamp(value: Any) -> str:
@@ -39,8 +41,8 @@ def _format_ths_timestamp(value: Any) -> str:
     return datetime.fromtimestamp(timestamp / 1000).strftime("%Y-%m-%d")
 
 
-def _parse_ths_fund_kline_value(item: List[Any], previous_close: float | None = None) -> Dict[str, Any]:
-    """解析同花顺单条基金 K 线数组。字段顺序来自 data_fields: 1,7,8,9,11,13,19。"""
+def _parse_ths_kline_value(item: List[Any], previous_close: float | None = None) -> Dict[str, Any]:
+    """解析同花顺单条基金/指数 K 线数组。字段顺序来自 data_fields: 1,7,8,9,11,13,19。"""
     open_price = _safe_float(item[1] if len(item) > 1 else None)
     high = _safe_float(item[2] if len(item) > 2 else None)
     low = _safe_float(item[3] if len(item) > 3 else None)
@@ -70,8 +72,8 @@ def _parse_ths_fund_kline_value(item: List[Any], previous_close: float | None = 
     }
 
 
-def fetch_fund_kline(code: str, limit: int) -> List[Dict[str, Any]]:
-    """抓取同花顺基金日 K 线数据，仅返回格式化 K 线列表。"""
+def fetch_ths_kline(code: str, limit: int) -> List[Dict[str, Any]]:
+    """抓取同花顺基金/指数日 K 线数据，仅返回格式化 K 线列表。"""
     if limit <= 0:
         raise ValueError("limit 必须大于 0")
 
@@ -86,9 +88,9 @@ def fetch_fund_kline(code: str, limit: int) -> List[Dict[str, Any]]:
         "adjust_type": "forward",
         "gpid": 1,
     }
-    # 保留调试信息，便于排查同花顺接口字段或参数变化。
+    # 保留调试信息，便于排查同花顺接口字段、市场映射或参数变化。
     print(
-        "[fetch_fund_kline] request params:",
+        "[fetch_ths_kline] request params:",
         {
             "code": code,
             "limit": limit,
@@ -120,11 +122,11 @@ def fetch_fund_kline(code: str, limit: int) -> List[Dict[str, Any]]:
         )
         data = response.json()
     except Exception as exc:
-        raise RuntimeError(f"获取基金K线失败: {exc}")
+        raise RuntimeError(f"获取同花顺K线失败: {exc}")
 
     if data.get("status_code") != 0:
         message = data.get("status_msg") or "未知错误"
-        raise RuntimeError(f"获取基金K线失败: {message}")
+        raise RuntimeError(f"获取同花顺K线失败: {message}")
 
     quote_data = (data.get("data") or {}).get("quote_data") or []
     if not quote_data:
@@ -136,18 +138,18 @@ def fetch_fund_kline(code: str, limit: int) -> List[Dict[str, Any]]:
     for item in values:
         if not isinstance(item, list):
             continue
-        record = _parse_ths_fund_kline_value(item, previous_close)
+        record = _parse_ths_kline_value(item, previous_close)
         records.append(record)
         previous_close = record["close"]
     return records
 
 
-async def fetch_fund_kline_cached(code: str, limit: int) -> List[Dict[str, Any]]:
-    """带内存缓存的基金 K 线读取，避免重复请求同一代码与条数数据。"""
-    key = f"fund_kline:{str(code).zfill(6)}|{limit}"
-    cached = await fund_kline_cache.get(key)
+async def fetch_ths_kline_cached(code: str, limit: int) -> List[Dict[str, Any]]:
+    """带内存缓存的基金/指数 K 线读取，避免重复请求同一代码与条数数据。"""
+    key = f"ths_kline:{str(code).zfill(6)}|{limit}"
+    cached = await ths_kline_cache.get(key)
     if cached is not None:
         return cached
-    records = await asyncio.to_thread(fetch_fund_kline, code, limit)
-    await fund_kline_cache.set(key, records, ttl=1800)
+    records = await asyncio.to_thread(fetch_ths_kline, code, limit)
+    await ths_kline_cache.set(key, records, ttl=1800)
     return records

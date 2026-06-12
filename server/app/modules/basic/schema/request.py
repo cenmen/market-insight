@@ -34,8 +34,8 @@ class FundTopHoldingsParams(BaseModel):
     code: str = Field(..., description="ETF 基金代码", min_length=1, json_schema_extra={"example": "588200"})
 
 
-class FundKlineParams(BaseModel):
-    code: str = Field(..., description="ETF 基金代码", min_length=1, json_schema_extra={"example": "588200"})
+class ThsKlineParams(BaseModel):
+    code: str = Field(..., description="基金或指数代码", min_length=1, json_schema_extra={"example": "588200"})
     limit: int = Field(default=60, description="返回K线条数", ge=1, le=500)
 
 
@@ -63,3 +63,6 @@ class IndexKlineByTxParams(BaseModel):
         json_schema_extra={"example": "000685"},
     )
     limit: int = Field(default=320, description="返回日K线条数", ge=1, le=1000)
+
+
+FundKlineParams = ThsKlineParams

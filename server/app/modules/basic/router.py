@@ -7,7 +7,6 @@ from fastapi import APIRouter, Depends
 from app.core.context import Context, build_context
 from app.core.response import ResponseModel
 from app.modules.basic.schema.request import (
-    FundKlineParams,
     FundSnapshotParams,
     FundTopHoldingsParams,
     MarketTurnoverParams,
@@ -15,10 +14,9 @@ from app.modules.basic.schema.request import (
     SearchStockParams,
     StockMainFinanceParams,
     IndexKlineByTxParams,
+    ThsKlineParams,
 )
 from app.modules.basic.schema.response import (
-    FundKlineItem,
-    FundKlineResponse,
     FundSnapshotItem,
     FundTopHoldingItem,
     FundTopHoldingsResponse,
@@ -30,16 +28,18 @@ from app.modules.basic.schema.response import (
     SearchStockItem,
     SearchStockResponse,
     IndexKlineByTxResponse,
+    ThsKlineItem,
+    ThsKlineResponse,
 )
 from app.modules.basic.api.fetch_market_turnover import sync_market_turnover_csv
 from app.modules.basic.service import (
-    fetch_fund_kline_cached,
     fetch_fund_snapshot_cached,
     fetch_fund_top_holdings_cached,
     fetch_kline_by_tx_cached,
     fetch_search_stocks_cached,
     fetch_index_kline_by_tx_cached,
     fetch_stock_main_finance_cached,
+    fetch_ths_kline_cached,
 )
 
 router = APIRouter()
@@ -93,13 +93,13 @@ async def get_fund_top_holdings(params: FundTopHoldingsParams = Depends(), conte
 @router.get(
     "/fund/kline",
     response_model=ResponseModel,
-    summary="获取ETF基金K线（同花顺）",
-    description="按基金代码返回指定条数的日 K 线数据，数据来自同花顺基金行情接口",
+    summary="获取基金/指数K线（同花顺）",
+    description="按基金或指数代码返回指定条数的日 K 线数据，数据来自同花顺行情接口",
 )
-async def get_fund_kline(params: FundKlineParams = Depends(), context: Context = Depends(build_context)):
-    records = await fetch_fund_kline_cached(params.code, params.limit)
-    items = [FundKlineItem.model_validate(r) for r in records]
-    data = FundKlineResponse(code=params.code, count=len(items), lines=items)
+async def get_ths_kline(params: ThsKlineParams = Depends(), context: Context = Depends(build_context)):
+    records = await fetch_ths_kline_cached(params.code, params.limit)
+    items = [ThsKlineItem.model_validate(r) for r in records]
+    data = ThsKlineResponse(code=params.code, count=len(items), lines=items)
     return ResponseModel.success(data=data, request_id=context.request_id)
 
 

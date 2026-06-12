@@ -7,14 +7,14 @@ from typing import Any, Dict
 from aiocache import SimpleMemoryCache
 
 from app.modules.basic.service import (
-    fetch_fund_kline,
-    fetch_fund_kline_cached,
     fetch_fund_snapshot,
     fetch_fund_snapshot_cached,
     fetch_fund_top_holdings,
     fetch_fund_top_holdings_cached,
     fetch_stock_main_finance,
     fetch_stock_main_finance_cached,
+    fetch_ths_kline,
+    fetch_ths_kline_cached,
 )
 
 etf_base_data_cache = SimpleMemoryCache()
@@ -53,7 +53,7 @@ def fetch_etf_base_data(code: str, kline_limit: int = 60) -> Dict[str, Any]:
     except Exception:
         snapshot = None
     holdings, position_report = fetch_fund_top_holdings(code)
-    k_line_data = fetch_fund_kline(code, kline_limit)
+    k_line_data = fetch_ths_kline(code, kline_limit)
 
     for holding in holdings:
         try:
@@ -92,7 +92,7 @@ async def fetch_etf_base_data_cached(code: str, kline_limit: int = 60) -> Dict[s
 
     snapshot_task = fetch_fund_snapshot_cached(code)
     holdings_task = fetch_fund_top_holdings_cached(code)
-    kline_task = fetch_fund_kline_cached(code, kline_limit)
+    kline_task = fetch_ths_kline_cached(code, kline_limit)
 
     try:
         snapshot = await snapshot_task

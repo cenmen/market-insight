@@ -58,7 +58,7 @@ class FundTopHoldingsResponse(BaseModel):
     items: List[FundTopHoldingItem] = Field()
 
 
-class FundKlineItem(BaseModel):
+class ThsKlineItem(BaseModel):
     date: Optional[str] = Field(default=None)
     open: Optional[float] = Field(default=None)
     close: Optional[float] = Field(default=None)
@@ -73,10 +73,10 @@ class FundKlineItem(BaseModel):
     turnoverRate: Optional[float] = Field(default=None)
 
 
-class FundKlineResponse(BaseModel):
+class ThsKlineResponse(BaseModel):
     code: str = Field()
     count: int = Field()
-    lines: List[FundKlineItem] = Field()
+    lines: List[ThsKlineItem] = Field()
 
 
 class FundSnapshotItem(BaseModel):
@@ -122,3 +122,7 @@ class IndexKlineByTxResponse(BaseModel):
     code: str = Field(description="指数代码")
     count: int = Field(description="历史日K线条数")
     klines: list[dict[str, Any]] = Field(default_factory=list, description="腾讯原始日K线数组")
+
+
+FundKlineItem = ThsKlineItem
+FundKlineResponse = ThsKlineResponse

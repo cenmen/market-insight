@@ -8,6 +8,7 @@ const K_LINE_MARKER_TYPE_PRIORITY = {
   support: 1,
   resistance: 2,
   keyInfo: 3,
+  event: 3.5,
   candle: 4,
 };
 
@@ -218,6 +219,7 @@ function normalizeMarkerGroups(markers, supportMarkers) {
   if (Array.isArray(markers)) {
     return {
       candleMarkers: markers,
+      eventMarkers: [],
       supportMarkers: Array.isArray(supportMarkers) ? supportMarkers : [],
       resistanceMarkers: [],
       keyInfoMarkers: [],
@@ -227,6 +229,7 @@ function normalizeMarkerGroups(markers, supportMarkers) {
   if (!isPlainObject(markers)) {
     return {
       candleMarkers: [],
+      eventMarkers: [],
       supportMarkers: Array.isArray(supportMarkers) ? supportMarkers : [],
       resistanceMarkers: [],
       keyInfoMarkers: [],
@@ -235,6 +238,7 @@ function normalizeMarkerGroups(markers, supportMarkers) {
 
   return {
     candleMarkers: Array.isArray(markers.candleMarkers) ? markers.candleMarkers : [],
+    eventMarkers: Array.isArray(markers.eventMarkers) ? markers.eventMarkers : [],
     supportMarkers: Array.isArray(supportMarkers) ? supportMarkers : Array.isArray(markers.supportMarkers) ? markers.supportMarkers : [],
     resistanceMarkers: Array.isArray(markers.resistanceMarkers) ? markers.resistanceMarkers : [],
     keyInfoMarkers: Array.isArray(markers.keyInfoMarkers) ? markers.keyInfoMarkers : [],
@@ -252,6 +256,10 @@ function resolveDefaultMarkerLabel(type) {
 
   if (type === 'keyInfo') {
     return '关键信息位';
+  }
+
+  if (type === 'event') {
+    return '事件标记';
   }
 
   return 'K线标记';
@@ -279,6 +287,14 @@ function resolveMarkerStyle(type) {
       line: '#8a7f74',
       fill: '#f7f4ef',
       text: '#66605a',
+    };
+  }
+
+  if (type === 'event') {
+    return {
+      line: '#5f7d5a',
+      fill: '#eef6ec',
+      text: '#4d6b49',
     };
   }
 
@@ -628,6 +644,7 @@ export default function BaseKLineChart({ data = [], height = 360, className, mar
       const normalizedMarkers = normalizeMarkerGroups(markers, supportMarkers);
       const markerList = [
         ...normalizedMarkers.candleMarkers,
+        ...normalizedMarkers.eventMarkers,
         ...normalizedMarkers.supportMarkers,
         ...normalizedMarkers.resistanceMarkers,
         ...normalizedMarkers.keyInfoMarkers,
@@ -653,6 +670,7 @@ export default function BaseKLineChart({ data = [], height = 360, className, mar
         { type: 'support', priority: K_LINE_MARKER_TYPE_PRIORITY.support, markers: normalizedMarkers.supportMarkers },
         { type: 'resistance', priority: K_LINE_MARKER_TYPE_PRIORITY.resistance, markers: normalizedMarkers.resistanceMarkers },
         { type: 'keyInfo', priority: K_LINE_MARKER_TYPE_PRIORITY.keyInfo, markers: normalizedMarkers.keyInfoMarkers },
+        { type: 'event', priority: K_LINE_MARKER_TYPE_PRIORITY.event, markers: normalizedMarkers.eventMarkers },
         { type: 'candle', priority: K_LINE_MARKER_TYPE_PRIORITY.candle, markers: normalizedMarkers.candleMarkers },
       ]);
       if (overlays.length > 0 && isFunction(chart.createOverlay)) {

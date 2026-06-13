@@ -1774,6 +1774,7 @@ const etf159326 = {
         lineLength: 1,
       },
     ],
+    eventMarkers: [],
     supportMarkers: [
       {
         date: '2026-05-26',

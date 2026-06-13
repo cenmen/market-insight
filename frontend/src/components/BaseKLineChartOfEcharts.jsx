@@ -6,6 +6,7 @@ const KLineMarkerTypeEnum = Object.freeze({
   RESISTANCE: 'resistance',
   KEY_INFO: 'keyInfo',
   CANDLE: 'candle',
+  EVENT: 'event',
 });
 
 const KLineMarkerDirectionEnum = Object.freeze({
@@ -19,6 +20,7 @@ const KLineMarkerPriorityEnum = Object.freeze({
   SUPPORT: 1,
   RESISTANCE: 2,
   KEY_INFO: 3,
+  EVENT: 3.5,
   CANDLE: 4,
 });
 
@@ -272,6 +274,7 @@ function normalizeMarkerGroups(markers) {
   if (Array.isArray(markers)) {
     return {
       candleMarkers: markers,
+      eventMarkers: [],
       supportMarkers: [],
       resistanceMarkers: [],
       keyInfoMarkers: [],
@@ -282,6 +285,7 @@ function normalizeMarkerGroups(markers) {
   if (!markers || typeof markers !== 'object') {
     return {
       candleMarkers: [],
+      eventMarkers: [],
       supportMarkers: [],
       resistanceMarkers: [],
       keyInfoMarkers: [],
@@ -291,6 +295,7 @@ function normalizeMarkerGroups(markers) {
 
   return {
     candleMarkers: Array.isArray(markers.candleMarkers) ? markers.candleMarkers : [],
+    eventMarkers: Array.isArray(markers.eventMarkers) ? markers.eventMarkers : [],
     supportMarkers: Array.isArray(markers.supportMarkers) ? markers.supportMarkers : [],
     resistanceMarkers: Array.isArray(markers.resistanceMarkers) ? markers.resistanceMarkers : [],
     keyInfoMarkers: Array.isArray(markers.keyInfoMarkers) ? markers.keyInfoMarkers : [],
@@ -311,6 +316,10 @@ function resolveDefaultMarkerLabel(type) {
     return '关键信息位';
   }
 
+  if (type === KLineMarkerTypeEnum.EVENT) {
+    return '事件标记';
+  }
+
   return '锤子线';
 }
 
@@ -321,6 +330,10 @@ function resolveMarkerDirection(type, position) {
 
   if (type === KLineMarkerTypeEnum.RESISTANCE) {
     return KLineMarkerDirectionEnum.DOWN;
+  }
+
+  if (type === KLineMarkerTypeEnum.EVENT) {
+    return position === 'below' ? KLineMarkerDirectionEnum.UP_LEFT : KLineMarkerDirectionEnum.DOWN_LEFT;
   }
 
   if (position === 'below') {
@@ -501,6 +514,16 @@ function makeCandleMarkerSeries(markerData) {
       };
     }
 
+    if (type === KLineMarkerTypeEnum.EVENT) {
+      return {
+        line: '#5f7d5a',
+        fill: '#eef6ec',
+        text: '#4d6b49',
+        lineWidth: 0.7,
+        fontSize: 7,
+      };
+    }
+
     return {
       line: '#8c897f',
       fill: '#faf8f3',
@@ -628,6 +651,7 @@ export default function BaseKLineChart({ data = [], height = 360, className, mar
         { type: KLineMarkerTypeEnum.SUPPORT, priority: KLineMarkerPriorityEnum.SUPPORT, markers: normalizedMarkers.supportMarkers },
         { type: KLineMarkerTypeEnum.RESISTANCE, priority: KLineMarkerPriorityEnum.RESISTANCE, markers: normalizedMarkers.resistanceMarkers },
         { type: KLineMarkerTypeEnum.KEY_INFO, priority: KLineMarkerPriorityEnum.KEY_INFO, markers: normalizedMarkers.keyInfoMarkers },
+        { type: KLineMarkerTypeEnum.EVENT, priority: KLineMarkerPriorityEnum.EVENT, markers: normalizedMarkers.eventMarkers },
         { type: KLineMarkerTypeEnum.CANDLE, priority: KLineMarkerPriorityEnum.CANDLE, markers: normalizedMarkers.candleMarkers },
       ]);
       const polyLineData = buildPolylineData(data, dataset.categoryData, normalizedMarkers.polyLines);

@@ -8,6 +8,7 @@ import Rate from '@/components/Rate.jsx';
 import ReportFooter from '@/components/ReportFooter.jsx';
 import Timeline from '@/components/Timeline.jsx';
 import etfs from '@/data/etfs';
+import records from '@/data/records';
 import { identity, mean, minBy, takeRight } from 'es-toolkit';
 import { Navigate, useParams, useSearchParams } from 'react-router-dom';
 
@@ -18,6 +19,71 @@ const formatRate = (rate) => {
 const getLatestFinancial = (row) => {
   return row.data?.[0] ?? {};
 };
+
+function getLatestRecordKey(recordMap) {
+  const keys = Object.keys(recordMap ?? {});
+
+  if (keys.length === 0) {
+    return null;
+  }
+
+  keys.sort();
+  return keys[keys.length - 1] ?? null;
+}
+
+function normalizeConceptText(value) {
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  return value.replace(/\s+/g, '');
+}
+
+function buildEventMarkers(recordMap, etfConcepts) {
+  const latestRecordKey = getLatestRecordKey(recordMap);
+
+  if (!latestRecordKey) {
+    return [];
+  }
+
+  const latestRecords = Array.isArray(recordMap[latestRecordKey]) ? recordMap[latestRecordKey] : [];
+  const normalizedEtfConcepts = (Array.isArray(etfConcepts) ? etfConcepts : [])
+    .map(function mapConcept(concept) {
+      return normalizeConceptText(concept);
+    })
+    .filter(Boolean);
+
+  if (normalizedEtfConcepts.length === 0) {
+    return [];
+  }
+
+  return latestRecords
+    .filter(function filterRecord(record) {
+      const recordConcepts = Array.isArray(record?.concepts) ? record.concepts : [];
+
+      return recordConcepts.some(function someRecordConcept(recordConcept) {
+        const normalizedRecordConcept = normalizeConceptText(recordConcept);
+
+        if (normalizedRecordConcept === '') {
+          return false;
+        }
+
+        return normalizedEtfConcepts.some(function someEtfConcept(etfConcept) {
+          return etfConcept.includes(normalizedRecordConcept) || normalizedRecordConcept.includes(etfConcept);
+        });
+      });
+    })
+    .map(function mapRecord(record) {
+      return {
+        date: record.date,
+        label: record.title,
+        position: 'below',
+        lineLength: 3.4,
+        lineWidth: 0.7,
+        fontSize: 7,
+      };
+    });
+}
 
 function getRecentTenDayKLineData(kLineData) {
   return takeRight(Array.isArray(kLineData) ? kLineData : [], 10);
@@ -86,6 +152,10 @@ export default function EtfReportPage() {
       value: Number(item.rate.toFixed(2)),
     };
   });
+  const kLineMarkers = {
+    ...(data.kLineMarkers ?? {}),
+    eventMarkers: buildEventMarkers(records, data.etf.concepts),
+  };
 
   return (
     <main className='min-h-screen bg-[#f5f4ed] font-["TsangerJinKai02","Source_Han_Serif_SC","Noto_Serif_CJK_SC","Songti_SC","STSong",Georgia,serif] text-[10pt] leading-[1.5] tracking-[0.3pt] text-[#141413]'>
@@ -307,7 +377,7 @@ export default function EtfReportPage() {
             </div>
           </div>
           <figure className='my-[12pt] break-inside-avoid'>
-            <BaseKLineChart data={data.kLineData} markers={data.kLineMarkers} height={364} />
+            <BaseKLineChart data={data.kLineData} markers={kLineMarkers} height={364} />
             <figcaption className='mt-[4pt] text-[9pt] leading-[1.5] text-[#6b6a64]'>{data.report.chartCaption}</figcaption>
           </figure>
         </section>

@@ -313,7 +313,6 @@ export default function EtfReportPage() {
         </section>
 
         <section>
-          <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>拥挤度</h2>
           <CongestionLineChart />
         </section>
 

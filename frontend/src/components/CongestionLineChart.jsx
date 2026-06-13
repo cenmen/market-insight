@@ -1,13 +1,14 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { format, parseISO } from 'date-fns';
 
 import { fetchSectorCongestion } from '@/services';
 import BaseChart from './BaseChart';
 
 const DEFAULT_CONGESTION_THEMES = [
-  { key: 'chip', label: '芯片', color: '#1b365d' },
+  { key: 'chip', label: '半导体', color: '#1b365d' },
   { key: 'communication', label: '通信', color: '#8a5d25' },
-  // { key: 'semiconductorEquipment', label: '半导体设备', color: '#2f8a52' },
+  { key: 'semiconductorEquipment', label: '半导体设备', color: '#2f8a52' },
 ];
 
 function buildQueryKey(themes, days) {
@@ -27,12 +28,11 @@ function formatDateLabel(value) {
     return '--';
   }
 
-  const parts = value.split('-');
-  if (parts.length === 3) {
-    return `${parts[1]}-${parts[2]}`;
+  try {
+    return format(parseISO(value), 'MM-dd');
+  } catch {
+    return value;
   }
-
-  return value;
 }
 
 function formatPercent(value) {
@@ -188,7 +188,7 @@ export default function CongestionLineChart({
           type: 'category',
           boundaryGap: false,
           data: chartRows.map(function mapRow(row) {
-            return row.date;
+            return formatDateLabel(row.date);
           }),
           axisLine: {
             lineStyle: {
@@ -201,7 +201,7 @@ export default function CongestionLineChart({
           axisLabel: {
             color: '#6b6a64',
             formatter: function formatXAxis(value) {
-              return formatDateLabel(value);
+              return value;
             },
           },
           splitLine: {
@@ -242,7 +242,7 @@ export default function CongestionLineChart({
             showSymbol: false,
             connectNulls: true,
             lineStyle: {
-              width: 2.2,
+              width: 1.5,
               color: theme.color,
             },
             itemStyle: {

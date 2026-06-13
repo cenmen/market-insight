@@ -30,6 +30,8 @@ def _ths_market(code_value: str) -> str:
     code = str(code_value).zfill(6)
     if code.startswith("9"):
         return "120"
+    if code.startswith("8"):
+        return "48"
     return "20" if code.startswith(("5", "6")) else "36"
 
 

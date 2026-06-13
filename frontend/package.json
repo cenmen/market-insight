@@ -13,6 +13,7 @@
     "@tanstack/react-query": "^5.101.0",
     "axios": "^1.17.0",
     "clsx": "^2.1.1",
+    "date-fns": "^4.4.0",
     "echarts": "^6.1.0",
     "es-toolkit": "^1.47.0",
     "klinecharts": "10.0.0-beta3",

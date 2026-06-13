@@ -17,7 +17,7 @@ from app.modules.basic.service import (
     fetch_ths_kline_cached,
     sync_market_turnover_csv,
 )
-from app.constants.theme_config import THEME_CONFIG_MAP
+from app.modules.setting.service import get_theme_config_map
 
 etf_base_data_cache = SimpleMemoryCache()
 sector_congestion_cache = SimpleMemoryCache()
@@ -108,11 +108,12 @@ def _resolve_theme_configs(theme_keys: Iterable[str]) -> tuple[list[dict[str, An
     if not keys:
         return [], [], []
 
+    theme_config_map = get_theme_config_map()
     configs: list[dict[str, Any]] = []
     missing_keys: list[str] = []
     missing_index_codes: list[str] = []
     for key in keys:
-        config = THEME_CONFIG_MAP.get(key)
+        config = theme_config_map.get(key)
         if config is None:
             missing_keys.append(key)
             continue

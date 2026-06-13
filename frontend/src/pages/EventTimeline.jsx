@@ -1,6 +1,7 @@
 import Timeline from '@/components/Timeline.jsx';
 import records from '@/data/records';
-import { etfAliasMap } from '@/data/etfBaseList';
+import { useMemo } from 'react';
+import useSettingStore from '@/stores/setting';
 
 function getLatestRecordKey(recordMap) {
   const keys = Object.keys(recordMap ?? {});
@@ -13,13 +14,37 @@ function getLatestRecordKey(recordMap) {
   return keys[keys.length - 1] ?? null;
 }
 
-function isValidConcept(concept) {
+function isValidConcept(concept, etfAliasMap) {
   return typeof concept === 'string' && Boolean(etfAliasMap[concept]);
 }
 
-function normalizeEvent(item) {
+function buildEtfAliasMap(list) {
+  const aliasMap = {};
+
+  for (const item of list) {
+    const aliasKeys = [item.key, item.code, item.name, item.indexName];
+
+    if (Array.isArray(item.aliases)) {
+      aliasKeys.push(...item.aliases);
+    }
+
+    aliasKeys.forEach(function eachAlias(alias) {
+      if (typeof alias === 'string' && alias.trim() !== '') {
+        aliasMap[alias] = item;
+      }
+    });
+  }
+
+  return aliasMap;
+}
+
+function normalizeEvent(item, etfAliasMap) {
   const tags = Array.isArray(item.tags) ? item.tags.slice() : [];
-  const concepts = Array.isArray(item.concepts) ? item.concepts.filter(isValidConcept) : [];
+  const concepts = Array.isArray(item.concepts)
+    ? item.concepts.filter(function filterConcept(concept) {
+        return isValidConcept(concept, etfAliasMap);
+      })
+    : [];
 
   return {
     ...item,
@@ -32,8 +57,21 @@ function normalizeEvent(item) {
 }
 
 export default function EventTimelinePage() {
+  const etfTracking = useSettingStore(function selectEtfTracking(state) {
+    return state.etfTracking;
+  });
+  const etfAliasMap = useMemo(
+    function makeEtfAliasMap() {
+      return buildEtfAliasMap(etfTracking);
+    },
+    [etfTracking],
+  );
   const latestRecordKey = getLatestRecordKey(records);
-  const recentEvents = latestRecordKey ? records[latestRecordKey].map(normalizeEvent) : [];
+  const recentEvents = latestRecordKey
+    ? records[latestRecordKey].map(function mapEvent(item) {
+        return normalizeEvent(item, etfAliasMap);
+      })
+    : [];
 
   return (
     <main className="flex min-h-screen items-center justify-center overflow-hidden bg-[#f5f4ed] px-4 py-6 [font-family:'TsangerJinKai02','Source_Han_Serif_SC','Noto_Serif_CJK_SC','Songti_SC','STSong',Georgia,serif] text-[#141413]">

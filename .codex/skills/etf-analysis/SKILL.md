@@ -429,7 +429,7 @@ curl "http://localhost:8000/api/skill/sector/congestion?themeKeys=<THEME_KEYS>&d
 
 要求：
 
-- `themeKeys` 必须使用当前 ETF 对应主题的 key，多个 key 用英文逗号分隔。
+- `themeKeys` 必须使用 `GET /api/setting/etf-tracking` 返回的 `etfTracking` / `activeThemeKeys` 中对应主题的 key，多个 key 用英文逗号分隔。
 - 必须根据接口返回的最新日期、最近几天占比变化和绝对占比位置来写判断。
 - 先写“为什么这条线现在拥挤”，再写“是继续拥挤还是开始降温”，最后写“接下来 1 到 3 个交易日更像哪种节奏”。
 - 文案要解释成交额占比变化对板块热度和资金持续性的含义，不要直接复述接口字段。

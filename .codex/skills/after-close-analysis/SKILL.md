@@ -24,7 +24,7 @@ frontend/src/data/afterCloseData.jsx
 ## 开始前
 
 1. 读取 `frontend/src/data/afterCloseData.jsx`，确认当前 JSX 数据结构和排序辅助函数，不要改动无关逻辑。
-2. 读取 `frontend/src/data/etfBaseList.js`，用它作为 ETF 与跟踪指数清单来源。不要在 skill 中另建一份 ETF 清单。
+2. 通过 `GET /api/setting/etf-tracking` 获取 ETF 与跟踪指数清单。不要在 skill 中另建一份 ETF 清单，也不要读取前端本地配置副本。
 3. 获取当天最新市场数据。盘后数据属于强时效信息，必须使用当前来源查询，不能只凭模型记忆。
 4. 如果用户提供其他博主收盘观点，把它们作为观点参考；只吸收逻辑，不要照抄原文。
 5. 遵守项目 `AGENTS.md`：完成后不要运行 preview、build、test、lint 或自校验命令，只告诉用户可手动执行的命令。

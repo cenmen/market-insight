@@ -3,13 +3,20 @@ import { useQuery } from '@tanstack/react-query';
 import { format, parseISO } from 'date-fns';
 
 import { fetchSectorCongestion } from '@/services';
+import useSettingStore from '@/stores/setting';
 import BaseChart from './BaseChart';
 
-const DEFAULT_CONGESTION_THEMES = [
-  { key: 'chip', label: '半导体', color: '#1b365d' },
-  { key: 'communication', label: '通信', color: '#8a5d25' },
-  { key: 'semiconductorEquipment', label: '半导体设备', color: '#2f8a52' },
-];
+const DEFAULT_CONGESTION_COLORS = ['#1b365d', '#8a5d25', '#2f8a52', '#b35c1e', '#4b6b4f'];
+
+function buildDefaultCongestionThemes(activeEtfTracking) {
+  return activeEtfTracking.map(function mapTheme(item, index) {
+    return {
+      key: item.key,
+      label: item.indexName,
+      color: DEFAULT_CONGESTION_COLORS[index % DEFAULT_CONGESTION_COLORS.length],
+    };
+  });
+}
 
 function buildQueryKey(themes, days) {
   return [
@@ -97,16 +104,30 @@ export default function CongestionLineChart({
   description = '热门板块近 90 日成交额占比变化',
   chartCaption,
   days = 90,
-  themes = DEFAULT_CONGESTION_THEMES,
+  themes,
   height = 300,
 }) {
-  const themeList = Array.isArray(themes) && themes.length > 0 ? themes : DEFAULT_CONGESTION_THEMES;
+  const etfTracking = useSettingStore(function selectEtfTracking(state) {
+    return state.etfTracking;
+  });
+  const defaultThemes = useMemo(
+    function makeDefaultThemes() {
+      const activeEtfTracking = etfTracking.filter(function filterActiveTheme(item) {
+        return item?.active === true;
+      });
+
+      return buildDefaultCongestionThemes(activeEtfTracking);
+    },
+    [etfTracking],
+  );
+  const themeList = Array.isArray(themes) && themes.length > 0 ? themes : defaultThemes;
   const themeKeys = themeList.map(function mapTheme(theme) {
     return theme.key;
   });
 
   const query = useQuery({
     queryKey: buildQueryKey(themeList, days),
+    enabled: themeKeys.length > 0,
     queryFn: function fetchCongestion() {
       return fetchSectorCongestion({
         themeKeys: themeKeys.join(','),

@@ -14,6 +14,7 @@
 ## JavaScript / TypeScript 规则
 
 - JavaScript 和 TypeScript 文件中优先使用 `function` 声明，而不是箭头函数。
+- `stores` 目录下的函数必须使用箭头函数形式。
 - `utils` 和 `services` 目录下的函数必须包含 JSDoc 注释。
 - TypeScript 枚举必须使用 PascalCase 命名，并且以 `Enum` 结尾。
 - 枚举示例：`UserRoleEnum`、`LoginTypeEnum`。

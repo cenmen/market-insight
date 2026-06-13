@@ -67,13 +67,3 @@ def get_theme_config_map() -> dict[str, dict[str, Any]]:
     """返回按主题 key 索引的配置映射。"""
     return {item["key"]: dict(item) for item in ETF_TRACKING_CONFIGS}
 
-
-def get_setting_payload() -> dict[str, Any]:
-    """返回供前端与 skill 复用的设置数据。"""
-    etf_tracking = get_etf_tracking_configs()
-    active_etf_tracking = [dict(item) for item in etf_tracking if item.get("active") is True]
-    return {
-        "etfTracking": etf_tracking,
-        "activeEtfTracking": active_etf_tracking,
-        "activeThemeKeys": [item["key"] for item in active_etf_tracking],
-    }

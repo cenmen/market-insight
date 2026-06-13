@@ -7,25 +7,19 @@ import { fetchEtfTrackingSetting } from '@/services';
 import useSettingStore from '@/stores/setting';
 
 export default function App() {
-  const updateEtfTracking = useSettingStore(function selectUpdateEtfTracking(state) {
-    return state.updateEtfTracking;
-  });
+  const updateEtfTracking = useSettingStore((state) => state.updateEtfTracking);
+  const loadEtfTracking = async () => {
+    try {
+      const payload = await fetchEtfTrackingSetting();
+      updateEtfTracking(Array.isArray(payload) ? payload : []);
+    } catch (error) {
+      updateEtfTracking([]);
+    }
+  };
 
-  useEffect(
-    function loadSettingsOnMount() {
-      async function loadEtfTracking() {
-        try {
-          const payload = await fetchEtfTrackingSetting();
-          updateEtfTracking(payload?.etfTracking);
-        } catch (error) {
-          updateEtfTracking([]);
-        }
-      }
-
-      loadEtfTracking();
-    },
-    [updateEtfTracking],
-  );
+  useEffect(() => {
+    loadEtfTracking();
+  }, []);
 
   return (
     <>

@@ -119,7 +119,7 @@ const etf159206 = {
     scale: '175.24 亿元',
   },
   report: {
-    date: '2026-06-12',
+    date: '2026-06-13',
     author: '抖音 · ETF主线侦探',
     headlineSignal: '空天信息主题观察',
     heatScore: 3,

@@ -313,7 +313,7 @@ export default function EtfReportPage() {
         </section>
 
         <section>
-          <CongestionLineChart />
+          <CongestionLineChart chartCaption={data.report.congestionCaption} />
         </section>
 
         {data.report.timelineEvents?.length > 0 ? (

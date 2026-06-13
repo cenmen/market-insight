@@ -94,10 +94,11 @@ function buildChartRows(rows, themes) {
 
 export default function CongestionLineChart({
   title = '拥挤度',
-  description = '近 90 日成交额占比变化。',
+  description = '热门板块近 90 日成交额占比变化',
+  chartCaption,
   days = 90,
   themes = DEFAULT_CONGESTION_THEMES,
-  height = 260,
+  height = 300,
 }) {
   const themeList = Array.isArray(themes) && themes.length > 0 ? themes : DEFAULT_CONGESTION_THEMES;
   const themeKeys = themeList.map(function mapTheme(theme) {
@@ -262,15 +263,15 @@ export default function CongestionLineChart({
   const totalAmount = formatAmount(latestRow?.total_amount, latestRow?.unit);
 
   return (
-    <section className='break-inside-avoid rounded-[4pt] bg-[#faf9f5] p-[10pt]'>
+    <figure className='break-inside-avoid rounded-[4pt] bg-[#faf9f5] p-[10pt]'>
       <div className='flex flex-wrap items-end justify-between gap-[8pt]'>
         <div>
           <div className='text-[10pt] font-medium text-[#3d3d3a]'>{title}</div>
           <div className='mt-[3pt] text-[9pt] leading-[1.45] text-[#504e49]'>{description}</div>
         </div>
         <div className='text-right text-[8.5pt] leading-[1.45] text-[#6b6a64]'>
-          <div>最近日期 {latestDate}</div>
-          <div>总成交额 {totalAmount}</div>
+          <div>最近交易日期 {latestDate}</div>
+          <div>两市总成交额 {totalAmount}</div>
         </div>
       </div>
 
@@ -293,6 +294,7 @@ export default function CongestionLineChart({
         {query.isError ? <p className='text-[9pt] text-[#8a4b3b]'>{query.error?.message || '拥挤度加载失败'}</p> : null}
         {!query.isLoading && !query.isError ? <BaseChart option={option} height={height} /> : null}
       </div>
-    </section>
+      {chartCaption ? <figcaption className='mt-[4pt] text-[9pt] leading-[1.5] text-[#6b6a64]'>{chartCaption}</figcaption> : null}
+    </figure>
   );
 }

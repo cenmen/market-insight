@@ -134,6 +134,7 @@ export interface EtfReport {
   thesis: string;
   callout: string;
   chartCaption: unknown;
+  congestionCaption?: unknown;
   hiddenStoryLine: string;
   timelineEvents?: TimelineItem[];
   disclaimer: string;

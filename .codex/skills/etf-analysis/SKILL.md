@@ -1,6 +1,6 @@
 ---
 name: etf-analysis
-description: Market Insight 项目专用的 ETF 分析工作流。通过本地 server 接口抓取 ETF 前十大持仓、持仓公司核心财务数据和基金最近 90 根日 K 线，整理为 frontend/src/data/etfs 使用的静态数据，并同步生成 K 线技术分析、画线参数和行情推演图注。仅当用户显式调用 $etf-analysis 或明确要求使用 ETF 分析 skill 时使用；不要因为上下文自动调用。
+description: Market Insight 项目专用的 ETF 分析工作流。通过本地 server 接口抓取 ETF 前十大持仓、持仓公司核心财务数据、基金最近 90 根日 K 线和板块拥挤度数据，整理为 frontend/src/data/etfs 使用的静态数据，并同步生成 K 线技术分析、板块拥挤度分析、画线参数和行情推演图注。仅当用户显式调用 $etf-analysis 或明确要求使用 ETF 分析 skill 时使用；不要因为上下文自动调用。
 ---
 
 # ETF 分析
@@ -61,6 +61,13 @@ const etf588200 = {
         <p>近 90 根日 K 线整体保持震荡抬升后的高位整固，前期快速拉升把价格推升到阶段高位，随后量能回落、振幅收敛，说明短线从情绪驱动转向分歧消化。当前价格仍运行在中期均线之上，但进攻斜率已经放缓，资金更关注高位筹码交换后的承接质量。</p>
         <p>短线关键支撑先看最近两次回踩确认的密集成交区，若失守则容易回到前一轮放量启动平台；上方压力则集中在前高附近和放量长上影区间，只有重新放量站稳，才说明趋势资金愿意继续抬升估值。均线结构尚未走坏，但需要警惕缩量反抽后的再度回踩。</p>
         <p>接下来 1 到 3 个交易日更可能围绕支撑与前高之间做震荡换手：如果放量突破压力位，短线有继续向上试探的空间；如果缩量上冲无果或跌破支撑，行情大概率回到平台整理，操作节奏更适合等回踩确认，而不是在情绪拉升阶段盲目追价。</p>
+      </>
+    ),
+    congestionCaption: (
+      <>
+        <p>最近这条拥挤度线更像是资金在板块之间重新排座位，成交额占比抬得快不快、回落得快不快，直接决定这条主线是继续被追，还是只是短线轮动一下就散。</p>
+        <p>如果最近几天的占比持续抬升，说明主题资金还在往这个方向集中；如果占比冲高后很快回落，就说明追进去的资金开始分歧，板块更像在高位换手而不是继续扩散。</p>
+        <p>接下来 1 到 3 个交易日，拥挤度更常见的节奏通常是先继续抬一段、先横一横，或者冲高后回吐一点再观察承接。分析时要先自己调用接口，再结合最新几天的占比变化写判断，不要直接套模板。</p>
       </>
     ),
     hiddenStoryLine: '如果国产算力生态从单点突破走向整机、存储、封装和材料协同放量，市场很容易把这类 ETF 从“景气主题”进一步交易成“国产替代基础设施”的长期叙事。',
@@ -233,7 +240,7 @@ export default etf588200;
 - `businessRatio`、`shortTermFactors`、`styleCharacteristics`、`kLineData`、`financialRows` 必须是数组。
 - `kLineMarkers` 必须是对象，包含 `candleMarkers`、`supportMarkers`、`resistanceMarkers`、`keyInfoMarkers`、`polyLines`。
 - `viewpoints` 没有可靠事件时写 `[]`，不要写 `null`。
-- `report.chartCaption` 是唯一允许使用 JSX 的叙事字段；其他叙事字段使用纯字符串或数组对象。
+- `report.chartCaption` 和 `report.congestionCaption` 是允许使用 JSX 的叙事字段；其他叙事字段使用纯字符串或数组对象。
 
 ### `etf`
 
@@ -392,6 +399,7 @@ K 线指标计算规则：
 生成或更新 ETF 数据时，必须按 `references/kline-technical-analysis.md` 执行技术分析，并写入：
 
 - `report.chartCaption`
+- `report.congestionCaption`
 - `kLineMarkers.candleMarkers`
 - `kLineMarkers.supportMarkers`
 - `kLineMarkers.resistanceMarkers`
@@ -408,6 +416,36 @@ K 线指标计算规则：
 - 第 2 段写关键支撑、压力、均线或形态变化，但必须顺手解释这些位置意味着什么。
 - 第 3 段写接下来 1 到 3 个交易日的推演和操作节奏，用“可能先震荡、可能回踩、如果放量再看上行”这类简单表达。
 - 可以保留少量技术词，但必须给出白话解释；不要只下结论不展开。
+
+## 板块拥挤度分析
+
+`report.congestionCaption` 用来描述当前 ETF 对应板块的拥挤度变化，写法要和 K 线图注区分开。
+
+生成时必须先自己调用板块拥挤度接口：
+
+```bash
+curl "http://localhost:8000/api/skill/sector/congestion?themeKeys=<THEME_KEYS>&days=90"
+```
+
+要求：
+
+- `themeKeys` 必须使用当前 ETF 对应主题的 key，多个 key 用英文逗号分隔。
+- 必须根据接口返回的最新日期、最近几天占比变化和绝对占比位置来写判断。
+- 先写“为什么这条线现在拥挤”，再写“是继续拥挤还是开始降温”，最后写“接下来 1 到 3 个交易日更像哪种节奏”。
+- 文案要解释成交额占比变化对板块热度和资金持续性的含义，不要直接复述接口字段。
+- 仍然使用 3 段左右的 JSX 图注，每段尽量口语化、适合直接放在图表下方。
+
+推荐写法：
+
+```jsx
+congestionCaption: (
+  <>
+    <p style={{ textIndent: '2em' }}>...</p>
+    <p style={{ textIndent: '2em' }}>...</p>
+    <p style={{ textIndent: '2em' }}>...</p>
+  </>
+)
+```
 
 ## 工作流程
 

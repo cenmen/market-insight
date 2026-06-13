@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toast } from 'sonner';
 
 const DEFAULT_ERROR_MESSAGE = 'Request failed';
 
@@ -34,7 +35,9 @@ class Http {
 
     if (Http.isResponseModel(payload)) {
       if (!payload.success) {
-        throw new RequestError(payload.message || DEFAULT_ERROR_MESSAGE, {
+        const message = payload.message || DEFAULT_ERROR_MESSAGE;
+        toast.error(message);
+        throw new RequestError(message, {
           status: response.status,
           code: payload.code,
           data: payload.data,
@@ -56,9 +59,11 @@ class Http {
    */
   handleErrorResponse(error) {
     const payload = error.response?.data;
+    const message = payload?.message || error.message || DEFAULT_ERROR_MESSAGE;
 
     if (payload && typeof payload === 'object') {
-      throw new RequestError(payload.message || error.message || DEFAULT_ERROR_MESSAGE, {
+      toast.error(message);
+      throw new RequestError(message, {
         status: error.response?.status,
         code: payload.code,
         data: payload.data,
@@ -66,7 +71,11 @@ class Http {
       });
     }
 
-    throw new RequestError(error.message || DEFAULT_ERROR_MESSAGE, {
+    if (error.code !== 'ERR_CANCELED') {
+      toast.error(message);
+    }
+
+    throw new RequestError(message, {
       status: error.response?.status,
     });
   }

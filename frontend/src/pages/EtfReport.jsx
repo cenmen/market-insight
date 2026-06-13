@@ -1,6 +1,7 @@
 import BaseKLineChart from '@/components/BaseKLineChart';
 import BaseLineChart from '@/components/BaseLineChart';
 import BasePieChart from '@/components/BasePieChart';
+import CongestionLineChart from '@/components/CongestionLineChart';
 import EtfSharePrompt from '@/components/EtfSharePrompt.jsx';
 import EtfPublicAccountPrompt from '@/components/EtfPublicAccountPrompt.jsx';
 import Rate from '@/components/Rate.jsx';
@@ -309,6 +310,11 @@ export default function EtfReportPage() {
             <BaseKLineChart data={data.kLineData} markers={data.kLineMarkers} height={364} />
             <figcaption className='mt-[4pt] text-[9pt] leading-[1.5] text-[#6b6a64]'>{data.report.chartCaption}</figcaption>
           </figure>
+        </section>
+
+        <section>
+          <h2 className='mt-[18pt] mb-[6pt] text-[16pt] leading-[1.25] font-medium text-[#141413]'>拥挤度</h2>
+          <CongestionLineChart />
         </section>
 
         {data.report.timelineEvents?.length > 0 ? (

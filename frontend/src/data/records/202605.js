@@ -1,0 +1,108 @@
+const record202605 = [
+  {
+    date: '2026-05-28',
+    title: 'Anthropic完成650亿美元融资',
+    source: 'Anthropic',
+    statusTag: { label: '利好', kind: 'bullish' },
+    summary: 'Anthropic完成Series H融资，融资规模650亿美元，投后估值达到9650亿美元，超过OpenAI成为全球估值最高AI创业公司之一。资金将主要投入模型训练和算力扩张。',
+    tags: [
+      { label: '大模型', kind: 'bullish' },
+      { label: '算力扩张', kind: 'bullish' },
+      { label: '资本开支', kind: 'bullish' },
+    ],
+    concepts: ['人工智能', '算力', '芯片', '云计算'],
+  },
+  {
+    date: '2026-05-28',
+    title: 'Anthropic发布Claude Opus 4.8',
+    source: 'Anthropic',
+    statusTag: { label: '利好', kind: 'bullish' },
+    summary: 'Anthropic正式推出Claude Opus 4.8，同时预告Claude Mythos即将上线。Opus 4.8重点强化推理透明度和代码能力，进一步冲击企业级Agent市场。',
+    tags: [
+      { label: '大模型', kind: 'bullish' },
+      { label: 'Agent', kind: 'bullish' },
+      { label: '代码模型', kind: 'bullish' },
+    ],
+    concepts: ['人工智能', '软件', '企业服务'],
+  },
+  {
+    date: '2026-05-20',
+    title: 'Google I/O发布Gemini 3.5系列',
+    source: 'Google I/O 2026',
+    statusTag: { label: '利好', kind: 'bullish' },
+    summary: 'Google在I/O大会发布Gemini 3.5模型家族，并全面接入Search、Workspace、Cloud和Agent平台。Google正式进入Agent生态全面商业化阶段。',
+    tags: [
+      { label: '大模型', kind: 'bullish' },
+      { label: 'AI搜索', kind: 'bullish' },
+      { label: 'Agent', kind: 'bullish' },
+    ],
+    concepts: ['人工智能', '搜索', '云计算', '软件'],
+  },
+  {
+    date: '2026-05-20',
+    title: 'Google发布第八代TPU',
+    source: 'Google Cloud Next',
+    statusTag: { label: '利好', kind: 'bullish' },
+    summary: 'Google推出TPU 8t和TPU 8i，面向Agent时代的大规模训练和推理场景。Google继续强化自研AI芯片路线，对NVIDIA形成长期竞争。',
+    tags: [
+      { label: 'AI芯片', kind: 'bullish' },
+      { label: '推理算力', kind: 'bullish' },
+      { label: '自研芯片', kind: 'bullish' },
+    ],
+    concepts: ['芯片', '人工智能', '算力'],
+  },
+  {
+    date: '2026-05-20',
+    title: 'Google成立7.5亿美元AI伙伴基金',
+    source: 'Google Cloud Next',
+    statusTag: { label: '利好', kind: 'bullish' },
+    summary: 'Google宣布设立7.5亿美元合作伙伴基金，用于推动企业Agent部署和AI生态扩张，进一步争夺企业级市场。',
+    tags: [
+      { label: '企业AI', kind: 'bullish' },
+      { label: '生态扩张', kind: 'bullish' },
+      { label: '云计算', kind: 'default' },
+    ],
+    concepts: ['人工智能', '云计算', '软件'],
+  },
+  {
+    date: '2026-05-19',
+    title: 'Google Search全面升级Gemini 3.5',
+    source: 'Google Search',
+    statusTag: { label: '利好', kind: 'bullish' },
+    summary: 'Google宣布AI Search默认升级为Gemini 3.5 Flash。AI正式成为搜索入口核心能力，进一步提升推理Token消耗和推理算力需求。',
+    tags: [
+      { label: 'AI搜索', kind: 'bullish' },
+      { label: '大模型', kind: 'bullish' },
+      { label: '推理算力', kind: 'bullish' },
+    ],
+    concepts: ['人工智能', '云计算', '软件'],
+  },
+  {
+    date: '2026-05-15',
+    title: 'OpenAI持续扩建Stargate算力中心',
+    source: 'OpenAI / Oracle',
+    statusTag: { label: '利好', kind: 'bullish' },
+    summary: 'OpenAI继续推进Stargate超级数据中心计划，与Oracle等合作伙伴扩大AI基础设施建设。市场预计未来几年仍将保持超大规模GPU采购需求。',
+    tags: [
+      { label: '数据中心', kind: 'bullish' },
+      { label: '算力扩张', kind: 'bullish' },
+      { label: 'GPU采购', kind: 'bullish' },
+    ],
+    concepts: ['算力', '芯片', '服务器', '通信'],
+  },
+  {
+    date: '2026-05-08',
+    title: 'OpenAI企业Agent业务加速扩张',
+    source: 'OpenAI',
+    statusTag: { label: '利好', kind: 'bullish' },
+    summary: 'OpenAI持续强化企业Agent与开发者生态，推动ChatGPT从工具向工作平台转型。市场关注其对微软Copilot及Google Workspace的竞争。',
+    tags: [
+      { label: 'Agent', kind: 'bullish' },
+      { label: '企业AI', kind: 'bullish' },
+      { label: '工作平台', kind: 'bullish' },
+    ],
+    concepts: ['人工智能', '软件', '云计算'],
+  },
+];
+
+export default record202605;
